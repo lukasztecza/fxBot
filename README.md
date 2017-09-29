@@ -1,2 +1,2 @@
-# tinyAppBase
+# tinyApp
 Tiny app base
