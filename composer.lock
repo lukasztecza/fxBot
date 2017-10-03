@@ -1,0 +1,74 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "hash": "c96deae9d49eee94fff788954f2bd87f",
+    "content-hash": "1efcd7bdf6c20884e3a4e3b8f89851c4",
+    "packages": [
+        {
+            "name": "lukasztecza/httpClient",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lukasztecza/httpClient.git",
+                "reference": "323eca29f72847bd30ce92e8ef2d7065712fb57a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lukasztecza/httpClient/zipball/323eca29f72847bd30ce92e8ef2d7065712fb57a",
+                "reference": "323eca29f72847bd30ce92e8ef2d7065712fb57a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^6.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "HttpClient\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Lukasz Tecza",
+                    "email": "lukasztecza.pl@gmail.com",
+                    "homepage": "http://lukasztecza.pl"
+                }
+            ],
+            "description": "Minimal PHP http client",
+            "keywords": [
+                "curl",
+                "factory",
+                "http",
+                "middleware",
+                "php",
+                "request"
+            ],
+            "support": {
+                "source": "https://github.com/lukasztecza/httpClient/tree/master",
+                "issues": "https://github.com/lukasztecza/httpClient/issues"
+            },
+            "time": "2017-09-29 00:01:56"
+        }
+    ],
+    "packages-dev": null,
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {
+        "lukasztecza/httpclient": 20
+    },
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "php": ">=7.0"
+    },
+    "platform-dev": []
+}
