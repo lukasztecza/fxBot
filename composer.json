@@ -1,0 +1,29 @@
+{
+    "name": "lukasztecza/tinyApp",
+    "description": "Tiny php application skeleton",
+    "keywords": ["php", "app", "framework", "skeleton", "dependency"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Lukasz Tecza",
+            "email": "lukasztecza.pl@gmail.com",
+            "homepage": "http://lukasztecza.pl"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/lukasztecza/httpClient"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "lukasztecza/httpClient": "dev-master"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.3.0"
+    },
+    "autoload": {
+        "psr-4": { "TinyApp\\": "src/" }
+    }
+}

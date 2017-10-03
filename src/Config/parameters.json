@@ -1,0 +1,7 @@
+{
+    "environment": "prod",
+
+    "database_user": "user",
+    "database_password": "pass",
+    "database_host": "localhost"
+}

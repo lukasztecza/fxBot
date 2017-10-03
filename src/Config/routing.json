@@ -1,0 +1,7 @@
+{
+    "user/1": {
+        "controller": "user_controller",
+        "method": ["GET"],
+        "action": "get"
+    }
+}

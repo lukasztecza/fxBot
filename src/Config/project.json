@@ -1,0 +1,12 @@
+{
+    "error_handling_class": "TinyApp\\System\\ErrorHandler",
+
+    "routing_class": "TinyApp\\System\\Router",
+    "system_request_class": "TinyApp\\System\\Request",
+
+    "dependency_controller_placeholder": "#routed_controller",
+    "dependency_action_placeholder": "#routed_action",
+    "application_starting_point": "@rendering_middleware",
+
+    "system_response_class": "TinyApp\\System\\Request"
+}
