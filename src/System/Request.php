@@ -5,8 +5,8 @@ class Request
 {
     private $path;
     private $attributes;
-    private $query;
-    private $payload;
+    private $get;
+    private $post;
     private $input;
     private $cookie;
     private $server;
@@ -17,8 +17,8 @@ class Request
     public function __construct(
         string $path,
         array $attributes,
-        array $query,
-        array $payload,
+        array $get,
+        array $post,
         array $files,
         string $input,
         array $cookie,
@@ -28,8 +28,8 @@ class Request
     ) {
         $this->path = $path;
         $this->attributes = $attributes;
-        $this->query = $query;
-        $this->payload = $payload;
+        $this->get = $get;
+        $this->post = $post;
         $this->input = $input;
         $this->cookie = $cookie;
         $this->server = $server;
@@ -50,12 +50,12 @@ class Request
 
     public function get(array $combinedKeys = []) : array
     {
-        return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->query) : $this->query;
+        return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->get) : $this->get;
     }
 
     public function post(array $combinedKeys = []) : array
     {
-        return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->payload) : $this->payload;
+        return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->post) : $this->post;
     }
 
     public function input() : string
@@ -92,30 +92,17 @@ class Request
     {
         $return = [];
         foreach ($combinedKeys as $combinedKey) {
-            $counter = 0;
             $nesting = explode('.', $combinedKey);
-            $return[$combinedKey] = $this->getValue($counter ,$arrayToFilter, $nesting);
-        }   
-        return $return;
-    }
-
-    private function getValue(int &$counter, array $arrayToFilter, $nesting)
-    {
-        $counter++;
-        if (1000 < $counter) {
-            throw new \Exception('Too deep array or danger of infinite recurrence, reached counter ' . $counter);
-        }   
-
-        $key = array_shift($nesting);
-        if (array_key_exists($key, $arrayToFilter)) {
-            if (is_array($arrayToFilter[$key]) && count($nesting)) {
-                return $this->getValue($counter, $arrayToFilter[$key], $nesting);
-            } else {
-                return $arrayToFilter[$key];
+            $arrayChunk = $arrayToFilter;
+            foreach ($nesting as $key) {
+                if (!empty($arrayChunk[$key])) {
+                    $arrayChunk = $arrayChunk[$key];
+                } else {
+                    $arrayChunk = null;
+                }
             }
-        } else {
-            return null;
-         
+            $return[$combinedKey] = $arrayChunk;
         }
+        return $return;
     }
 }

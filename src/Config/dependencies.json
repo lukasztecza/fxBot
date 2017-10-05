@@ -1,0 +1,46 @@
+{
+    "user_controller": {
+        "class": "TinyApp\\Controller\\UserController",
+        "inject": [
+            "some text",
+            1234,
+            "@user_service@"
+        ]
+    },
+    "rendering_middleware": {
+        "class": "TinyApp\\Model\\Middleware\\RenderingMiddleware",
+        "inject": [
+            "%routed_controller%",
+            "%routed_action%"
+        ]
+    },
+    "user_service": {
+        "class": "TinyApp\\Model\\Service\\UserService",
+        "inject": [
+            "@user_repository@"
+        ]
+    },
+    "user_repository": {
+        "class": "TinyApp\\Model\\Repository\\UserRepository",
+        "inject": [
+            "@read_connection@",
+            "@write_connection@"
+        ]
+    },
+    "read_connection": {
+        "class": "TinyApp\\Model\\Repository\\DatabaseConnection",
+        "inject": [
+            "%database_host_read%",
+            "%database_user_read%",
+            "%database_password_read%"
+        ]
+    },
+    "write_connection": {
+        "class": "TinyApp\\Model\\Repository\\DatabaseConnection",
+        "inject": [
+            "%database_host_write%",
+            "%database_user_write%",
+            "%database_password_write%"
+        ]
+    }
+}
