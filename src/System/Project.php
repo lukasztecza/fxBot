@@ -1,43 +1,48 @@
 <?php
 namespace TinyApp\System;
 
+use TinyApp\System\ErrorHandler;
+use TinyApp\System\Router;
+
 class Project
 {
+    const ROUTED_CONTROLLER_PLACEHOLDER = '%routed_controller%';
+    const ROUTED_ACTION_PLACEHOLDER = '%routed_action%';
+    const APPLICATION_STARTING_POINT = 'rendering_middleware';
+
     public function run()
     {
         // Get project variables and set error handler
         $parameters = json_decode(file_get_contents(__DIR__ . '/../Config/parameters.json'), true);
-        $project = json_decode(file_get_contents(__DIR__ . '/../Config/project.json'), true);
-        $project = array_merge($project, $parameters);
-        $errorHandler = new $project['error_handling_class']($project['environment']);
+        $errorHandler = new ErrorHandler($parameters['environment']);
 
-        // Get routing and build request object
-        $routing = json_decode(file_get_contents(__DIR__ . '/../Config/routing.json'), true);
-        $router = new $project['routing_class']($routing);
-        $request = $router->buildRequest($project['system_request_class']);
+        // Get routes and build request object
+        $routes = json_decode(file_get_contents(__DIR__ . '/../Config/routes.json'), true);
+        $router = new Router($routes);
+        $request = $router->buildRequest();
 
-        // Update dependency placeholders
-        $dependency = file_get_contents(__DIR__ . '/../Config/dependency.json');
-        $dependency = str_replace(
-            [$project['dependency_controller_placeholder'], $project['dependency_action_placeholder']],
-            ['@' . $request->controller(), $request->action()],
-            $dependency
-        );
-        $dependency = json_decode($dependency, true);
+        // Update dependencies placeholders
+        $dependencies = file_get_contents(__DIR__ . '/../Config/dependencies.json');
+        $placeholders = [self::ROUTED_CONTROLLER_PLACEHOLDER, self::ROUTED_ACTION_PLACEHOLDER];
+        $values = ['@' . $request->controller() . '@', $request->action()];
+        foreach ($parameters as $placeholder => $value) {
+            $placeholders[] = '%' . $placeholder . '%';
+            $values[] = $value;
+        }
+        $dependencies = str_replace($placeholders, $values, $dependencies);
+        $dependencies = json_decode($dependencies, true);
 
         // Check classes to create
         $toCreate = [];
         $counter = 0;
-        $this->analyseInjections($counter, $dependency, $toCreate, substr($project['application_starting_point'], 1));
+        $this->analyseInjections($counter, $dependencies, $toCreate, self::APPLICATION_STARTING_POINT);
 
-        // Build dependency tree
-        $this->inject($dependency, $toCreate);
-        var_dump($dependency['user_controller']);exit;
-
-        //var_dump([$parameters, $project, $routing, $dependency]);
+        // Build dependencies tree
+        $this->inject($dependencies, $toCreate);
+        $dependencies[self::APPLICATION_STARTING_POINT]['object']->process($request);
     }
 
-    private function analyseInjections(int $counter, array $dependency, array &$toCreate, string $name)
+    private function analyseInjections(int $counter, array $dependencies, array &$toCreate, string $name)
     {
         $counter++;
         if ($counter > 1000) {
@@ -48,26 +53,28 @@ class Project
             $toCreate[] = $name;
         }
 
-        foreach ($dependency[$name]['inject'] as $injection) {
+        foreach ($dependencies[$name]['inject'] as $injection) {
             if (is_string($injection) && strpos($injection, '@') === 0) {
-                $subname = substr($injection, 1);
-                $this->analyseInjections($counter, $dependency, $toCreate, $subname);
+                $subname = trim($injection, '@');
+                $this->analyseInjections($counter, $dependencies, $toCreate, $subname);
             }
         }
     }
 
-    private function inject(&$dependency, $toCreate)
+    private function inject(&$dependencies, $toCreate)
     {
         $index = count($toCreate);
         while ($index--) {
-            foreach ($dependency[$toCreate[$index]]['inject'] as &$injection) {
+            foreach ($dependencies[$toCreate[$index]]['inject'] as &$injection) {
                 if (is_string($injection) && strpos($injection, '@') === 0) {
-                    $injection = $dependency[substr($injection, 1)]['object'];
+                    $injection = $dependencies[trim($injection, '@')]['object'];
                 }
             }
 
-            if (empty($dependency[$toCreate[$index]]['object'])) {
-                $dependency[$toCreate[$index]]['object'] = new $dependency[$toCreate[$index]]['class'](...$dependency[$toCreate[$index]]['inject']);
+            if (empty($dependencies[$toCreate[$index]]['object'])) {
+                $dependencies[$toCreate[$index]]['object'] = new $dependencies[$toCreate[$index]]['class'](
+                    ...$dependencies[$toCreate[$index]]['inject']
+                );
             }
         }
     }

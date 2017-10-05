@@ -3,10 +3,14 @@ namespace TinyApp\Model\Service;
 
 class UserService
 {
+    private $userRepository;
 
-public function __construct($txt, $num) {
-$this->txt = $txt;
-$this->num = $num;
-}
+    public function __construct($userRepository) {
+        $this->userRepository = $userRepository;
+    }
 
+    public function something()
+    {
+        $this->userRepository->getUser();
+    }
 }
