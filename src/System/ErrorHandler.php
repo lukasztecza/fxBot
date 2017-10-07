@@ -41,8 +41,7 @@ class ErrorHandler
 
     public function handleException(\Throwable $exception)
     {
-        $this->log($exception->getCode(), $exception->getMessage(), $exception->getFile(), $exception->getLine(), 'exception');
+        $this->log($exception->getCode(), $exception->getMessage(), $exception->getFile(), $exception->getLine(), get_class($exception));
         exit;
     }
-
 }

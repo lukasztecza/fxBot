@@ -14,14 +14,11 @@ class Router
 
     public function buildRequest()
     {
-        //@TODO here get from globals
         $host = $_SERVER['SERVER_NAME'] ?? $_SERVER['HTTP_HOST'] ?? null;
         $uri = $_SERVER['REQUEST_URI'] ?? null;
-
-$uri = 'user/2/test';
-        //@TODO based on uri find route and assign controller and action and attributes
-        //@TODO get http verb GET POST PUT PATCH DELETE etc. and compare routes against it
-
+        $method = $_SERVER['REQUEST_METHOD'];
+//$host = 'localhost'; $uri = '/user/2/tes'; $method = 'GET';
+        $uri = str_replace('app.php/', '', $uri);
         $uriElements = explode('/', $uri);
         $uriElementsCount = count($uriElements);
 
@@ -35,7 +32,7 @@ $uri = 'user/2/test';
                 continue;
             }
 
-            if (0 /* @TODO here compare if http verb matches the route */) {
+            if (!empty($parameters['method']) && !in_array($method, $parameters['method'])) {
                 continue;
             }
 
@@ -44,7 +41,7 @@ $uri = 'user/2/test';
                 if (strpos($routeElements[$key], '{') !== false) {
                     $attribute = rtrim(ltrim($routeElements[$key], '{'), '}');
                     if (empty($parameters['requirements'][$attribute])) {
-                        throw new \Exception('No requirement set for route attribute ' . $attribute);
+                        throw new \Exception('No requirement set for route attribute ' . var_export($attribute, true));
                     }
                     $pattern = $parameters['requirements'][$attribute];
                     if (!preg_match('/^' . $pattern . '$/', $element)) {
@@ -62,7 +59,7 @@ $uri = 'user/2/test';
         }
 
         if (empty($found)) {
-            throw new \Exception('No route found');
+            throw new \Exception('No route found for uri ' . var_export($uri, true));
         }
 
         $attributes = [];

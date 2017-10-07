@@ -1,7 +1,9 @@
 {
     "environment": "prod",
 
+    "database_engine": "mysql",
+    "database_host": "localhost:3306",
+    "database_name": "my_db",
     "database_user": "user",
-    "database_password": "pass",
-    "database_host": "localhost"
+    "database_password": "pass"
 }

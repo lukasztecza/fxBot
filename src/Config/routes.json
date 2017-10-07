@@ -1,20 +1,19 @@
 {
-    "admin/{id}": {
+    "/admin/{id}": {
         "controller": "user_controller",
         "method": ["GET"],
         "requirements": {"id": "\\d+"},
         "action": "get"
     },
-    "user/{id}/{word}": {
+    "/user/{id}/{word}": {
         "controller": "user_controller",
-        "method": ["GET"],
+        "method": ["POST", "GET"],
         "requirements": {"id": "\\d+", "word": "\\D+"},
         "action": "get"
     },
-    "user/2": {
+    "/": {
         "controller": "user_controller",
-        "method": ["GET"],
-        "requirements": {"id": "\\d+"},
-        "action": "get"
+        "action": "get",
+        "requirements":{"test":"\\w+"}
     }
 }

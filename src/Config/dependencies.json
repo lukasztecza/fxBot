@@ -30,17 +30,22 @@
     "read_connection": {
         "class": "TinyApp\\Model\\Repository\\DatabaseConnection",
         "inject": [
-            "%database_host_read%",
-            "%database_user_read%",
-            "%database_password_read%"
+            "%database_engine%",
+            "%database_host%",
+            "%database_name%",
+            "%database_user%",
+            "%database_password%"
         ]
     },
     "write_connection": {
         "class": "TinyApp\\Model\\Repository\\DatabaseConnection",
         "inject": [
-            "%database_host_write%",
-            "%database_user_write%",
-            "%database_password_write%"
+            "%database_engine%",
+            "%database_host%",
+            "%database_name%",
+            "%database_user%",
+            "%database_password%"
         ]
     }
+
 }
