@@ -1,5 +1,5 @@
 <?php
-namespace TinyApp\Model\Middleware;
+namespace TinyApp\System;
 
 use TinyApp\System\Request;
 

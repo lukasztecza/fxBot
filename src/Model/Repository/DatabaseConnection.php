@@ -3,19 +3,22 @@ namespace TinyApp\Model\Repository;
 
 class DatabaseConnection
 {
-    private $host;
-    private $user;
-    private $password;
+    private $connection;
 
-    public function __construct($host, $user, $password)
+    public function __construct($engine, $host, $database, $user, $password)
     {
-        $this->host = $host;
-        $this->user = $user;
-        $this->password = $password;
+        return;
+        $this->connection = new \PDO(
+            $engine . ':host=' . $host . ';dbname=' . $database . ';charset=utf8',
+            $user,
+            $password
+        );
+        $this->connection->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
+        $this->connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
     }
 
-    public function execute()
+    public function getConnection()
     {
-        return 'hey';
+        return $this->connection;
     }
 }

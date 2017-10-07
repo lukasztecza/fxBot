@@ -5,8 +5,8 @@ class Request
 {
     private $path;
     private $attributes;
-    private $get;
-    private $post;
+    private $query;
+    private $payload;
     private $input;
     private $cookie;
     private $server;
@@ -38,52 +38,52 @@ class Request
         $this->routedAction = $routedAction;
     }
 
-    public function path() : string
+    public function getPath() : string
     {
         return $this->path;
     }
 
-    public function attributes(array $combinedKeys = []) : array
+    public function getAttributes(array $combinedKeys = []) : array
     {
         return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->attributes) : $this->attributes;
     }
 
-    public function get(array $combinedKeys = []) : array
+    public function getQuery(array $combinedKeys = []) : array
     {
         return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->get) : $this->get;
     }
 
-    public function post(array $combinedKeys = []) : array
+    public function getPayload(array $combinedKeys = []) : array
     {
         return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->post) : $this->post;
     }
 
-    public function input() : string
+    public function getInput() : string
     {
         return $this->input;
     }
 
-    public function cookie(array $combinedKeys = []) : array
+    public function getCookie(array $combinedKeys = []) : array
     {
         return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->cookie) : $this->cookie;
     }
 
-    public function server(array $combinedKeys = []) : array
+    public function getServer(array $combinedKeys = []) : array
     {
         return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->server) : $this->server;
     }
 
-    public function files(array $combinedKeys = []) : array
+    public function getFiles(array $combinedKeys = []) : array
     {
         return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->files) : $this->files;
     }
 
-    public function controller() : string
+    public function getController() : string
     {
         return $this->routedController;
     }
 
-    public function action() : string
+    public function getAction() : string
     {
         return $this->routedAction;
     }

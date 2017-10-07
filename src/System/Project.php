@@ -3,6 +3,7 @@ namespace TinyApp\System;
 
 use TinyApp\System\ErrorHandler;
 use TinyApp\System\Router;
+use TinyApp\System\ApplicationMiddlewareInterface;
 
 class Project
 {
@@ -23,8 +24,23 @@ class Project
 
         // Update dependencies placeholders
         $dependencies = file_get_contents(__DIR__ . '/../Config/dependencies.json');
+        if (
+            !strpos($dependencies, self::ROUTED_CONTROLLER_PLACEHOLDER) ||
+            !strpos($dependencies, self::ROUTED_ACTION_PLACEHOLDER) ||
+            !strpos($dependencies, self::APPLICATION_STARTING_POINT)
+        ) {
+            throw new \Exception(
+                'Could not find ' .
+                self::ROUTED_CONTROLLER_PLACEHOLDER . ' placeholder or ' .
+                self::ROUTED_ACTION_PLACEHOLDER . ' placeholder or ' .
+                self::APPLICATION_STARTING_POINT . ' application starting point in dependencies.json, ' .
+                'make sure you specify application starting point and ' .
+                'set routed controller placeholder and routed action placeholder ' .
+                'as dependecies of object responsible for handling them.'
+            );
+        }
         $placeholders = [self::ROUTED_CONTROLLER_PLACEHOLDER, self::ROUTED_ACTION_PLACEHOLDER];
-        $values = ['@' . $request->controller() . '@', $request->action()];
+        $values = ['@' . $request->getController() . '@', $request->getAction()];
         foreach ($parameters as $placeholder => $value) {
             $placeholders[] = '%' . $placeholder . '%';
             $values[] = $value;
@@ -39,6 +55,9 @@ class Project
 
         // Build dependencies tree
         $this->inject($dependencies, $toCreate);
+        if (!($dependencies[self::APPLICATION_STARTING_POINT]['object'] instanceof ApplicationMiddlewareInterface)) {
+            throw new \Exception('Application middleware has to implement ' . ApplicationMiddlewareInterface::class);
+        }
         $dependencies[self::APPLICATION_STARTING_POINT]['object']->process($request);
     }
 
@@ -46,7 +65,7 @@ class Project
     {
         $counter++;
         if ($counter > 1000) {
-            throw new \Exception('Too many dependencies or danger of infinite recurrence, reached counter ' . $counter);
+            throw new \Exception('Too many dependencies or danger of infinite recurrence, reached counter ' . var_export($counter, true));
         }
 
         if (!in_array($name, $toCreate)) {
@@ -76,6 +95,19 @@ class Project
                     ...$dependencies[$toCreate[$index]]['inject']
                 );
             }
+        }
+    }
+
+    public static function buildParameters()
+    {
+        if (!file_exists(__DIR__ . '/../Config/parameters.json')) {
+            $pattern = file_get_contents(__DIR__ . '/../Config/parameters.json.dist');
+            //@TODO add reading and setting parameters if it is different than dist version
+//            foreach ($pattern as $key => $value) {
+// read inputed value and assign value
+//            }
+//            file_put_contents(__DIR__ . '/../Config/parameters.json', json_encode($pattern));
+            var_dump(json_decode($pattern, true));
         }
     }
 }

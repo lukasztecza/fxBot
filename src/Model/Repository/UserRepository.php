@@ -14,6 +14,6 @@ class UserRepository
 
     public function getUser()
     {
-        $this->read->execute();
+        $this->read->getConnection();
     }
 }
