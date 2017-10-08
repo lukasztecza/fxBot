@@ -27,7 +27,7 @@ class ErrorHandler
         }
     }
 
-    public function handleErrorm(int $type = null, string $message = null, string $file = null, int $line = null, array $context = [])
+    public function handleError(int $type = null, string $message = null, string $file = null, int $line = null, array $context = [])
     {
         if (!(error_reporting() & $type)) {
             // This error code is not included in error_reporting shutting down
