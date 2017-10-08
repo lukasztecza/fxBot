@@ -75,6 +75,9 @@ class RenderingMiddleware implements ApplicationMiddlewareInterface
 
     private function renderTemplate(string $template, array $variables)
     {
+        $template = preg_replace('/[^a-zA-Z0-9\.\/]/', '', $template);
+        $template = preg_replace(['/(\.\.\/)/', '/\.\./'], '', $template);
+
         if (empty($template) || !file_exists(__DIR__ . '/../../View/' . $template)) {
             throw new \Exception('Template does not exist ' . var_export($template, true));
         }

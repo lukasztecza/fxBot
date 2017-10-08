@@ -25,8 +25,9 @@ class UserController
             'layout.php',
 //            null,
             ['first' => 123, 'second' => '<div>hey</div>', 'third' => ['hey' => [10,30,50,'test'], 'wow']],
-            ['Content-Type' => 'application/jsoni'],
-            ['third.0' => 'raw', 'first' => 'html', 'second' => 'raw', 'third.hey.1' => 'raw', 'template' => 'raw']
+            ['third.0' => 'raw', 'first' => 'html', 'second' => 'raw', 'third.hey.1' => 'raw', 'template' => 'raw'],
+//            ['Content-Type' => 'application/json'],
+            []
         );
     }
 }
