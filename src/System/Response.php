@@ -12,15 +12,15 @@ class Response
 
     private $template;
     private $variables;
-    private $headers;
     private $rules;
+    private $headers;
 
-    public function __construct(string $template = null, array $variables, array $headers, array $rules)
+    public function __construct(string $template = null, array $variables, array $rules, array $headers)
     {
         $this->template = $template;
         $this->variables = $variables;
-        $this->headers = $headers;
         $this->rules = $rules;
+        $this->headers = $headers;
     }
 
     public function getTemplate() : string
