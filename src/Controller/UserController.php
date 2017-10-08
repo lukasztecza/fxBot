@@ -21,6 +21,12 @@ class UserController
     {
 //        list($ss, $post1) = array_values($request->getPayload(['post3.subp2.ss', 'post1']));
         $this->userService->something();
-        return new Response(['first' => 123, 'second' => '<div>hey</div>', 'third' => ['hey' => [10,30,50,'test'], 'wow'], 'template' => 'layout.php'], ['Content-Type' => 'application/json'], ['third.0' => 'raw', 'first' => 'html', 'second' => 'raw', 'third.hey.1' => 'raw']);
+        return new Response(
+            'layout.php',
+//            null,
+            ['first' => 123, 'second' => '<div>hey</div>', 'third' => ['hey' => [10,30,50,'test'], 'wow']],
+            ['Content-Type' => 'application/jsoni'],
+            ['third.0' => 'raw', 'first' => 'html', 'second' => 'raw', 'third.hey.1' => 'raw', 'template' => 'raw']
+        );
     }
 }

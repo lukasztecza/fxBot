@@ -10,18 +10,25 @@ class Response
     const JS_ESCAPE = 'js';
     const NO_ESCAPE = 'raw';
 
+    private $template;
     private $variables;
     private $headers;
     private $rules;
 
-    public function __construct(array $variables, array $headers, array $rules)
+    public function __construct(string $template = null, array $variables, array $headers, array $rules)
     {
+        $this->template = $template;
         $this->variables = $variables;
         $this->headers = $headers;
         $this->rules = $rules;
     }
 
-    public function variables() : array
+    public function getTemplate() : string
+    {
+        return $this->template;
+    }
+
+    public function getVariables() : array
     {
         $counter = 0;
         $variables = $this->variables;
@@ -29,7 +36,7 @@ class Response
         return $variables;
     }
 
-    public function headers() : array
+    public function getHeaders() : array
     {
         return $this->headers;
     }
@@ -96,7 +103,7 @@ class Response
     //@TODO update html escape from twig
     private function htmlEscapeValue(&$value)
     {
-        $value = htmlspecialchars($value, ECS_QUOTES);
+        $value = htmlspecialchars($value, ENT_QUOTES);
     }
 
     //@TODO add attr escape from twig
