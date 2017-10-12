@@ -1,3 +1,3 @@
 <?php
 include('../vendor/autoload.php');
-(new TinyApp\System\Project())->run();
+(new TinyApp\Model\System\Project())->run();

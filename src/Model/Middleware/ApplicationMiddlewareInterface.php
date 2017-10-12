@@ -1,7 +1,7 @@
 <?php
-namespace TinyApp\System;
+namespace TinyApp\Model\Middleware;
 
-use TinyApp\System\Request;
+use TinyApp\Model\System\Request;
 
 interface ApplicationMiddlewareInterface
 {

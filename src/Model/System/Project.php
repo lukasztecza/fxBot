@@ -1,9 +1,9 @@
 <?php
-namespace TinyApp\System;
+namespace TinyApp\Model\System;
 
-use TinyApp\System\ErrorHandler;
-use TinyApp\System\Router;
-use TinyApp\System\ApplicationMiddlewareInterface;
+use TinyApp\Model\System\ErrorHandler;
+use TinyApp\Model\System\Router;
+use TinyApp\Model\Middleware\ApplicationMiddlewareInterface;
 
 class Project
 {
@@ -11,19 +11,21 @@ class Project
     const ROUTED_ACTION_PLACEHOLDER = '%routed_action%';
     const APPLICATION_STARTING_POINT = 'rendering_middleware';
 
+    const CONFIG_PATH = __DIR__ . '/../../Config/';
+
     public function run()
     {
         // Get project variables and set error handler
-        $parameters = json_decode(file_get_contents(__DIR__ . '/../Config/parameters.json'), true);
+        $parameters = json_decode(file_get_contents(self::CONFIG_PATH . 'parameters.json'), true);
         $errorHandler = new ErrorHandler($parameters['environment']);
 
         // Get routes and build request object
-        $routes = json_decode(file_get_contents(__DIR__ . '/../Config/routes.json'), true);
+        $routes = json_decode(file_get_contents(self::CONFIG_PATH . 'routes.json'), true);
         $router = new Router($routes);
         $request = $router->buildRequest();
 
         // Update dependencies placeholders
-        $dependencies = file_get_contents(__DIR__ . '/../Config/dependencies.json');
+        $dependencies = file_get_contents(self::CONFIG_PATH . 'dependencies.json');
         if (
             !strpos($dependencies, self::ROUTED_CONTROLLER_PLACEHOLDER) ||
             !strpos($dependencies, self::ROUTED_ACTION_PLACEHOLDER) ||
@@ -68,6 +70,10 @@ class Project
             throw new \Exception('Too many dependencies or danger of infinite recurrence, reached counter ' . var_export($counter, true));
         }
 
+        if (empty($dependencies[$name])) {
+            throw new \Exception('Unrecognized dependency ' . $name);
+        }
+
         if (!in_array($name, $toCreate)) {
             $toCreate[] = $name;
         }
@@ -100,8 +106,8 @@ class Project
 
     public static function buildParameters()
     {
-        if (!file_exists(__DIR__ . '/../Config/parameters.json')) {
-            $pattern = file_get_contents(__DIR__ . '/../Config/parameters.json.dist');
+        if (!file_exists(__DIR__ . '/../../Config/parameters.json')) {
+            $pattern = file_get_contents(__DIR__ . '/../../Config/parameters.json.dist');
             //@TODO add reading and setting parameters if it is different than dist version
 //            foreach ($pattern as $key => $value) {
 // read inputed value and assign value

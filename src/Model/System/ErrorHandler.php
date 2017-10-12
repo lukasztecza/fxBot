@@ -1,8 +1,14 @@
 <?php
-namespace TinyApp\System;
+namespace TinyApp\Model\System;
 
 class ErrorHandler
 {
+    const DEFAULT_CONTENT_TYPE = 'application/json';
+
+    const CONTENT_TYPE_JSON = 'application_/json';
+    const CONTENT_TYPE_HTML = 'text/html';
+    const LOGS_PATH = __DIR__ . '/../../../tmp/logs/';
+
     public function __construct(string $environment)
     {
         error_reporting(E_ALL & ~E_USER_NOTICE);
@@ -13,19 +19,19 @@ class ErrorHandler
         }
     }
 
-    public function log(int $type, string $message, string $file, int $line, string $reason, array $context)
+    private function log(int $type, string $message, string $file, int $line, string $reason, array $context)
     {
         $context = json_encode($context);
         $message = json_encode($message);
         list($context, $message) = preg_replace(['/[^a-zA-Z0-9 ]/', '/_{1,}/'], '_', [$context, $message]);
 
-        if (!file_exists(__DIR__ . '/../../tmp/logs')) {
-            mkdir(__DIR__ . '/../../tmp/logs', 0775, true);
+        if (!file_exists(self::LOGS_PATH)) {
+            mkdir(self::LOGS_PATH, 0775, true);
         }
         file_put_contents(
-            __DIR__ . '/../../tmp/logs/' . date('Y-m-d') . '.log',
+            self::LOGS_PATH . date('Y-m-d') . '.log',
             date('Y-m-d H:i:s') . ' | ' . $reason .  ' | code: ' . $type . ' | file: ' . $file . ' | line: ' . $line .
-            ' | with message: ' . $message . ' | with context: ' . $context . PHP_EOL . PHP_EOL, 
+            ' | with message: ' . $message . ' | with context: ' . $context . PHP_EOL . PHP_EOL,
             FILE_APPEND | LOCK_EX
         );
     }
@@ -47,7 +53,7 @@ class ErrorHandler
         }
 
         $this->log($type, $message, $file, $line, 'Error', $context);
-        exit;
+        $this->displayErorPage($type);
     }
 
     public function handleException(\Throwable $exception)
@@ -60,6 +66,27 @@ class ErrorHandler
             get_class($exception),
             $exception->getTrace()
         );
-        exit;
+        $this->displayErorPage();
+    }
+
+    private function displayErorPage(int $type = null)
+    {
+        switch (self::DEFAULT_CONTENT_TYPE) {
+            case self::CONTENT_TYPE_JSON:
+                header('Content-Type: application/json');
+                //@TODO echo json
+                echo json_encode(['status' => 'error', 'code' => $type]);
+                exit;
+            case self::CONTENT_TYPE_HTML:
+            default:
+                echo
+                    '<!Doctype html>' .
+                    '<html>' .
+                    '<head> meta charset="utf-8"><meta name="robots" content="noindex, nofollow"></head>' .
+                    '<body><p>Status: error</p><p>Code: ' . $type . '</p></body>' .
+                    '</html>'
+                ;
+                exit;
+        }
     }
 }

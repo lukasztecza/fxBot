@@ -1,7 +1,7 @@
 <?php
-namespace TinyApp\System;
+namespace TinyApp\Model\System;
 
-use TinyApp\System\Request;
+use TinyApp\Model\System\Request;
 
 class Router
 {
@@ -17,8 +17,11 @@ class Router
         $host = $_SERVER['SERVER_NAME'] ?? $_SERVER['HTTP_HOST'] ?? null;
         $uri = $_SERVER['REQUEST_URI'] ?? null;
         $method = $_SERVER['REQUEST_METHOD'];
-//$host = 'localhost'; $uri = '/user/2/tes'; $method = 'GET';
         $uri = str_replace('app.php/', '', $uri);
+        $queryStart = strpos($uri, '?');
+        if ($queryStart !== false) {
+            $uri = substr($uri, 0, $queryStart);
+        }
         $uriElements = explode('/', $uri);
         $uriElementsCount = count($uriElements);
 
@@ -75,8 +78,10 @@ class Router
 
         $input = file_get_contents('php://input');
         $request = new Request(
-            (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $host . $uri,
+            (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $host,
+            $uri,
             $attributes,
+            $method,
             $_GET,
             $_POST,
             $_FILES,

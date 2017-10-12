@@ -1,5 +1,5 @@
 {
-    "environment": "prod",
+    "environment": "dev",
 
     "database_engine": "mysql",
     "database_host": "localhost:3306",
