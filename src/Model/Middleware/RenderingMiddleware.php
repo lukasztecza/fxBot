@@ -1,14 +1,18 @@
 <?php
 namespace TinyApp\Model\Middleware;
 
-use TinyApp\System\Request;
-use TinyApp\System\Response;
-use TinyApp\System\ApplicationMiddlewareInterface;
+use TinyApp\Model\System\Request;
+use TinyApp\Model\System\Response;
+use TinyApp\Model\Middleware\ApplicationMiddlewareInterface;
 
 class RenderingMiddleware implements ApplicationMiddlewareInterface
 {
+    const DEFAULT_CONTENT_TYPE = 'text/html';
+
     const CONTENT_TYPE_HTML = 'text/html';
     const CONTENT_TYPE_JSON = 'application/json';
+
+    const TEMPLATES_PATH = __DIR__ . '/../../View/';
 
     private $controller;
     private $action;
@@ -36,21 +40,19 @@ class RenderingMiddleware implements ApplicationMiddlewareInterface
             exit;
         }
 
-        //@TODO move content types to constants and add application/xml octet-string for download or display file
-        $contentType = $headers['Content-Type'] ?? self::CONTENT_TYPE_HTML;
+        $contentType = $headers['Content-Type'] ?? self::DEFAULT_CONTENT_TYPE;
         $variables = $response->getVariables();
 
         switch($contentType) {
             case self::CONTENT_TYPE_HTML:
-                $this->returnHtmlResponse($response->getTemplate(), $variables, $headers);
+                $this->returnHtmlResponse($response->getFile(), $variables, $headers);
                 exit;
             case self::CONTENT_TYPE_JSON:
                 $this->returnJsonResponse($variables, $headers);
                 exit;
+            //@TODO add download file content type
             default:
-                unset($headers['Content-Type']);
-                $this->returnHtmlResponse($response->getTemplate(), $variables, $headers);
-                exit;
+                throw new \Exception('Not supported Content-Type ' . $contentType);
         }
     }
 
@@ -75,13 +77,11 @@ class RenderingMiddleware implements ApplicationMiddlewareInterface
 
     private function renderTemplate(string $template, array $variables)
     {
-        $template = preg_replace('/[^a-zA-Z0-9\.\/]/', '', $template);
-        $template = preg_replace(['/(\.\.\/)/', '/\.\./'], '', $template);
-
-        if (empty($template) || !file_exists(__DIR__ . '/../../View/' . $template)) {
+        if (empty($template) || !file_exists(self::TEMPLATES_PATH . $template)) {
             throw new \Exception('Template does not exist ' . var_export($template, true));
         }
         extract($variables);
-        include(__DIR__ . '/../../View/' . $template);
+        unset($variables);
+        include(self::TEMPLATES_PATH . $template);
     }
 }

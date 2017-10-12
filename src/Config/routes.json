@@ -1,19 +1,24 @@
 {
-    "/admin/{id}": {
-        "controller": "user_controller",
+    "/": {
+        "controller": "sample_controller",
+        "method": ["GET"],
+        "requirements": {"id": "\\d+"},
+        "action": "home"
+    },
+    "/items/{id}": {
+        "controller": "sample_controller",
         "method": ["GET"],
         "requirements": {"id": "\\d+"},
         "action": "get"
     },
-    "/user/{id}/{word}": {
-        "controller": "user_controller",
-        "method": ["POST", "GET"],
-        "requirements": {"id": "\\d+", "word": "\\D+"},
-        "action": "get"
+    "/items": {
+        "controller": "sample_controller",
+        "method": ["POST"],
+        "action": "save"
     },
-    "/": {
-        "controller": "user_controller",
-        "action": "get",
-        "requirements":{"test":"\\w+"}
+    "/api": {
+        "controller": "sample_controller",
+        "method": ["GET"],
+        "action": "api"
     }
 }

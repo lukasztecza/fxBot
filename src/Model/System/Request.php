@@ -1,10 +1,12 @@
 <?php
-namespace TinyApp\System;
+namespace TinyApp\Model\System;
 
 class Request
 {
+    private $host;
     private $path;
     private $attributes;
+    private $method;
     private $query;
     private $payload;
     private $input;
@@ -15,8 +17,10 @@ class Request
     private $routedAction;
 
     public function __construct(
+        string $host,
         string $path,
         array $attributes,
+        string $method,
         array $get,
         array $post,
         array $files,
@@ -26,6 +30,7 @@ class Request
         string $routedController,
         string $routedAction
     ) {
+        $this->host = $host;
         $this->path = $path;
         $this->attributes = $attributes;
         $this->get = $get;
@@ -38,9 +43,25 @@ class Request
         $this->routedAction = $routedAction;
     }
 
+    public function getHost() : string
+    {
+        return $this->host;
+    }
+
     public function getPath() : string
     {
         return $this->path;
+    }
+
+    public function getMethod() : string
+    {
+        return $this->method;
+    }
+
+    //@TODO check if isAjax
+    public function isAjax() : boolean
+    {
+        return false;
     }
 
     public function getAttributes(array $combinedKeys = []) : array
@@ -95,7 +116,7 @@ class Request
             $nesting = explode('.', $combinedKey);
             $arrayChunk = $arrayToFilter;
             foreach ($nesting as $key) {
-                if (!empty($arrayChunk[$key])) {
+                if (isset($arrayChunk[$key])) {
                     $arrayChunk = $arrayChunk[$key];
                 } else {
                     $arrayChunk = null;

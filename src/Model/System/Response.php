@@ -1,9 +1,9 @@
 <?php
-namespace TinyApp\System;
+namespace TinyApp\Model\System;
 
 class Response
 {
-    const SECURE = 'secure';
+    const SANITIZE = 'sanitize';
     const HTML_ESCAPE = 'html';
     const HTML_ATTRIBUTE_ESCAPE = 'html-attr';
     const CSS_ESCAPE = 'css';
@@ -15,17 +15,17 @@ class Response
     private $rules;
     private $headers;
 
-    public function __construct(string $template = null, array $variables, array $rules, array $headers)
+    public function __construct(string $file = null, array $variables = [], array $rules = [], array $headers = [])
     {
-        $this->template = $template;
+        $this->file = $file;
         $this->variables = $variables;
         $this->rules = $rules;
         $this->headers = $headers;
     }
 
-    public function getTemplate() : string
+    public function getFile() : string
     {
-        return $this->template;
+        return preg_replace(['/(\.\.\/)/', '/\.\./'], '', preg_replace('/[^a-zA-Z0-9\.\/]/', '', $this->file));
     }
 
     public function getVariables() : array
@@ -63,7 +63,7 @@ class Response
 
     private function selectAndApplyRuleForValue(&$value, $currentKeyString)
     {
-        $selectedRule = self::SECURE;
+        $selectedRule = self::SANITIZE;
         foreach ($this->rules as $ruleKeyString => $rule) {
             if (strpos($currentKeyString, $ruleKeyString) === 0) {
                 $selectedRule = $rule;
@@ -73,8 +73,8 @@ class Response
         }
 
         switch($selectedRule) {
-            case self::SECURE:
-                $this->secureValue($value);
+            case self::SANITIZE:
+                $this->sanitizeValue($value);
                 break;
             case self::HTML_ESCAPE:
                 $this->htmlEscapeValue($value);
@@ -91,11 +91,11 @@ class Response
             case self::NO_ESCAPE:
                 break;
             default:
-                $this->secureValue($value);
+                throw new \Exception('Not supported escape/sanitize rule ' . $selectedRule);
         }
     }
 
-    private function secureValue(&$value)
+    private function sanitizeValue(&$value)
     {
         $value = preg_replace('/[^a-zA-Z0-9]/', '', $value);
     }
