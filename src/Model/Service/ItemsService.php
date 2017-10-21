@@ -1,28 +1,28 @@
 <?php
 namespace TinyApp\Model\Service;
 
-class SampleService
+class ItemsService
 {
-    private $userRepository;
+    private $itemsRepository;
 
-    public function __construct($sampleRepository) {
-        $this->sampleRepository = $sampleRepository;
+    public function __construct($itemsRepository) {
+        $this->itemsRepository = $itemsRepository;
     }
 
     public function getItems() : array
     {
-        return $this->sampleRepository->getItems();
+        return $this->itemsRepository->getItems();
     }
 
     public function getItem(int $id) : array
     {
-        return $this->sampleRepository->getItem($id);
+        return $this->itemsRepository->getItem($id);
     }
 
     public function saveItem(array $item) : int
     {
         try {
-            return $this->sampleRepository->saveItem($item);
+            return $this->itemsRepository->saveItem($item);
         } catch (\Exception $e) {
             error_log('Failed to save item with payload ' . var_export($item, true), E_USER_NOTICE);
             return 0;
@@ -37,7 +37,7 @@ class SampleService
                 $items[] = ['name' => $name];
             }
 
-            return $this->sampleRepository->saveItems($items);
+            return $this->itemsRepository->saveItems($items);
         } catch (\Exception $e) {
             error_log('Failed to save items ' . var_export($names, true), E_USER_NOTICE);
             return [];
@@ -47,7 +47,7 @@ class SampleService
     public function updateItem(array $item) : int
     {
         try {
-            return $this->sampleRepository->updateItem($item);
+            return $this->itemsRepository->updateItem($item);
         } catch (\Exception $e) {
             error_log('Failed to update item with id ' . $id, E_USER_NOTICE);
             return 0;
@@ -57,7 +57,7 @@ class SampleService
     public function deleteItem(int $id) : bool
     {
         try {
-            return $this->sampleRepository->deleteItem($id);
+            return $this->itemsRepository->deleteItem($id);
         } catch (\Exception $e) {
             error_log('Failed to delete item with id ' . $id, E_USER_NOTICE);
             return false;
