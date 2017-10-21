@@ -1,34 +1,35 @@
 <?php
 namespace TinyApp\Controller;
 
+use TinyApp\Controller\ControllerInterface;
 use TinyApp\Model\System\Request;
 use TinyApp\Model\System\Response;
-use TinyApp\Model\Service\SampleService;
+use TinyApp\Model\Service\ItemsService;
 use TinyApp\Model\Validator\ValidatorFactory;
 use TinyApp\Model\Validator\ItemsAddValidator;
 use TinyApp\Model\Validator\ItemEditValidator;
 
-class SampleController
+class SampleController implements ControllerInterface
 {
-    private $sampleService;
+    private $itemsService;
     private $validatorFactory;
 
-    public function __construct(SampleService $sampleService, ValidatorFactory $validatorFactory)
+    public function __construct(ItemsService $itemsService, ValidatorFactory $validatorFactory)
     {
-        $this->sampleService = $sampleService;
+        $this->itemsService = $itemsService;
         $this->validatorFactory = $validatorFactory;
     }
 
     public function home(Request $request) : Response
     {
-        $items = $this->sampleService->getItems();
+        $items = $this->itemsService->getItems();
 
         return new Response('home.php');
     }
 
     public function list(Request $request) : Response
     {
-        $items = $this->sampleService->getItems();
+        $items = $this->itemsService->getItems();
 
         return new Response(
             'list.php',
@@ -39,7 +40,7 @@ class SampleController
     public function details(Request $request) : Response
     {
         list($id) = array_values($request->getAttributes(['id']));
-        $item = $this->sampleService->getItem($id);
+        $item = $this->itemsService->getItem($id);
         if (empty($item)) {
             return new Response(null, [], [], ['Location' => '/items']);
         }
@@ -56,7 +57,7 @@ class SampleController
         if ($request->getMethod() === 'POST') {
             $payload = $request->getPayload(['items']);
             if ($validator->check($payload)) {
-                $ids = $this->sampleService->saveItems($payload['items']);
+                $ids = $this->itemsService->saveItems($payload['items']);
                 if (empty($ids)) {
                     return new Response(
                         'addForm.php',
@@ -77,7 +78,7 @@ class SampleController
     public function edit(Request $request) : Response
     {
         list($id) = array_values($request->getAttributes(['id']));
-        $item = $this->sampleService->getItem($id);
+        $item = $this->itemsService->getItem($id);
         if (empty($item)) {
             return new Response(null, [], [], ['Location' => '/items']);
         }
@@ -87,7 +88,7 @@ class SampleController
             $payload = $request->getPayload(['name']);
             if ($validator->check($payload)) {
                 $payload['id'] = $id;
-                $updatedId = $this->sampleService->updateItem($payload);
+                $updatedId = $this->itemsService->updateItem($payload);
                 if (empty($updatedId)) {
                      return new Response(
                         'addForm.php',

@@ -1,7 +1,7 @@
 <?php
 namespace TinyApp\Model\Repository;
 
-class SampleRepository
+class ItemsRepository
 {
     private $write;
 

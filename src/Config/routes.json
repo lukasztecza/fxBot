@@ -13,6 +13,16 @@
         "action": "restricted"
     },
     {
+        "path": "/login",
+        "controller": "authentication_controller",
+        "action": "login"
+    },
+    {
+        "path": "/logout",
+        "controller": "authentication_controller",
+        "action": "logout"
+    },
+    {
         "path": "/items",
         "methods": ["GET"],
         "controller": "sample_controller",

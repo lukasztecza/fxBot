@@ -95,9 +95,7 @@ class Project
             throw new \Exception('Unrecognized dependency ' . $name);
         }
 
-        if (!in_array($name, $toCreate)) {
-            $toCreate[] = $name;
-        }
+        $toCreate[] = $name;
 
         if (isset($dependencies[$name]['inject'])) {
             foreach ($dependencies[$name]['inject'] as $injection) {
@@ -109,7 +107,7 @@ class Project
         }
     }
 
-    private function inject(&$dependencies, $toCreate) : void
+    private function inject(array &$dependencies, array $toCreate) : void
     {
         $index = count($toCreate);
         while ($index--) {

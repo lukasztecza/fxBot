@@ -139,7 +139,6 @@ class Request
     private function getFromArray(array $combinedKeys, array $arrayToFilter)
     {
         $return = [];
-        // Return requested key or null if it does not exist
         foreach ($combinedKeys as $combinedKey) {
             $nesting = explode('.', $combinedKey);
             $arrayChunk = $arrayToFilter;

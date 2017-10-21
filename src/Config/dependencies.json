@@ -2,39 +2,49 @@
     "rendering_middleware": {
         "class": "TinyApp\\Model\\Middleware\\RenderingMiddleware",
         "inject": [
-            "@securityMiddleware"
+            "@security_middleware"
         ]
     },
-    "securityMiddleware": {
+    "security_middleware": {
         "class": "TinyApp\\Model\\Middleware\\SecurityMiddleware",
         "inject": [
             "%security_list%",
+            "@session_service",
             "%routed_controller%",
             "%routed_action%"
         ]
     },
+    "session_service": {
+        "class": "TinyApp\\Model\\Service\\SessionService"
+    },
     "sample_controller": {
         "class": "TinyApp\\Controller\\SampleController",
         "inject": [
-            "@sample_service@",
+            "@items_service@",
             "@validator_factory"
+        ]
+    },
+    "authentication_controller": {
+        "class": "TinyApp\\Controller\\AuthenticationController",
+        "inject": [
+            "@session_service"
         ]
     },
     "api_controller": {
             "class": "TinyApp\\Controller\\ApiController",
         "inject": [
-            "@sample_service@",
+            "@items_service@",
             "@validator_factory"
         ]
     },
-    "sample_service": {
-        "class": "TinyApp\\Model\\Service\\SampleService",
+    "items_service": {
+        "class": "TinyApp\\Model\\Service\\ItemsService",
         "inject": [
-            "@sample_repository@"
+            "@items_repository@"
         ]
     },
-    "sample_repository": {
-        "class": "TinyApp\\Model\\Repository\\SampleRepository",
+    "items_repository": {
+        "class": "TinyApp\\Model\\Repository\\ItemsRepository",
         "inject": [
             "@write_connection@"
         ]
