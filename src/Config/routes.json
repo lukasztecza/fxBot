@@ -1,24 +1,74 @@
-{
-    "/": {
+[
+    {
+        "path": "/",
+        "methods": ["GET"],
         "controller": "sample_controller",
-        "method": ["GET"],
-        "requirements": {"id": "\\d+"},
         "action": "home"
     },
-    "/items/{id}": {
+    {
+        "path": "/restricted/{code}",
+        "methods": ["GET"],
+        "requirements": {"code": "\\w+"},
         "controller": "sample_controller",
-        "method": ["GET"],
+        "action": "restricted"
+    },
+    {
+        "path": "/items",
+        "methods": ["GET"],
+        "controller": "sample_controller",
+        "action": "list"
+    },
+    {
+        "path": "/items/add",
+        "methods": ["GET", "POST"],
+        "controller": "sample_controller",
+        "action": "add"
+    },
+    {
+        "path": "/items/{id}",
+        "methods": ["GET"],
         "requirements": {"id": "\\d+"},
+        "controller": "sample_controller",
+        "action": "details"
+    },
+    {
+        "path": "/items/{id}/edit",
+        "methods": ["GET", "POST"],
+        "requirements": {"id": "\\d+"},
+        "controller": "sample_controller",
+        "action": "edit"
+    },
+    {
+        "path": "/api/items",
+        "methods": ["GET"],
+        "controller": "api_controller",
+        "action": "cget"
+    },
+    {
+        "path": "/api/items",
+        "methods": ["POST"],
+        "controller": "api_controller",
+        "action": "post"
+    },
+    {
+        "path": "/api/items/{id}",
+        "methods": ["GET"],
+        "requirements": {"id": "\\d+"},
+        "controller": "api_controller",
         "action": "get"
     },
-    "/items": {
-        "controller": "sample_controller",
-        "method": ["POST"],
-        "action": "save"
+    {
+        "path": "/api/items/{id}",
+        "methods": ["PUT"],
+        "requirements": {"id": "\\d+"},
+        "controller": "api_controller",
+        "action": "put"
     },
-    "/api": {
-        "controller": "sample_controller",
-        "method": ["GET"],
-        "action": "api"
+    {
+        "path": "/api/items/{id}",
+        "methods": ["DELETE"],
+        "requirements": {"id": "\\d+"},
+        "controller": "api_controller",
+        "action": "delete"
     }
-}
+]

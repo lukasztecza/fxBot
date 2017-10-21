@@ -2,6 +2,13 @@
     "rendering_middleware": {
         "class": "TinyApp\\Model\\Middleware\\RenderingMiddleware",
         "inject": [
+            "@securityMiddleware"
+        ]
+    },
+    "securityMiddleware": {
+        "class": "TinyApp\\Model\\Middleware\\SecurityMiddleware",
+        "inject": [
+            "%security_list%",
             "%routed_controller%",
             "%routed_action%"
         ]
@@ -9,8 +16,15 @@
     "sample_controller": {
         "class": "TinyApp\\Controller\\SampleController",
         "inject": [
-            "sample text",
-            "@sample_service@"
+            "@sample_service@",
+            "@validator_factory"
+        ]
+    },
+    "api_controller": {
+            "class": "TinyApp\\Controller\\ApiController",
+        "inject": [
+            "@sample_service@",
+            "@validator_factory"
         ]
     },
     "sample_service": {
@@ -34,6 +48,8 @@
             "%database_user%",
             "%database_password%"
         ]
+    },
+    "validator_factory": {
+        "class": "TinyApp\\Model\\Validator\\ValidatorFactory"
     }
-
 }

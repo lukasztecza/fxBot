@@ -3,8 +3,6 @@ namespace TinyApp\Model\Repository;
 
 class SampleRepository
 {
-    const STORAGE_PATH = __DIR__ . '/Storage/';
-
     private $write;
 
     public function __construct($write)
@@ -12,50 +10,62 @@ class SampleRepository
         $this->write = $write;
     }
 
-    public function getItem(int $key)
+    public function getItem(int $id) : array
     {
-        /*
         $items = $this->write->fetch(
             'SELECT * FROM `items` WHERE `id` = :id',
-            ['id' => $key]
+            ['id' => $id]
         );
-        return array_pop($items);
-        */
-        $items = file_get_contents(self::STORAGE_PATH . 'items.json');
-        $items = json_decode($items, true);
-        return $items[$key];
+
+        return !empty($items) ? array_pop($items) : [];
     }
 
-    public function getItems()
+    public function getItems() : array
     {
-        /*
         $items = $this->write->fetch(
-            'SELECT * FROM `items`
+            'SELECT * FROM `items`'
         );
-        */
-        $items = file_get_contents(self::STORAGE_PATH . 'items.json');
-        return json_decode($items, true);
+
+        return $items ?? [];
     }
 
-    public function saveItems(array $items)
+    public function saveItems(array $items) : array
     {
-        /*
         $this->write->prepare(
-            'INSERT INTO `items`(`text`) VALUES (:text)
+            'INSERT INTO `items`(`name`) VALUES (:name)'
         );
+        $affectedIds = [];
         foreach ($items as $item) {
-            null,
-            $lastId = $this->execute(['text' => $item]);
+            $affectedIds[] = $this->write->execute(null, ['name' => $item['name']]);
         }
-        return $lastId;
-        */
-        $itemsStored = file_get_contents(self::STORAGE_PATH . 'items.json');
-        $itemsStored = json_decode($itemsStored, true);
-        foreach ($items as $item) {
-            $itemsStored[] = $item;
-        }
-//        file_put_contents();
-   //     $keys = array_keys($this->samples);
-   //     return array_pop($keys);
+
+        return $affectedIds;
+    }
+
+    public function saveItem(array $item) : int
+    {
+        $affectedId = $this->write->execute(
+            'INSERT INTO `items` (`name`) VALUES (:name)', ['name' => $item['name']]
+        );
+
+        return (int)$affectedId;
+    }
+
+    public function updateItem(array $item) : int
+    {
+        $affectedId = $this->write->execute(
+            'UPDATE `items` SET `name` = :name WHERE `id` = :id AND `id` = last_insert_id(`id`)', ['name' => $item['name'], 'id' => $item['id']]
+        );
+
+        return (int)$affectedId;
+    }
+
+    public function deleteItem(int $id) : bool
+    {
+        $this->write->execute(
+            'DELETE FROM `items` WHERE `id` = :id AND `id`', ['id' => $id]
+        );
+
+        return true;
     }
 }

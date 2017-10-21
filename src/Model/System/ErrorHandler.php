@@ -7,11 +7,15 @@ class ErrorHandler
 
     const CONTENT_TYPE_JSON = 'application_/json';
     const CONTENT_TYPE_HTML = 'text/html';
+
     const LOGS_PATH = __DIR__ . '/../../../tmp/logs/';
 
     public function __construct(string $environment)
     {
+        // Report all errors/warnings/notices except E_USER_NOTICE
         error_reporting(E_ALL & ~E_USER_NOTICE);
+
+        // Set custom error/exception/shutdown handling for production environment
         if ('prod' === $environment) {
             set_error_handler([$this, 'handleError']);
             set_exception_handler([$this, 'handleException']);
@@ -19,12 +23,14 @@ class ErrorHandler
         }
     }
 
-    private function log(int $type, string $message, string $file, int $line, string $reason, array $context)
+    private function log(int $type, string $message, string $file, int $line, string $reason, array $context) : void
     {
+        // Sanitize context and message variables to prevent log injections
         $context = json_encode($context);
         $message = json_encode($message);
         list($context, $message) = preg_replace(['/[^a-zA-Z0-9 ]/', '/_{1,}/'], '_', [$context, $message]);
 
+        // Create separate log file per day
         if (!file_exists(self::LOGS_PATH)) {
             mkdir(self::LOGS_PATH, 0775, true);
         }
@@ -36,7 +42,7 @@ class ErrorHandler
         );
     }
 
-    public function handleShutDown()
+    public function handleShutDown() : void
     {
         $error = error_get_last();
         if ($error) {
@@ -44,10 +50,10 @@ class ErrorHandler
         }
     }
 
-    public function handleError(int $type = null, string $message = null, string $file = null, int $line = null, array $context = [])
+    public function handleError(int $type = null, string $message = null, string $file = null, int $line = null, array $context = []) : void
     {
         if (!(error_reporting() & $type)) {
-            // This error code is not included in error_reporting shutting down
+            // This error code is not included in error_reporting so just log it
             $this->log($type, $message, $file, $line, 'Error-ignored', $context);
             return;
         }
@@ -56,7 +62,7 @@ class ErrorHandler
         $this->displayErorPage($type);
     }
 
-    public function handleException(\Throwable $exception)
+    public function handleException(\Throwable $exception) : void
     {
         $this->log(
             $exception->getCode(),
@@ -69,14 +75,14 @@ class ErrorHandler
         $this->displayErorPage();
     }
 
-    private function displayErorPage(int $type = null)
+    private function displayErorPage(int $type = null) : void
     {
+        // Display error page according to default content type
         switch (self::DEFAULT_CONTENT_TYPE) {
             case self::CONTENT_TYPE_JSON:
                 header('Content-Type: application/json');
-                //@TODO echo json
                 echo json_encode(['status' => 'error', 'code' => $type]);
-                exit;
+                break;
             case self::CONTENT_TYPE_HTML:
             default:
                 echo
@@ -86,7 +92,9 @@ class ErrorHandler
                     '<body><p>Status: error</p><p>Code: ' . $type . '</p></body>' .
                     '</html>'
                 ;
-                exit;
+                break;
         }
+        //@TODO maybe remove exit
+        exit;
     }
 }

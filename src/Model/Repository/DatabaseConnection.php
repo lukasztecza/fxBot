@@ -8,7 +8,6 @@ class DatabaseConnection
 
     public function __construct($engine, $host, $database, $user, $password)
     {
-        return;
         $this->connection = new \PDO(
             $engine . ':host=' . $host . ';dbname=' . $database . ';charset=utf8',
             $user,
@@ -18,7 +17,7 @@ class DatabaseConnection
         $this->connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
     }
 
-    public function prepare(string $sql)
+    public function prepare(string $sql) : void
     {
         $this->statement = $this->connection->prepare($sql);
     }
@@ -29,21 +28,26 @@ class DatabaseConnection
         $this->statement->execute($arguments);
 
         $return = [];
-        while ($row = $stmt->fetch()) {
+        while ($row = $this->statement->fetch(\PDO::FETCH_ASSOC)) {
             $return[] = $row;
         }
 
         return $return;
     }
 
-    public function execute(string $sql = null, $arguments)
+    public function execute(string $sql = null, $arguments) : string
     {
         $this->checkStatement($sql);
         $this->statement->execute($arguments);
         return $this->connection->lastInsertId();
     }
 
-    private function checkStatement(string $sql = null)
+    public function cleanStatement() : void
+    {
+        $this->statement = null;
+    }
+
+    private function checkStatement(string $sql = null) : void
     {
         if (!empty($sql)) {
             $this->statement = $this->connection->prepare($sql);
@@ -52,9 +56,9 @@ class DatabaseConnection
         if (empty($this->statement)) {
             throw new \Exception('No statement prepared');
         }
-//@TODO update this check
-//        if (!($stmt instanceof pdostatement)) {
-//            throw new \Exception('No statement prepared');
-//        }
+
+        if (!($this->statement instanceof \PDOStatement)) {
+            throw new \Exception('No statement prepared');
+        }
     }
 }

@@ -3,6 +3,8 @@ namespace TinyApp\Model\System;
 
 class Response
 {
+    const DEFAULT_RULE = 'sanitize';
+
     const SANITIZE = 'sanitize';
     const HTML_ESCAPE = 'html';
     const HTML_ATTRIBUTE_ESCAPE = 'html-attr';
@@ -25,14 +27,15 @@ class Response
 
     public function getFile() : string
     {
+        // Filter out .. or ../ and allow only alphanumeric characters and . and / for file names
         return preg_replace(['/(\.\.\/)/', '/\.\./'], '', preg_replace('/[^a-zA-Z0-9\.\/]/', '', $this->file));
     }
 
     public function getVariables() : array
     {
-        $counter = 0;
+        // Return escaped variables by default but do not change class member
         $variables = $this->variables;
-        $this->escapeArray($counter, $variables, '');
+        $this->escapeArray(0, $variables, '');
         return $variables;
     }
 
@@ -48,6 +51,7 @@ class Response
             throw new \Exception('Too deep array or danger of infinite recurrence, reached counter ' . var_export($counter, true));
         }
 
+        // If value is not array apply rule else call self
         foreach ($array as $key => &$value) {
             $currentKeyString = empty($keyString) ? $key : $keyString . '.' . $key;
 
@@ -63,7 +67,8 @@ class Response
 
     private function selectAndApplyRuleForValue(&$value, $currentKeyString)
     {
-        $selectedRule = self::SANITIZE;
+        // Search for passed rule or use the default one
+        $selectedRule = self::DEFAULT_RULE;
         foreach ($this->rules as $ruleKeyString => $rule) {
             if (strpos($currentKeyString, $ruleKeyString) === 0) {
                 $selectedRule = $rule;
@@ -72,6 +77,7 @@ class Response
             }
         }
 
+        // Allow only known rules
         switch($selectedRule) {
             case self::SANITIZE:
                 $this->sanitizeValue($value);
@@ -97,7 +103,7 @@ class Response
 
     private function sanitizeValue(&$value)
     {
-        $value = preg_replace('/[^a-zA-Z0-9]/', '', $value);
+        $value = preg_replace('/[^a-zA-Z0-9 ]/', '', $value);
     }
 
     //@TODO update html escape from twig

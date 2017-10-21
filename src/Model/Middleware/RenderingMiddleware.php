@@ -14,46 +14,45 @@ class RenderingMiddleware implements ApplicationMiddlewareInterface
 
     const TEMPLATES_PATH = __DIR__ . '/../../View/';
 
-    private $controller;
-    private $action;
+    private $next;
 
-    public function __construct($controller, string $action)
+    public function __construct(ApplicationMiddlewareInterface $next)
     {
-        $this->controller = $controller;
-        $this->action = $action;
+        $this->next = $next;
     }
 
-    public function process(Request $request)
+    public function process(Request $request) : Response
     {
-        $controller = $this->controller;
-        $action = $this->action;
-        $response = $controller->$action($request);
+//        $controller = $this->controller;
+//        $action = $this->action;
+//        $response = $controller->$action($request);
+        $response = $this->next->process($request);
         if (!($response instanceof Response)) {
             throw new \Exception('Controller has to return Response object, returned ' . var_export($response, true));
         }
 
         $headers = $response->getHeaders();
-
         $location = $headers['Location'] ?? null;
-        if ($location) {
-            $this->setHeaders($headers);
-            exit;
-        }
-
         $contentType = $headers['Content-Type'] ?? self::DEFAULT_CONTENT_TYPE;
-        $variables = $response->getVariables();
+        $this->setHeaders($headers);
 
-        switch($contentType) {
-            case self::CONTENT_TYPE_HTML:
-                $this->returnHtmlResponse($response->getFile(), $variables, $headers);
-                exit;
-            case self::CONTENT_TYPE_JSON:
-                $this->returnJsonResponse($variables, $headers);
-                exit;
+        switch (true) {
+            case $location:
+                break;
+            case $contentType === self::CONTENT_TYPE_HTML:
+                $variables = $response->getVariables();
+                $this->buildHtmlResponse($response->getFile(), $variables);
+                break;
+            case $contentType === self::CONTENT_TYPE_JSON:
+                $variables = $response->getVariables();
+                $this->buildJsonResponse($variables);
+                break;
             //@TODO add download file content type
             default:
                 throw new \Exception('Not supported Content-Type ' . $contentType);
         }
+
+        return $response;
     }
 
     private function setHeaders(array $headers)
@@ -63,19 +62,12 @@ class RenderingMiddleware implements ApplicationMiddlewareInterface
         }
     }
 
-    private function returnJsonResponse(array $variables, array $headers)
+    private function buildJsonResponse(array $variables)
     {
-        $this->setHeaders($headers);
         echo json_encode($variables);
     }
 
-    private function returnHtmlResponse(string $template, array $variables, array $headers)
-    {
-        $this->setHeaders($headers);
-        $this->renderTemplate($template, $variables);
-    }
-
-    private function renderTemplate(string $template, array $variables)
+    private function buildHtmlResponse(string $template, array $variables)
     {
         if (empty($template) || !file_exists(self::TEMPLATES_PATH . $template)) {
             throw new \Exception('Template does not exist ' . var_export($template, true));

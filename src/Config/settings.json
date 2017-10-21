@@ -1,0 +1,9 @@
+{
+    "security_list": [
+        {
+            "route": "/restricted/{code}",
+            "methods": ["GET"],
+            "allow": ["ROLE_USER"]
+        }
+    ]
+}

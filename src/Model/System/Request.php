@@ -3,8 +3,14 @@ namespace TinyApp\Model\System;
 
 class Request
 {
+    const DEFAULT_INPUT_TYPE = 'query';
+
+    const INPUT_TYPE_QUERY = 'query';
+    const INPUT_TYPE_JSON = 'json';
+
     private $host;
     private $path;
+    private $route;
     private $attributes;
     private $method;
     private $query;
@@ -19,6 +25,7 @@ class Request
     public function __construct(
         string $host,
         string $path,
+        string $route,
         array $attributes,
         string $method,
         array $get,
@@ -32,7 +39,9 @@ class Request
     ) {
         $this->host = $host;
         $this->path = $path;
+        $this->route = $route;
         $this->attributes = $attributes;
+        $this->method = $method;
         $this->get = $get;
         $this->post = $post;
         $this->input = $input;
@@ -53,14 +62,22 @@ class Request
         return $this->path;
     }
 
+    public function getRoute() : string
+    {
+        return $this->route;
+    }
+
     public function getMethod() : string
     {
         return $this->method;
     }
 
-    //@TODO check if isAjax
-    public function isAjax() : boolean
+    public function isAjax() : bool
     {
+        if(isset($this->server['HTTP_X_REQUESTED_WITH']) && 'xmlhttprequest' === strtolower($this->server['HTTP_X_REQUESTED_WITH'])) {
+            return true;
+        }
+
         return false;
     }
 
@@ -79,9 +96,19 @@ class Request
         return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->post) : $this->post;
     }
 
-    public function getInput() : string
+    public function getInput(array $combinedKeys = [], string $type = self::DEFAULT_INPUT_TYPE) : array
     {
-        return $this->input;
+        switch ($type) {
+            case self::INPUT_TYPE_QUERY:
+                parse_str($this->input, $input);
+                break;
+            case self::INPUT_TYPE_JSON:
+                $input = json_decode($this->input, true);
+                break;
+            default:
+                throw new \Exception('Not supported input type rule ' . $selectedRule);
+        }
+        return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $input) : $input;
     }
 
     public function getCookie(array $combinedKeys = []) : array
@@ -112,6 +139,7 @@ class Request
     private function getFromArray(array $combinedKeys, array $arrayToFilter)
     {
         $return = [];
+        // Return requested key or null if it does not exist
         foreach ($combinedKeys as $combinedKey) {
             $nesting = explode('.', $combinedKey);
             $arrayChunk = $arrayToFilter;

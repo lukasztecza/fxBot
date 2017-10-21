@@ -3,7 +3,7 @@
 
     "database_engine": "mysql",
     "database_host": "localhost:3306",
-    "database_name": "my_db",
+    "database_name": "tiny_app",
     "database_user": "user",
     "database_password": "pass"
 }
