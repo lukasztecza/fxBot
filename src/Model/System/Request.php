@@ -111,7 +111,7 @@ class Request
         return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $input) : $input;
     }
 
-    public function getCookie(array $combinedKeys = []) : array
+    public function getCookies(array $combinedKeys = []) : array
     {
         return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->cookie) : $this->cookie;
     }

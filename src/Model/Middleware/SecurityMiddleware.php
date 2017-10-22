@@ -52,7 +52,7 @@ class SecurityMiddleware implements ApplicationMiddlewareInterface
         }
 
         if (!empty($included) && empty($permitted)) {
-            return new Response(null, [], [], ['Location' => '/login']);
+            return new Response(null, [], [], ['Location' => '/login'], [['name' => 'previousPath', 'value' => $request->getPath()]]);
         }
 
         $controller = $this->controller;

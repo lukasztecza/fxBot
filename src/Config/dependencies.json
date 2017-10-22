@@ -27,7 +27,10 @@
     "authentication_controller": {
         "class": "TinyApp\\Controller\\AuthenticationController",
         "inject": [
-            "@session_service"
+            "@session_service",
+            "@validator_factory",
+            "%in_memory_username%",
+            "%in_memory_password_hash%"
         ]
     },
     "api_controller": {

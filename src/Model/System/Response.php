@@ -16,13 +16,15 @@ class Response
     private $variables;
     private $rules;
     private $headers;
+    private $cookies;
 
-    public function __construct(string $file = null, array $variables = [], array $rules = [], array $headers = [])
+    public function __construct(string $file = null, array $variables = [], array $rules = [], array $headers = [], array $cookies = [])
     {
         $this->file = $file;
         $this->variables = $variables;
         $this->rules = $rules;
         $this->headers = $headers;
+        $this->cookies = $cookies;
     }
 
     public function getFile() : string
@@ -42,6 +44,11 @@ class Response
     public function getHeaders() : array
     {
         return $this->headers;
+    }
+
+    public function getCookies() : array
+    {
+        return $this->cookies;
     }
 
     private function escapeArray(int $counter, array &$array, string $keyString)
