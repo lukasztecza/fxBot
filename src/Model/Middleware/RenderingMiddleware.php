@@ -15,17 +15,16 @@ class RenderingMiddleware implements ApplicationMiddlewareInterface
     const TEMPLATES_PATH = __DIR__ . '/../../View/';
 
     private $next;
+    private $assetsVersion;
 
-    public function __construct(ApplicationMiddlewareInterface $next)
+    public function __construct(ApplicationMiddlewareInterface $next, string $assetsVersion)
     {
         $this->next = $next;
+        $this->assetsVersion = $assetsVersion;
     }
 
     public function process(Request $request) : Response
     {
-//        $controller = $this->controller;
-//        $action = $this->action;
-//        $response = $controller->$action($request);
         $response = $this->next->process($request);
         if (!($response instanceof Response)) {
             throw new \Exception('Controller has to return Response object, returned ' . var_export($response, true));
@@ -93,6 +92,7 @@ class RenderingMiddleware implements ApplicationMiddlewareInterface
         }
         extract($variables);
         unset($variables);
+        $assetsVersioning = '?v=' . $this->assetsVersion;
         include(self::TEMPLATES_PATH . $template);
     }
 }

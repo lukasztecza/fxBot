@@ -35,6 +35,9 @@ fi
 # Enable mod_rewrite for apache
 a2enmod rewrite
 
+# Enable mod_headers for apache
+a2enmod headers
+
 # Set mysql answers and install mysql-server and mysql-client
 debconf-set-selections <<< "mysql-server mysql-server/root_password password $MYSQL_ROOT_PASSWORD"
 debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $MYSQL_ROOT_PASSWORD"

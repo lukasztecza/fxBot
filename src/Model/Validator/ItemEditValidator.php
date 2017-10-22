@@ -9,12 +9,12 @@ class ItemEditValidator extends ValidatorAbstract
     public function check(array $payload) : bool
     {
         if (empty($payload['name'])) {
-            $this->error = 'name can not be empty';
+            $this->error = 'Value of name can not be empty';
             return false;
         }
 
         if (strpos($payload['name'], 'wrong') !== false) {
-            $this->error = 'name can not contain wrong';
+            $this->error = 'Value of name can not contain wrong';
             return false;
         }
 

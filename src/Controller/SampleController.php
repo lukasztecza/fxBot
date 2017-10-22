@@ -47,7 +47,7 @@ class SampleController implements ControllerInterface
 
         return new Response(
             'item.php',
-            ['item' => $item, 'message' => 'Name of the item']
+            ['item' => $item]
         );
     }
 

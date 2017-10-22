@@ -20,7 +20,7 @@ class ItemsAddValidator extends ValidatorAbstract
             }
 
             if (strpos($name, 'wrong') !== false) {
-                $this->error = 'No noame can contain wrong';
+                $this->error = 'No name can contain wrong';
                 return false;
             }
         }

@@ -2,7 +2,8 @@
     "rendering_middleware": {
         "class": "TinyApp\\Model\\Middleware\\RenderingMiddleware",
         "inject": [
-            "@security_middleware"
+            "@security_middleware",
+            "1"
         ]
     },
     "security_middleware": {
