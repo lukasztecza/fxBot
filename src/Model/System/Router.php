@@ -90,7 +90,7 @@ class Router
         }
 
         if (!isset($found)) {
-            throw new \Exception('No route found for path ' . var_export($path, true));
+            throw new \Exception('No route found for path ' . var_export($path, true), 404);
         }
 
         return $found;

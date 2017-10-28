@@ -1,20 +1,13 @@
+<?php include(__DIR__ . '/../common/head.php'); ?>
 <h3>Add form</h3>
-<p><?php echo $error; ?></p>
+<p class="error"><?php echo $error; ?></p>
 <form method="post">
-    <div>
-        <input type="text" name="items[]" />
-    </div>
-    <input type="submit" />
     <input type="button" value="Add input" />
+    <div>
+        <input type="text" name="items[]" /><br />
+    </div>
+    <input type="text" name="csrfToken" value="<?php echo $csrfToken; ?>" /><br />
+    <input type="submit" />
 </form>
-<script>
-(function() {
-    var appendInput = function appendInput() {
-        var input = document.createElement("input");
-        input.type = "text";
-        input.name = "items[]";
-        document.querySelector("form > div").appendChild(input);
-    }
-    document.querySelector("input[type=button]").addEventListener("click", appendInput);
-})();
-</script>
+<script src="/assets/js/core.js<?php echo $assetsVersioning; ?>"></script>
+<?php include(__DIR__ . '/../common/foot.php'); ?>

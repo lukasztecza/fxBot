@@ -5,9 +5,10 @@ use TinyApp\Model\Service\SessionService;
 use TinyApp\Controller\ControllerInterface;
 use TinyApp\Model\System\Request;
 use TinyApp\Model\System\Response;
+use TinyApp\Model\Middleware\ApplicationMiddlewareAbstract;
 use TinyApp\Model\Middleware\ApplicationMiddlewareInterface;
 
-class SecurityMiddleware implements ApplicationMiddlewareInterface
+class SecurityMiddleware extends ApplicationMiddlewareAbstract
 {
     const LOGIN_ROUTE = '/login';
 
@@ -15,17 +16,16 @@ class SecurityMiddleware implements ApplicationMiddlewareInterface
     private $routedController;
     private $routedAction;
 
-    public function __construct(array $securityList, SessionService $sessionService, ControllerInterface $controller, string $action)
+    public function __construct(ApplicationMiddlewareInterface $next, array $securityList, SessionService $sessionService)
     {
+        parent::__construct($next);
         $this->securityList = $securityList;
         $this->sessionService = $sessionService;
-        $this->controller = $controller;
-        $this->action = $action;
     }
 
     public function process(Request $request) : Response
     {
-        list($roles) = array_values($this->sessionService->get(['roles']));
+        extract($this->sessionService->get(['roles']));
 
         foreach ($this->securityList as $ruleKey => $rule) {
             if (!isset($rule['route'])) {
@@ -52,11 +52,10 @@ class SecurityMiddleware implements ApplicationMiddlewareInterface
         }
 
         if (!empty($included) && empty($permitted)) {
-            return new Response(null, [], [], ['Location' => '/login'], [['name' => 'previousPath', 'value' => $request->getPath()]]);
+            $this->sessionService->set(['previousPath' => $request->getPath()]);
+            return new Response(null, [], [], ['Location' => '/login']);
         }
 
-        $controller = $this->controller;
-        $action = $this->action;
-        return $controller->$action($request);
+        return $this->getNext()->process($request);
     }
 }

@@ -7,9 +7,7 @@ class Response
 
     const SANITIZE = 'sanitize';
     const HTML_ESCAPE = 'html';
-    const HTML_ATTRIBUTE_ESCAPE = 'html-attr';
-    const CSS_ESCAPE = 'css';
-    const JS_ESCAPE = 'js';
+    const URL_ESCAPE = 'url';
     const NO_ESCAPE = 'raw';
 
     private $template;
@@ -31,6 +29,7 @@ class Response
     {
         // Filter out .. or ../ and allow only alphanumeric characters and . and / for file names
         return preg_replace(['/(\.\.\/)/', '/\.\./'], '', preg_replace('/[^a-zA-Z0-9\.\/]/', '', $this->file));
+        //@TODO ensure that . is before extension only
     }
 
     public function getVariables() : array
@@ -48,18 +47,43 @@ class Response
 
     public function getCookies() : array
     {
-        return $this->cookies;
+        $cookies = $this->cookies;
+        foreach ($cookies as &$cookie) {
+            if (empty($cookie['name']) || empty($cookie['value'])) {
+                throw new \Exception('Cookie name and value is required ' . var_export($cookie, true));
+            }
+
+            $cookie['expire'] = $cookie['expire'] ?? 0;
+            $cookie['path'] = $cookie['path'] ?? '/';
+            $cookie['domain'] = $cookie['domain'] ?? '';
+            $cookie['secure']  = $cookie['secure'] ?? false;
+            $cookie['httponly'] = $cookie['httponly'] ?? true;
+        }
+
+        return $cookies;
     }
 
     private function escapeArray(int $counter, array &$array, string $keyString)
     {
-        $counter++;
-        if (1000 < $counter) {
-            throw new \Exception('Too deep array or danger of infinite recurrence, reached counter ' . var_export($counter, true));
-        }
+        $this->handleCounter($counter);
 
         // If value is not array apply rule else call self
         foreach ($array as $key => &$value) {
+            $this->handleCounter($counter);
+
+            $originalKey = $key;
+            $this->sanitizeValue($key);
+            if ($key !== (string)$originalKey) {
+                unset($array[$originalKey]);
+                if (!empty($key)) {
+                    $array[$key] = $value;
+                    trigger_error('Sanitized improper key ' . $originalKey . ' from ' . var_export($array, true) , E_USER_NOTICE);
+                    continue;
+                }
+                trigger_error('Dropped improper key ' . $originalKey . ' from ' . var_export($array, true), E_USER_NOTICE);
+                continue;
+            }
+
             $currentKeyString = empty($keyString) ? $key : $keyString . '.' . $key;
 
             if (is_string($value) || is_numeric($value)) {
@@ -69,6 +93,14 @@ class Response
             if (is_array($value)) {
                 $this->escapeArray($counter, $value, $currentKeyString);
             }
+        }
+    }
+
+    private function handleCounter(&$counter) : void
+    {
+        $counter++;
+        if (1000 < $counter) {
+            throw new \Exception('Too deep array or danger of infinite recurrence, reached counter ' . var_export($counter, true));
         }
     }
 
@@ -92,14 +124,8 @@ class Response
             case self::HTML_ESCAPE:
                 $this->htmlEscapeValue($value);
                 break;
-            case self::HTML_ATTRIBUTE_ESCAPE:
-                $this->htmlAttributeEscapeValue($value);
-                break;
-            case self::CSS_ESCAPE:
-                $this->cssEscapeValue($value);
-                break;
-            case self::JS_ESCAPE:
-                $this->jsEscapeValue($value);
+            case self::URL_ESCAPE:
+                $this->urlEscapeValue($value);
                 break;
             case self::NO_ESCAPE:
                 break;
@@ -110,30 +136,17 @@ class Response
 
     private function sanitizeValue(&$value)
     {
-        $value = preg_replace('/[^a-zA-Z0-9 ]/', '', $value);
+        $value = preg_replace('/[^a-zA-Z0-9]/', '', $value);
     }
 
-    //@TODO update html escape from twig
     private function htmlEscapeValue(&$value)
     {
         $value = htmlspecialchars($value, ENT_QUOTES);
+        //@TODO add whitelist of characters and change them back
     }
 
-    //@TODO add attr escape from twig
-    private function htmlAttributeEscapeValue(&$value)
+    private function urlEscapeValue(&$value)
     {
-        $value = $value . '_html-attr';
-    }
-
-    //@TODO add css escape from twig
-    private function cssEscapeValue(&$value)
-    {
-        $value = $value . '_css';
-    }
-
-    //@TODO add js escape from twig
-    private function jsEscapeValue(&$value)
-    {
-        $value = $value . '_js';
+        $value = rawurlencode($value);
     }
 }
