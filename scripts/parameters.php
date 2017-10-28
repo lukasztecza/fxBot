@@ -1,7 +1,7 @@
 <?php
 echo 'Checking parameters.json' . PHP_EOL;
 
-if (1 || !file_exists(__DIR__ . '/../src/Config/parameters.json')) {
+if (!file_exists(__DIR__ . '/../src/Config/parameters.json')) {
     if (!file_exists(__DIR__ . '/../src/Config/parameters.json')) {
         echo 'parameters.json.dist required create it first in ' . __DIR__ . '/../src/Config/parameters.json';
         return;
