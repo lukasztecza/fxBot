@@ -1,5 +1,11 @@
 [
     {
+        "path": "/test",
+        "methods": ["GET"],
+        "controller": "sample_controller",
+        "action": "test"
+    },
+    {
         "path": "/",
         "methods": ["GET"],
         "controller": "sample_controller",

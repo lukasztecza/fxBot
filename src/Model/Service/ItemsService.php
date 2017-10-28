@@ -24,7 +24,7 @@ class ItemsService
         try {
             return $this->itemsRepository->saveItem($item);
         } catch (\Exception $e) {
-            error_log('Failed to save item with payload ' . var_export($item, true), E_USER_NOTICE);
+            trigger_error('Failed to save item with payload ' . var_export($item, true), E_USER_NOTICE);
             return 0;
         }
     }
@@ -39,7 +39,7 @@ class ItemsService
 
             return $this->itemsRepository->saveItems($items);
         } catch (\Exception $e) {
-            error_log('Failed to save items ' . var_export($names, true), E_USER_NOTICE);
+            trigger_error('Failed to save items ' . var_export($names, true), E_USER_NOTICE);
             return [];
         }
     }
@@ -49,7 +49,7 @@ class ItemsService
         try {
             return $this->itemsRepository->updateItem($item);
         } catch (\Exception $e) {
-            error_log('Failed to update item with id ' . $id, E_USER_NOTICE);
+            trigger_error('Failed to update item ' . var_export($item, true), E_USER_NOTICE);
             return 0;
         }
     }
@@ -59,7 +59,7 @@ class ItemsService
         try {
             return $this->itemsRepository->deleteItem($id);
         } catch (\Exception $e) {
-            error_log('Failed to delete item with id ' . $id, E_USER_NOTICE);
+            trigger_error('Failed to delete item with id ' . $id, E_USER_NOTICE);
             return false;
         }
     }

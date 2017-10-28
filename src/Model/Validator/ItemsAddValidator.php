@@ -2,12 +2,14 @@
 namespace TinyApp\Model\Validator;
 
 use TinyApp\Model\Validator\ValidatorAbstract;
+use TinyApp\Model\System\Request;
 
 class ItemsAddValidator extends ValidatorAbstract
 {
-//@TODO update dont use request
-    public function check(array $payload) : bool
+    public function validate(Request $request) : bool
     {
+        $payload = $request->getPayload(['items']);
+
         if (empty($payload['items'])) {
             $this->error = 'Needs at least one item';
             return false;

@@ -6,8 +6,13 @@ use TinyApp\Model\Validator\ValidatorAbstract;
 
 class ItemEditValidator extends ValidatorAbstract
 {
-    public function check(array $payload) : bool
+    public function validate(Request $request) : bool
     {
+        $payload = $request->getPayload(['name']);
+        if (empty($paylaod)) {
+            $payload = $request->getInput(['name']);
+        }
+
         if (empty($payload['name'])) {
             $this->error = 'Value of name can not be empty';
             return false;

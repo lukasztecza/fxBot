@@ -3,9 +3,10 @@ namespace TinyApp\Model\Middleware;
 
 use TinyApp\Model\System\Request;
 use TinyApp\Model\System\Response;
+use TinyApp\Model\Middleware\ApplicationMiddlewareAbstract;
 use TinyApp\Model\Middleware\ApplicationMiddlewareInterface;
 
-class RenderingMiddleware implements ApplicationMiddlewareInterface
+class OutputMiddleware extends ApplicationMiddlewareAbstract
 {
     const DEFAULT_CONTENT_TYPE = 'text/html';
 
@@ -14,18 +15,17 @@ class RenderingMiddleware implements ApplicationMiddlewareInterface
 
     const TEMPLATES_PATH = __DIR__ . '/../../View/';
 
-    private $next;
     private $assetsVersion;
 
     public function __construct(ApplicationMiddlewareInterface $next, string $assetsVersion)
     {
-        $this->next = $next;
+        parent::__construct($next); 
         $this->assetsVersion = $assetsVersion;
     }
 
     public function process(Request $request) : Response
     {
-        $response = $this->next->process($request);
+        $response = $this->getNext()->process($request);
         if (!($response instanceof Response)) {
             throw new \Exception('Controller has to return Response object, returned ' . var_export($response, true));
         }
@@ -65,17 +65,14 @@ class RenderingMiddleware implements ApplicationMiddlewareInterface
     private function setCookies(array $cookies) : void
     {
         foreach ($cookies as $cookie) {
-            if (empty($cookie['name']) || empty($cookie['value'])) {
-                throw new \Exception('Cookie name and value is required ' . var_export($cookie, true));
-            }
             setcookie(
                 $cookie['name'],
                 $cookie['value'],
-                $cookie['expire'] ?? 0,
-                $cookie['path'] ?? '/',
-                $cookie['domain'] ?? '',
-                $cookie['secure'] ?? false,
-                $cookie['httponly'] ?? false
+                $cookie['expire'],
+                $cookie['path'],
+                $cookie['domain'],
+                $cookie['secure'],
+                $cookie['httponly']
             );
         }
     }

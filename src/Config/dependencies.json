@@ -1,6 +1,6 @@
 {
-    "rendering_middleware": {
-        "class": "TinyApp\\Model\\Middleware\\RenderingMiddleware",
+    "output_middleware": {
+        "class": "TinyApp\\Model\\Middleware\\OutputMiddleware",
         "inject": [
             "@security_middleware",
             "1"
@@ -9,8 +9,14 @@
     "security_middleware": {
         "class": "TinyApp\\Model\\Middleware\\SecurityMiddleware",
         "inject": [
+            "@controller_middleware",
             "%security_list%",
-            "@session_service",
+            "@session_service"
+        ]
+    },
+    "controller_middleware": {
+        "class": "TinyApp\\Model\\Middleware\\ControllerMiddleware",
+        "inject": [
             "%routed_controller%",
             "%routed_action%"
         ]
@@ -18,11 +24,21 @@
     "session_service": {
         "class": "TinyApp\\Model\\Service\\SessionService"
     },
+    "file_manager" : {
+        "class": "TinyApp\\Model\\Repository\\FileManager"
+    },
+    "validator_factory": {
+        "class": "TinyApp\\Model\\Validator\\ValidatorFactory",
+        "inject": [
+            "@session_service"
+        ]
+    },
     "sample_controller": {
         "class": "TinyApp\\Controller\\SampleController",
         "inject": [
-            "@items_service@",
-            "@validator_factory"
+            "@items_service",
+            "@validator_factory",
+            "@file_manager"
         ]
     },
     "authentication_controller": {
@@ -62,8 +78,5 @@
             "%database_user%",
             "%database_password%"
         ]
-    },
-    "validator_factory": {
-        "class": "TinyApp\\Model\\Validator\\ValidatorFactory"
     }
 }

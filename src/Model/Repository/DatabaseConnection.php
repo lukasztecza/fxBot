@@ -47,6 +47,21 @@ class DatabaseConnection
         $this->statement = null;
     }
 
+    public function beginTransaction() : void
+    {
+        $this->connection->beginTransaction();
+    }
+
+    public function commit() : void
+    {
+        $this->connection->commit();
+    }
+
+    public function rollBack() : void
+    {
+        $this->connection->rollBack();
+    }
+
     private function checkStatement(string $sql = null) : void
     {
         if (!empty($sql)) {
