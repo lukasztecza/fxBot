@@ -19,7 +19,7 @@ class OutputMiddleware extends ApplicationMiddlewareAbstract
 
     public function __construct(ApplicationMiddlewareInterface $next, string $assetsVersion)
     {
-        parent::__construct($next); 
+        parent::__construct($next);
         $this->assetsVersion = $assetsVersion;
     }
 

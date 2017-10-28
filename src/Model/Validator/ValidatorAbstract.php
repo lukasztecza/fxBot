@@ -22,7 +22,7 @@ abstract class ValidatorAbstract implements ValidatorInterface
     final public function check(Request $request, $checkOrigin = true, $checkCsrfToken = true) : bool
     {
         extract($request->getPayload(['csrfToken']));
-       
+
         if ($checkOrigin) {
             switch (true) {
                 case !empty($request->getServer()['HTTP_ORIGIN']):

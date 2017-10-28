@@ -12,7 +12,7 @@ class FileManager
         "png" => "image/png",
         "gif" => "image/gif"
     ];
-    
+
     const FILES_MIME = [
         "txt" => "text/plain",
         "pdf" => "application/pdf",

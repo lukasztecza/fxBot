@@ -27,8 +27,6 @@ class SampleController implements ControllerInterface
 
     public function test(Request $request) : Response
     {
-        
-
         if ($request->getMethod() === 'POST') {
             var_dump(1);exit;
         }
