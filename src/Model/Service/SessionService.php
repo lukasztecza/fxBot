@@ -44,12 +44,18 @@ class SessionService
         return $return;
     }
 
-    public function set(string $key, $value) : void
+    public function set(array $variables) : void
     {
-        if (!is_null($value)) {
-            $_SESSION[$key] = $value;
-        } else {
-            unset($_SESSION[$key]);
+        if (PHP_SESSION_ACTIVE !== session_status()) {
+            throw new \Exception('No active session');
+        }
+
+        foreach ($variables as $key => $value) {
+            if (!is_null($value)) {
+                $_SESSION[$key] = $value;
+            } else {
+                unset($_SESSION[$key]);
+            }
         }
     }
 

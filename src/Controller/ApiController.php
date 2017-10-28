@@ -27,7 +27,7 @@ class ApiController implements ControllerInterface
         return new Response(
             null,
             ['items' => $items],
-            [],
+            ['items' => 'html'],
             ['Content-Type' => 'application/json']
         );
     }
@@ -44,7 +44,7 @@ class ApiController implements ControllerInterface
         return new Response(
             null,
             ['item' => $item],
-            [],
+            ['item' => 'html'],
             ['Content-Type' => 'application/json']
         );
     }
@@ -52,8 +52,8 @@ class ApiController implements ControllerInterface
     public function post(Request $request) : Response
     {
         $validator = $this->validatorFactory->create(ItemEditValidator::class);
-        $payload = $request->getPayload(['name']);
-        if ($validator->check($payload)) {
+        if ($validator->check($request, false, false)) {
+            $payload = $request->getPayload(['name']);
             $insertedId = $this->itemsService->saveItem($payload);
             if (empty($insertedId)) {
                 return $this->errorResponse('Nothing inserted');
@@ -61,7 +61,6 @@ class ApiController implements ControllerInterface
 
             return $this->successResponse();
         }
-
         return $this->errorResponse($validator->getError());
     }
 
@@ -69,9 +68,9 @@ class ApiController implements ControllerInterface
     {
         list($id) = array_values($request->getAttributes(['id']));
 
-        $payload = $request->getInput(['name']);
         $validator = $this->validatorFactory->create(ItemEditValidator::class);
-        if ($validator->check($payload)) {
+        if ($validator->check($request, false, false)) {
+            $payload = $request->getInput(['name']);
             $payload['id'] = $id;
             $updatedId = $this->itemsService->updateItem($payload);
             if (empty($updatedId)) {
@@ -100,7 +99,7 @@ class ApiController implements ControllerInterface
         return new Response(
             null,
             ['error' => $error],
-            [],
+            ['error' => 'html'],
             ['Content-Type' => 'application/json']
         );
     }

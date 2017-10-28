@@ -20,18 +20,6 @@
         "php": ">=7.0",
         "lukasztecza/httpClient": "dev-master"
     },
-    "scripts": {
-        "scripts": [
-            "TinyApp\\System\\Project::buildParameters"
-        ],
-        "post-install-cmd": [
-            "@scripts"
-        ],
-        "post-update-cmd": [
-            "@scripts"
-        ]
-    },
-
     "require-dev": {
         "phpunit/phpunit": "^6.3.0"
     },

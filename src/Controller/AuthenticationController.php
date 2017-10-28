@@ -31,29 +31,31 @@ class AuthenticationController implements ControllerInterface
     {
         $validator = $this->validatorFactory->create(LoginValidator::class);
         if ($request->getMethod() === 'POST') {
-            $payload = $request->getPayload(['username', 'password']);
-            if ($validator->check($payload)) {
+            if ($validator->check($request)) {
+                $payload = $request->getPayload(['username', 'password']);
                 if (
                     $this->inMemoryUsername === $payload['username'] &&
                     password_verify($payload['password'], $this->inMemoryPasswordHash)
                 ) {
-                    $this->sessionService->set('roles', ['ROLE_USER']);
-                    $cookies = $request->getCookies(['previousPath']);
-                    return new Response(null, [], [], ['Location' => $request->getHost() . $cookies['previousPath']]);
+                    $this->sessionService->set(['roles' => ['ROLE_USER']]);
+                    extract($this->sessionService->get(['previousPath']));
+                    $this->sessionService->set(['previousPath' => null]);
+                    return new Response(null, [], [], ['Location' => $request->getHost() . $previousPath]);
                 }
                 $error = 'Invalid credentials';
             }
         }
 
         return new Response(
-            'loginForm.php',
-            ['error' => $error ?? $validator->getError()]
+            'authentication/loginForm.php',
+            ['error' => $error ?? $validator->getError(), 'csrfToken' => $validator->getCsrfToken()],
+            ['error' => 'html']
         );
     }
 
     public function logout(Request $request) : Response
     {
-        $this->sessionService->set('roles', null);
+        $this->sessionService->set(['roles' => null]);
         $this->sessionService->destroy();
         return new Response(null, [], [], ['Location' => $request->getHost() . '/']);
     }

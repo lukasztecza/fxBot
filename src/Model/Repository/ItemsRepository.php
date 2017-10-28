@@ -31,13 +31,20 @@ class ItemsRepository
 
     public function saveItems(array $items) : array
     {
-        $this->write->prepare(
-            'INSERT INTO `items`(`name`) VALUES (:name)'
-        );
-        $affectedIds = [];
-        foreach ($items as $item) {
-            $affectedIds[] = $this->write->execute(null, ['name' => $item['name']]);
+        $this->write->beginTransaction();
+        try {
+            $this->write->prepare(
+                'INSERT INTO `items`(`name`) VALUES (:name)'
+            );
+            $affectedIds = [];
+            foreach ($items as $item) {
+                $affectedIds[] = $this->write->execute(null, ['name' => $item['name']]);
+            }
+        } catch(\Exception $e) {
+            $this->write->rollBack();
+            return [];
         }
+        $this->write->commit();
 
         return $affectedIds;
     }

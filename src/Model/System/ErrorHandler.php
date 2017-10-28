@@ -12,15 +12,18 @@ class ErrorHandler
 
     public function __construct(string $environment)
     {
-        // Report all errors/warnings/notices except E_USER_NOTICE
-        error_reporting(E_ALL & ~E_USER_NOTICE);
-
         // Set custom error/exception/shutdown handling for production environment
         if ('prod' === $environment) {
+            // Address all errors/warnings/notices except E_USER_NOTICE which will be logged only
+            error_reporting(E_ALL & ~E_USER_NOTICE);
             set_error_handler([$this, 'handleError']);
             set_exception_handler([$this, 'handleException']);
             register_shutdown_function([$this, 'handleShutDown']);
+            return;
         }
+
+        // Other environments should report everything
+        error_reporting(E_ALL);
     }
 
     private function log(int $type, string $message, string $file, int $line, string $reason, array $context) : void
@@ -72,7 +75,7 @@ class ErrorHandler
             get_class($exception),
             $exception->getTrace()
         );
-        $this->displayErorPage();
+        $this->displayErorPage($exception->getCode());
     }
 
     private function displayErorPage(int $type = null) : void
@@ -88,13 +91,12 @@ class ErrorHandler
                 echo
                     '<!Doctype html>' .
                     '<html>' .
-                    '<head> meta charset="utf-8"><meta name="robots" content="noindex, nofollow"></head>' .
+                    '<head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"></head>' .
                     '<body><p>Status: error</p><p>Code: ' . $type . '</p></body>' .
                     '</html>'
                 ;
                 break;
         }
-        //@TODO maybe remove exit
         exit;
     }
 }

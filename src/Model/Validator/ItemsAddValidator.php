@@ -2,12 +2,14 @@
 namespace TinyApp\Model\Validator;
 
 use TinyApp\Model\Validator\ValidatorAbstract;
+use TinyApp\Model\System\Request;
 
 class ItemsAddValidator extends ValidatorAbstract
 {
-//@TODO update dont use request
-    public function check(array $payload) : bool
+    public function validate(Request $request) : bool
     {
+        $payload = $request->getPayload(['items']);
+
         if (empty($payload['items'])) {
             $this->error = 'Needs at least one item';
             return false;
@@ -20,7 +22,7 @@ class ItemsAddValidator extends ValidatorAbstract
             }
 
             if (strpos($name, 'wrong') !== false) {
-                $this->error = 'No noame can contain wrong';
+                $this->error = 'No name can contain wrong';
                 return false;
             }
         }

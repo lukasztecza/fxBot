@@ -9,7 +9,7 @@ class Project
 {
     const ROUTED_CONTROLLER_PLACEHOLDER = '%routed_controller%';
     const ROUTED_ACTION_PLACEHOLDER = '%routed_action%';
-    const APPLICATION_STARTING_POINT = 'rendering_middleware';
+    const APPLICATION_STARTING_POINT = 'output_middleware';
 
     const CONFIG_PATH = __DIR__ . '/../../Config/';
 
@@ -33,8 +33,7 @@ class Project
 
         // Check classes to create
         $toCreate = [];
-        $counter = 0;
-        $this->analyseInjections($counter, $dependencies, $toCreate, self::APPLICATION_STARTING_POINT);
+        $this->analyseInjections(0, $dependencies, $toCreate, self::APPLICATION_STARTING_POINT);
 
         // Build dependencies tree and process request
         $this->inject($dependencies, $toCreate);
@@ -128,19 +127,6 @@ class Project
                     $dependencies[$toCreate[$index]]['object'] = new $dependencies[$toCreate[$index]]['class']();
                 }
             }
-        }
-    }
-
-    public static function buildParameters() : void
-    {
-        if (!file_exists(__DIR__ . '/../../Config/parameters.json')) {
-            $pattern = file_get_contents(__DIR__ . '/../../Config/parameters.json.dist');
-            //@TODO add reading and setting parameters if it is different than dist version
-//            foreach ($pattern as $key => $value) {
-// read inputed value and assign value
-//            }
-//            file_put_contents(__DIR__ . '/../Config/parameters.json', json_encode($pattern));
-            var_dump(json_decode($pattern, true));
         }
     }
 }
