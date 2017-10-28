@@ -14,7 +14,7 @@ abstract class ApplicationMiddlewareAbstract implements ApplicationMiddlewareInt
         $this->next = $next;
     }
 
-    public function getNext() : ApplicationMiddlewareInterface
+    protected function getNext() : ApplicationMiddlewareInterface
     {
         return $this->next;
     }
