@@ -13,10 +13,10 @@ class FilesRepository
     private const IMAGES = '/images';
     private const FILES = '/files';
 
-    private const IMAGE_PUBLIC = 1;
-    private const IMAGE_PRIVATE = 2;
-    private const FILE_PUBLIC = 3;
-    private const FILE_PRIVATE = 4;
+    public const IMAGE_PUBLIC = 1;
+    public const IMAGE_PRIVATE = 2;
+    public const FILE_PUBLIC = 3;
+    public const FILE_PRIVATE = 4;
 
     private const IMAGES_MIME = [
         "jpg" => "image/jpeg",
@@ -52,10 +52,10 @@ class FilesRepository
         }
     }
 
-    public function getPublicImages() : array
+    public function getPublic(int $type) : array
     {
         $items = $this->write->fetch(
-            'SELECT * FROM `files` WHERE `type` = :type', ['type' => self::IMAGE_PUBLIC]
+            'SELECT * FROM `files` WHERE `type` = :type', ['type' => $type]
         );
 
         return $items ?? [];
@@ -64,19 +64,21 @@ class FilesRepository
     public function uploadFiles(array $files, bool $public = false) : array
     {
         try {
-            $this->write->beginTransaction();
+            $this->write->begin();
             $uploaded = [];
             foreach ($files as $file) {
                 $uploaded[] = $this->uploadFile($file, $public);
             }
             $this->write->commit();
         } catch (\Exception $e) {
-            trigger_error('Failed to upload files with message ' . $e->getMessage() . ' with paylaod ' . var_export($files, true), E_USER_NOTICE);
+            trigger_error(
+                'Rolling back after failed attempt to upload files with message ' . $e->getMessage() . ' with payload ' . var_export([$files, $public], true)
+            );
             foreach ($uploaded as $file) {
                 unlink($file['uploadPath']);
             }
             $this->write->rollBack();
-            return [];
+            throw $e;
         }
 
         return $uploaded;
@@ -84,17 +86,15 @@ class FilesRepository
 
     public function deleteFiles(array $ids) : bool
     {
-    //@TODO try to do it using IN (:ids) with PDO
-        $sql = 'SELECT * FROM `files` WHERE ';
+        $this->write->prepare('SELECT * FROM `files` WHERE `id` = :id');
+        $files = [];
         foreach ($ids as $id) {
-            $sql .= '`id` = ? OR ';
-            $params[] = $id;
+            $output = $this->write->fetch(null, ['id' => $id]);
+            if (!empty($output)) {
+                $files[] = array_pop($output);
+            }
         }
-        if (empty($params)) {
-            return false;
-        }
-        $sql = rtrim($sql, 'OR ');
-        $files = $this->write->fetch($sql, $params);
+        $this->write->clean();
 
         if (empty($files)) {
             return false;
@@ -104,7 +104,7 @@ class FilesRepository
         foreach ($files as $file) {
             $this->deleteFile($file);
         }
-        $this->write->cleanStatement();
+        $this->write->clean();
 
         return true;
     }
@@ -115,26 +115,29 @@ class FilesRepository
 
         $name = date('YdmHis') . preg_replace('/[^a-zA-Z0-9]/', '', pathinfo($file['name'], PATHINFO_FILENAME));
         $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $mime = mime_content_type($file["tmp_name"]);
 
         // Check if image or other accepted file
         switch (true) {
             case
                 getimagesize($file['tmp_name']) &&
                 array_key_exists(strtolower($extension), self::IMAGES_MIME) &&
-                self::IMAGES_MIME[$extension] === mime_content_type($file["tmp_name"])
+                self::IMAGES_MIME[$extension] === $mime
             :
                 $uploadPath .= self::IMAGES;
                 $type = $public ? self::IMAGE_PUBLIC : self::IMAGE_PRIVATE;
                 break;
             case
                 array_key_exists(strtolower($extension), self::FILES_MIME) &&
-                self::FILES_MIME[$extension] === mime_content_type($file["tmp_name"])
+                self::FILES_MIME[$extension] === $mime
             :
                 $uploadPath .= self::FILES;
                 $type = $public ? self::FILE_PUBLIC : self::FILE_PRIVATE;
                 break;
             default:
-                throw new \Exception('Unsupported file mime content type ' . var_export($file));
+                throw new \Exception(
+                    'Unsupported file mime content type ' . var_export($mime, true) . ' for file ' . var_export([$file, $public], true)
+                );
         }
 
         // Create directory if it does not exist

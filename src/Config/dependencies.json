@@ -42,8 +42,8 @@
             "@session_service"
         ]
     },
-    "sample_controller": {
-        "class": "TinyApp\\Controller\\SampleController",
+    "items_controller": {
+        "class": "TinyApp\\Controller\\ItemsController",
         "inject": [
             "@items_service",
             "@validator_factory",
@@ -53,7 +53,8 @@
     "files_controller": {
         "class": "TinyApp\\Controller\\FilesController",
         "inject": [
-            "@files_service"
+            "@files_service",
+            "@validator_factory"
         ]
     },
     "authentication_controller": {
