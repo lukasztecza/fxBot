@@ -42,12 +42,12 @@ class DatabaseConnection
         return $this->connection->lastInsertId();
     }
 
-    public function cleanStatement() : void
+    public function clean() : void
     {
         $this->statement = null;
     }
 
-    public function beginTransaction() : void
+    public function begin() : void
     {
         $this->connection->beginTransaction();
     }

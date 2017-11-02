@@ -14,15 +14,28 @@ class FilesService
 
     public function uploadFiles(array $files, bool $public) : array
     {
-        return $this->filesRepository->uploadFiles($files, $public);
+        try {
+            return $this->filesRepository->uploadFiles($files, $public);
+        } catch(\Exception $e) {
+            trigger_error(
+                'Failed to upload files with message ' . $e->getMessage() . ' with paylaod ' . var_export([$files, $public], true), E_USER_NOTICE
+            );
+
+            return [];
+        }
     }
 
     public function getPublicImages() : array
-    {
-        return $this->filesRepository->getPublicImages();
+    {//@TODO add try catch in all
+        return $this->filesRepository->getPublic(FilesRepository::IMAGE_PUBLIC);
     }
 
-    public function deleteFile(array $ids) : bool
+    public function getPublicNotImages() : array
+    {
+        return $this->filesRepository->getPublic(FilesRepository::FILE_PUBLIC);
+    }
+
+    public function deleteFiles(array $ids) : bool
     {
         return $this->filesRepository->deleteFiles($ids);
     }

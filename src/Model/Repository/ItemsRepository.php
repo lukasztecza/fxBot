@@ -12,16 +12,6 @@ class ItemsRepository
         $this->write = $write;
     }
 
-    public function getItem(int $id) : array
-    {
-        $items = $this->write->fetch(
-            'SELECT * FROM `items` WHERE `id` = :id',
-            ['id' => $id]
-        );
-
-        return !empty($items) ? array_pop($items) : [];
-    }
-
     public function getItems() : array
     {
         $items = $this->write->fetch(
@@ -33,7 +23,7 @@ class ItemsRepository
 
     public function saveItems(array $items) : array
     {
-        $this->write->beginTransaction();
+        $this->write->begin();
         try {
             $this->write->prepare(
                 'INSERT INTO `items`(`name`) VALUES (:name)'
@@ -44,12 +34,35 @@ class ItemsRepository
             }
         } catch(\Exception $e) {
             $this->write->rollBack();
-            //@TODO maybe rethrow exception
-            return [];
+            trigger_error(
+                'Rolling back after failed attempt to save items with message ' . $e->getMessage() . ' with payload ' . var_export($items, true)
+            );
+            throw $e;
         }
         $this->write->commit();
 
         return $affectedIds;
+    }
+
+    public function deleteItems(array $ids) : bool
+    {
+        $this->write->prepare('DELETE FROM `items` WHERE `id` = :id');
+        foreach ($ids as $id) {
+            $this->write->execute(null, ['id' => $id]);
+        }
+        $this->write->clean();
+
+        return true;
+    }
+
+    public function getItem(int $id) : array
+    {
+        $items = $this->write->fetch(
+            'SELECT * FROM `items` WHERE `id` = :id',
+            ['id' => $id]
+        );
+
+        return !empty($items) ? array_pop($items) : [];
     }
 
     public function saveItem(array $item) : int

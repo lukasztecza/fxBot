@@ -11,6 +11,7 @@ class LoginValidator extends ValidatorAbstract
         $payload = $request->getPayload(['username', 'password']);
         if (empty($payload['username']) || empty($payload['password'])) {
             $this->error = 'Fields username and password can not be empty';
+
             return false;
         }
 
