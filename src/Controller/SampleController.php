@@ -8,33 +8,16 @@ use TinyApp\Model\Service\ItemsService;
 use TinyApp\Model\Validator\ValidatorFactory;
 use TinyApp\Model\Validator\ItemsAddValidator;
 use TinyApp\Model\Validator\ItemEditValidator;
-use TinyApp\Model\Service\SessionService;
-
-//@TODO it is for tests only
-use TinyApp\Model\Repository\FileManager;
 
 class SampleController implements ControllerInterface
 {
     private $itemsService;
     private $validatorFactory;
 
-    public function __construct(ItemsService $itemsService, ValidatorFactory $validatorFactory, FileManager $fm)
+    public function __construct(ItemsService $itemsService, ValidatorFactory $validatorFactory)
     {
         $this->itemsService = $itemsService;
         $this->validatorFactory = $validatorFactory;
-        $this->fm = $fm;
-    }
-
-    public function test(Request $request) : Response
-    {
-        if ($request->getMethod() === 'POST') {
-            var_dump(1);exit;
-        }
-        return new Response(
-            'test.php',
-            ['what' => 'ergg', 'blahKey' => 'blah value', 'another' => ['key eh', 'text' => '<p>test</p>']],
-            ['another.text' => 'html']
-        );
     }
 
     public function home(Request $request) : Response

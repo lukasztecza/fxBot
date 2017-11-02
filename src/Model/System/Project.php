@@ -11,7 +11,7 @@ class Project
     const ROUTED_ACTION_PLACEHOLDER = '%routed_action%';
     const APPLICATION_STARTING_POINT = 'output_middleware';
 
-    const CONFIG_PATH = __DIR__ . '/../../Config/';
+    const CONFIG_PATH = APP_ROOT_DIR . '/src/Config/';
 
     public function run() : void
     {

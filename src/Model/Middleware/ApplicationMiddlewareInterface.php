@@ -6,6 +6,5 @@ use TinyApp\Model\System\Response;
 
 interface ApplicationMiddlewareInterface
 {
-    public function getNext() : ApplicationMiddlewareInterface;
     public function process(Request $request) : Response;
 }

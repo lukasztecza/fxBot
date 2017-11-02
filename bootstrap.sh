@@ -22,7 +22,7 @@ apt-get update
 # Install basic tools
 apt-get install -y vim curl
 
-# Install apache and create symlink pointing default apache web dir to /vagrant
+# Install apache
 apt-get install -y apache2="$APACHE_VERSION"
 
 # Create symlink from default apache web dir to /vagrant
@@ -59,6 +59,9 @@ sed -i "s/display_errors = .*/display_errors = On/" /etc/php/"$PHP_VERSION"/apac
 sed -i "s/memory_limit = .*/memory_limit = 32M/" /etc/php/"$PHP_VERSION"/apache2/php.ini
 sed -i "s/upload_max_filesize = .*/upload_max_filesize = 16M/" /etc/php/"$PHP_VERSION"/apache2/php.ini
 sed -i "s/post_max_size = .*/post_max_size = 24M/" /etc/php/"$PHP_VERSION"/apache2/php.ini
+
+# Set php upload tmp directory
+sed -i "s/;upload_tmp_dir =/upload_tmp_dir = \/vagrant\/tmp\/upload/" /etc/php/"$PHP_VERSION"/apache2/php.ini
 
 # Allow usage of .htaccess files inside /var/www/html
 if ! fgrep "/var/www/html" /etc/apache2/apache2.conf; then
@@ -100,6 +103,13 @@ mysql -u "$MYSQL_USER" -p"$MYSQL_USER_PASSWORD" -h $MYSQL_HOST $MYSQL_DATABASE <
 CREATE TABLE IF NOT EXISTS `items` (
     `id` INT(11) NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(16) COLLATE utf8_general_ci NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+CREATE TABLE IF NOT EXISTS `files` (
+    `id` INT(11) NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(255) COLLATE utf8_general_ci NOT NULL,
+    `extension` VARCHAR(16) COLLATE utf8_general_ci NOT NULL,
+    `type` TINYINT(4) NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 EOL

@@ -6,7 +6,7 @@
     <div>
         <input type="text" name="items[]" /><br />
     </div>
-    <input type="text" name="csrfToken" value="<?php echo $csrfToken; ?>" /><br />
+    <input type="hidden" name="csrfToken" value="<?php echo $csrfToken; ?>" /><br />
     <input type="submit" />
 </form>
 <script src="/assets/js/core.js<?php echo $assetsVersioning; ?>"></script>
