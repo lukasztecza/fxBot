@@ -15,11 +15,13 @@ class ItemEditValidator extends ValidatorAbstract
 
         if (empty($payload['name'])) {
             $this->error = 'Value of name can not be empty';
+
             return false;
         }
 
         if (strpos($payload['name'], 'wrong') !== false) {
             $this->error = 'Value of name can not contain wrong';
+
             return false;
         }
 

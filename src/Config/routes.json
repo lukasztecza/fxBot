@@ -14,14 +14,14 @@
     {
         "path": "/",
         "methods": ["GET"],
-        "controller": "sample_controller",
+        "controller": "items_controller",
         "action": "home"
     },
     {
         "path": "/restricted/{code}",
         "methods": ["GET"],
         "requirements": {"code": "\\w+"},
-        "controller": "sample_controller",
+        "controller": "items_controller",
         "action": "restricted"
     },
     {
@@ -36,28 +36,28 @@
     },
     {
         "path": "/items",
-        "methods": ["GET"],
-        "controller": "sample_controller",
+        "methods": ["GET", "POST"],
+        "controller": "items_controller",
         "action": "list"
     },
     {
         "path": "/items/add",
         "methods": ["GET", "POST"],
-        "controller": "sample_controller",
+        "controller": "items_controller",
         "action": "add"
     },
     {
         "path": "/items/{id}",
         "methods": ["GET"],
         "requirements": {"id": "\\d+"},
-        "controller": "sample_controller",
+        "controller": "items_controller",
         "action": "details"
     },
     {
         "path": "/items/{id}/edit",
         "methods": ["GET", "POST"],
         "requirements": {"id": "\\d+"},
-        "controller": "sample_controller",
+        "controller": "items_controller",
         "action": "edit"
     },
     {
