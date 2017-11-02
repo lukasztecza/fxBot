@@ -13,7 +13,7 @@ class OutputMiddleware extends ApplicationMiddlewareAbstract
     const CONTENT_TYPE_HTML = 'text/html';
     const CONTENT_TYPE_JSON = 'application/json';
 
-    const TEMPLATES_PATH = __DIR__ . '/../../View/';
+    const TEMPLATES_PATH = APP_ROOT_DIR . '/src/View/';
 
     private $assetsVersion;
 

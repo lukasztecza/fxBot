@@ -24,8 +24,17 @@
     "session_service": {
         "class": "TinyApp\\Model\\Service\\SessionService"
     },
-    "file_manager" : {
-        "class": "TinyApp\\Model\\Repository\\FileManager"
+    "files_service": {
+        "class": "TinyApp\\Model\\Service\\FilesService",
+        "inject": [
+            "@files_repository"
+        ]
+    },
+    "files_repository" : {
+        "class": "TinyApp\\Model\\Repository\\FilesRepository",
+        "inject": [
+            "@write_connection@"
+        ]
     },
     "validator_factory": {
         "class": "TinyApp\\Model\\Validator\\ValidatorFactory",
@@ -38,7 +47,13 @@
         "inject": [
             "@items_service",
             "@validator_factory",
-            "@file_manager"
+            "@files_service"
+        ]
+    },
+    "files_controller": {
+        "class": "TinyApp\\Controller\\FilesController",
+        "inject": [
+            "@files_service"
         ]
     },
     "authentication_controller": {

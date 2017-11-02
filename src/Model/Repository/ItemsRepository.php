@@ -1,11 +1,13 @@
 <?php
 namespace TinyApp\Model\Repository;
 
+use TinyApp\Model\Repository\DatabaseConnection;
+
 class ItemsRepository
 {
     private $write;
 
-    public function __construct($write)
+    public function __construct(DatabaseConnection $write)
     {
         $this->write = $write;
     }
@@ -42,6 +44,7 @@ class ItemsRepository
             }
         } catch(\Exception $e) {
             $this->write->rollBack();
+            //@TODO maybe rethrow exception
             return [];
         }
         $this->write->commit();
@@ -70,7 +73,7 @@ class ItemsRepository
     public function deleteItem(int $id) : bool
     {
         $this->write->execute(
-            'DELETE FROM `items` WHERE `id` = :id AND `id`', ['id' => $id]
+            'DELETE FROM `items` WHERE `id` = :id', ['id' => $id]
         );
 
         return true;

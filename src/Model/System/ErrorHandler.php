@@ -8,7 +8,7 @@ class ErrorHandler
     const CONTENT_TYPE_JSON = 'application_/json';
     const CONTENT_TYPE_HTML = 'text/html';
 
-    const LOGS_PATH = __DIR__ . '/../../../tmp/logs/';
+    const LOGS_PATH = APP_ROOT_DIR . '/tmp/logs/';
 
     public function __construct(string $environment)
     {

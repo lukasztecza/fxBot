@@ -1,9 +1,15 @@
 [
     {
-        "path": "/test",
-        "methods": ["GET"],
-        "controller": "sample_controller",
-        "action": "test"
+        "path": "/files/add",
+        "methods": ["GET", "POST"],
+        "controller": "files_controller",
+        "action": "upload"
+    },
+    {
+        "path": "/files",
+        "methods": ["GET", "POST"],
+        "controller": "files_controller",
+        "action": "list"
     },
     {
         "path": "/",

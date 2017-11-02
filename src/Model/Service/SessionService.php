@@ -3,7 +3,7 @@ namespace TinyApp\Model\Service;
 
 class SessionService
 {
-    const SESSIONS_PATH = __DIR__ . '/../../../tmp/sessions';
+    const SESSIONS_PATH = APP_ROOT_DIR . '/tmp/sessions';
 
     public function __construct()
     {
