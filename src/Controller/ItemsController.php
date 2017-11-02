@@ -7,9 +7,10 @@ use TinyApp\Model\System\Response;
 use TinyApp\Model\Service\ItemsService;
 use TinyApp\Model\Validator\ValidatorFactory;
 use TinyApp\Model\Validator\ItemsAddValidator;
+use TinyApp\Model\Validator\ItemsDeleteValidator;
 use TinyApp\Model\Validator\ItemEditValidator;
 
-class SampleController implements ControllerInterface
+class ItemsController implements ControllerInterface
 {
     private $itemsService;
     private $validatorFactory;
@@ -31,10 +32,27 @@ class SampleController implements ControllerInterface
     {
         $items = $this->itemsService->getItems();
 
+        $validator = $this->validatorFactory->create(ItemsDeleteValidator::class);
+        if ($request->getMethod() === 'POST') {
+            if ($validator->check($request)) {
+                extract($request->getPayload(['ids']));
+                if (!empty($ids)) {
+                    $this->itemsService->deleteItems($ids);
+                    return new Response(null, [], [], ['Location' => '/items']);
+                }
+            }
+        }
+
+        $rules = [];
+        foreach ($items as $key => $item) {
+            $rules['items.' . $key . '.name'] = 'html';
+        }
+        $rules['error'] = 'html';
+
         return new Response(
             'items/list.php',
-            ['items' => $items],
-            ['items' => 'html']
+            ['items' => $items, 'error' => isset($error) ? $error : $validator->getError(), 'csrfToken' => $validator->getCsrfToken()],
+            $rules
         );
     }
 
