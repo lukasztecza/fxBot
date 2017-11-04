@@ -44,17 +44,26 @@ class FilesController implements ControllerInterface
     {
         $images = $this->filesService->getPublicImages();
         $otherFiles = $this->filesService->getPublicNotImages();
+
+        $validator = $this->validatorFactory->create(FilesDeleteValidator::class);
         if ($request->getMethod() === 'POST') {
-        //@TODO add validator here
-            extract($request->getPayload(['ids']));
-            if (!empty($ids)) {
-                $this->filesService->deleteFiles($ids);
-                return new Response(null, [], [], ['Location' => '/files']);
+            if ($validator->check($request)) {
+                extract($request->getPayload(['ids']));
+                if (!empty($ids)) {
+                    $this->filesService->deleteFiles($ids);
+                    return new Response(null, [], [], ['Location' => '/files']);
+                }
             }
         }
         return new Response(
             'files/list.php',
-            ['images' => $images, 'otherFiles' => $otherFiles]
+            [
+                'images' => $images,
+                'otherFiles' => $otherFiles,
+                'error' => isset($error) ? $error : $validator->getError(),
+                'csrfToken' => $validator->getCsrfToken()
+            ],
+            ['error' => 'html']
         );
     }
 }

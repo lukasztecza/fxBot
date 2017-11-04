@@ -11,3 +11,4 @@
     <title>Sample title</title>
 </head>
 <body>
+<?php include('menu.php'); ?>
