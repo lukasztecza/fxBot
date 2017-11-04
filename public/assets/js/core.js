@@ -10,3 +10,4 @@
     }
     document.querySelector("input[type=button]").addEventListener("click", appendInput);
 })();
+//@TODO add webpack and npm for dev env so it builds assets from View part using versioning variable

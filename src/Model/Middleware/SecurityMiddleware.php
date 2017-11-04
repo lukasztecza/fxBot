@@ -32,7 +32,12 @@ class SecurityMiddleware extends ApplicationMiddlewareAbstract
                 throw new \Exception('Security rule with key ' . $ruleKey . ' must contain route and allow parameters ' . var_export($rule, true));
             }
 
-            if ($rule['route'] === $request->getRoute()) {
+            if (
+                $rule['route'] === $request->getRoute() || (
+                    substr($rule['route'], strlen($rule['route']) - 2, 2) === '/*' &&
+                    strpos($request->getRoute(), substr($rule['route'], 0, strlen($rule['route']) - 2)) === 0
+                )
+            ) {
                 $included = true;
 
                 if (empty($roles)) {

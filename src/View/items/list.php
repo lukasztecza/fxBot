@@ -7,6 +7,8 @@
         <li>
             <input type="checkbox" name="ids[]" value="<?php echo $item['id']; ?>" />
             <?php echo $item['name'] ?>
+            <a href="<?php echo '/items/' . $item['id'] . '/edit'; ?>">Edit</a>
+            <a href="<?php echo '/items/' . $item['id']; ?>">Details</a>
         </li>
     <?php endforeach; ?>
 </ul>

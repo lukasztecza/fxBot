@@ -42,7 +42,7 @@ class FilesRepository
     ];
 
     private $write;
-
+//@TODO add the way to serve private files through internal proxy forward and security key update also csrfToken to use that key with time()
     public function __construct(DatabaseConnection $write)
     {
         $this->write = $write;

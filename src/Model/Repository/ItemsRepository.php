@@ -12,13 +12,28 @@ class ItemsRepository
         $this->write = $write;
     }
 
-    public function getItems() : array
+    public function getItems(int $page, int $perPage) : array
     {
         $items = $this->write->fetch(
-            'SELECT * FROM `items`'
+            'SELECT * FROM `items` LIMIT ' . --$page * $perPage . ', ' . $perPage
         );
 
         return $items ?? [];
+    }
+
+    public function getPages(int $perPage) : int
+    {
+        if ($perPage < 1) {
+            throw new \Exception('Need at least one per page');
+        }
+
+        $total = $this->write->fetch('SELECT COUNT(*) as count FROM `items`');
+        if (!empty($total[0]['count'])) {
+            $pages = $total[0]['count'] / $perPage;
+            return (int)$pages < $pages ? $pages + 1 : $pages;
+        }
+
+        return 0;
     }
 
     public function saveItems(array $items) : array
