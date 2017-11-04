@@ -9,6 +9,8 @@ class CacheMiddleware
     public function __construct()
     {
         //@TODO add this middleware
+
+        //@TODO add translation middleware using gettext
     }
 
     public function process(Request $request) : Response

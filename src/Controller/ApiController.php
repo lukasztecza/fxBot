@@ -22,7 +22,11 @@ class ApiController implements ControllerInterface
 
     public function cget(Request $request) : Response
     {
-        $items = $this->itemsService->getItems();
+        extract($request->getQuery(['page']));
+        if (empty($page)) {
+            return $this->errorResponse('Query parameter page is required');
+        }
+        $items = $this->itemsService->getItems($page);
 
         return new Response(
             null,

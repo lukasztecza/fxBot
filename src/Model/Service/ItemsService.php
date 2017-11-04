@@ -5,20 +5,25 @@ use TinyApp\Model\Repository\ItemsRepository;
 
 class ItemsService
 {
+    private const PER_PAGE = 5;
+
     private $itemsRepository;
 
     public function __construct(ItemsRepository $itemsRepository) {
         $this->itemsRepository = $itemsRepository;
     }
 
-    public function getItems() : array
+    public function getItems(int $page) : array
     {
         try {
-            return $this->itemsRepository->getItems();
+            return [
+                'items' => $this->itemsRepository->getItems($page, self::PER_PAGE),
+                'pages' => $this->itemsRepository->getPages(self::PER_PAGE)
+            ];
         } catch(\Exception $e) {
             trigger_error('Failed to get items with message ' . $e->getMessage());
 
-            return [];
+            return ['items' => [], 'pages' => 0];
         }
     }
 

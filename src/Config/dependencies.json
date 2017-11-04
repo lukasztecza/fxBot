@@ -50,6 +50,9 @@
             "@files_service"
         ]
     },
+    "restricted_controller": {
+        "class": "TinyApp\\Controller\\RestrictedController"
+    },
     "files_controller": {
         "class": "TinyApp\\Controller\\FilesController",
         "inject": [
