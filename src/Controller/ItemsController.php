@@ -23,15 +23,18 @@ class ItemsController implements ControllerInterface
 
     public function home(Request $request) : Response
     {
-        $items = $this->itemsService->getItems();
-
         return new Response('home.php');
     }
 
     public function list(Request $request) : Response
     {
-        $items = $this->itemsService->getItems();
+        extract($request->getAttributes(['page']));
+        $page = $page ?? 1;
+        $itemsPack = $this->itemsService->getItems($page);
+//@TODO finish pagination
+//@TODO create manifest.json and get rid of parameters.json -> remove from git
 
+var_dump($itemsPack);exit;
         $validator = $this->validatorFactory->create(ItemsDeleteValidator::class);
         if ($request->getMethod() === 'POST') {
             if ($validator->check($request)) {
@@ -51,7 +54,12 @@ class ItemsController implements ControllerInterface
 
         return new Response(
             'items/list.php',
-            ['items' => $items, 'error' => isset($error) ? $error : $validator->getError(), 'csrfToken' => $validator->getCsrfToken()],
+            [
+                'items' => $itemsPack['items'],
+                'pages' => $itemsPack['pages'],
+                'error' => isset($error) ? $error : $validator->getError(),
+                'csrfToken' => $validator->getCsrfToken()
+            ],
             $rules
         );
     }

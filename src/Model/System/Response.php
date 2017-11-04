@@ -30,6 +30,18 @@ class Response
         // Filter out .. or ../ and allow only alphanumeric characters and . and / for file names
         return preg_replace(['/(\.\.\/)/', '/\.\./'], '', preg_replace('/[^a-zA-Z0-9\.\/]/', '', $this->file));
         //@TODO ensure that . is before extension only
+
+        //@TODO change Exceptions to be HttpExceptions RuntimeExceptions etc
+
+        //@TODO add TCPDF composer lib
+
+        //@TODO add tinymce or some kind of editor handling and whitelist of html escape tags
+
+        //@TODO add image processing lib
+
+        //@TODO add multifiles and chunk upload jquery
+
+        //@TODO maybe later add streaming
     }
 
     public function getVariables() : array
@@ -42,6 +54,9 @@ class Response
 
     public function getHeaders() : array
     {
+    //@TODO add accepting only local js, css for all browsers
+    //@TODO X-Content-Security-Policy: default 'none'; script-src 'self' http://code.jquery.com; style-src 'self'
+    //@TODO X-Wbkit-CSP: default 'none'; script-src 'self' http://code.jquery.com; style-src 'self'
         return $this->headers;
     }
 
