@@ -136,7 +136,7 @@ class FilesRepository
                 break;
             default:
                 throw new \Exception(
-                    'Unsupported file mime content type ' . var_export($mime, true) . ' for file ' . var_export([$file, $public], true)
+                    'Unsupported file extension and mime content type ' . var_export($mime, true) . ' for file ' . var_export([$file, $public], true)
                 );
         }
 

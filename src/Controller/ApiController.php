@@ -22,15 +22,20 @@ class ApiController implements ControllerInterface
 
     public function cget(Request $request) : Response
     {
+        // Get items for page
         extract($request->getQuery(['page']));
-        if (empty($page)) {
-            return $this->errorResponse('Query parameter page is required');
+        if (empty($page) || $page < 1) {
+            return $this->errorResponse('Query parameter page 1 or higher is required');
         }
-        $items = $this->itemsService->getItems($page);
+        $itemsPack = $this->itemsService->getItems($page);
 
         return new Response(
             null,
-            ['items' => $items],
+            [
+                'items' => $itemsPack['items'],
+                'page' => $itemsPack['page'],
+                'pages' => $itemsPack['pages']
+            ],
             ['items' => 'html'],
             ['Content-Type' => 'application/json']
         );
@@ -38,9 +43,9 @@ class ApiController implements ControllerInterface
 
     public function get(Request $request) : Response
     {
+        // Get selected item
         list($id) = array_values($request->getAttributes(['id']));
         $item = $this->itemsService->getItem($id);
-
         if (empty($item)) {
             return $this->errorResponse('No item found for id ' . $id);
         }
@@ -55,6 +60,7 @@ class ApiController implements ControllerInterface
 
     public function post(Request $request) : Response
     {
+        // Create item
         $validator = $this->validatorFactory->create(ItemEditValidator::class);
         if ($validator->check($request, false, false)) {
             $payload = $request->getPayload(['name']);
@@ -65,13 +71,14 @@ class ApiController implements ControllerInterface
 
             return $this->successResponse();
         }
+
         return $this->errorResponse($validator->getError());
     }
 
     public function put(Request $request) : Response
     {
+        // Modify item
         list($id) = array_values($request->getAttributes(['id']));
-
         $validator = $this->validatorFactory->create(ItemEditValidator::class);
         if ($validator->check($request, false, false)) {
             $payload = $request->getInput(['name']);
@@ -89,6 +96,7 @@ class ApiController implements ControllerInterface
 
     public function delete(Request $request) : Response
     {
+        // Delete item
         list($id) = array_values($request->getAttributes(['id']));
         $deletedId = $this->itemsService->deleteItem($id);
         if (empty($deletedId)) {

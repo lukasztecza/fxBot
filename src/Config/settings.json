@@ -1,9 +1,18 @@
 {
+    "application_starting_point": "output_middleware",
+
     "security_list": [
         {
             "route": "/restricted/*",
             "methods": ["GET"],
             "allow": ["ROLE_USER"]
+        }
+    ],
+
+    "cache_list": [
+        {
+            "route": "/",
+            "time": "100"
         }
     ]
 }

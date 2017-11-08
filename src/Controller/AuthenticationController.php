@@ -29,6 +29,7 @@ class AuthenticationController implements ControllerInterface
 
     public function login(Request $request) : Response
     {
+        // Login user and redirect to previous path if exists (user could be redirected here by Security Middleware)
         $validator = $this->validatorFactory->create(LoginValidator::class);
         if ($request->getMethod() === 'POST') {
             if ($validator->check($request)) {
@@ -55,8 +56,10 @@ class AuthenticationController implements ControllerInterface
 
     public function logout(Request $request) : Response
     {
+        // Logout user
         $this->sessionService->set(['roles' => null]);
         $this->sessionService->destroy();
+
         return new Response(null, [], [], ['Location' => $request->getHost() . '/']);
     }
 }
