@@ -9,7 +9,6 @@ class Project
 {
     const ROUTED_CONTROLLER_PLACEHOLDER = '%routed_controller%';
     const ROUTED_ACTION_PLACEHOLDER = '%routed_action%';
-    const APPLICATION_STARTING_POINT = 'output_middleware';
 
     const CONFIG_PATH = APP_ROOT_DIR . '/src/Config/';
 
@@ -23,41 +22,50 @@ class Project
         $routes = json_decode(file_get_contents(self::CONFIG_PATH . 'routes.json'), true);
         $request = (new Router($routes))->buildRequest();
 
-        // Check and replace dependecies placeholders from settings and parameters
+        // Check and replace dependencies placeholders from settings and parameters
         $settings = json_decode(file_get_contents(self::CONFIG_PATH . 'settings.json'), true);
         $parameters += $settings;
         $dependencies = file_get_contents(self::CONFIG_PATH . 'dependencies.json');
-        $this->checkRequiredPlaceholders($dependencies);
+        $this->checkRequiredPlaceholders($dependencies, $parameters);
         $dependencies = json_decode($dependencies, true);
         $dependencies = $this->replacePlaceholders($dependencies, $parameters, $request);
 
         // Check classes to create
         $toCreate = [];
-        $this->analyseInjections(0, $dependencies, $toCreate, self::APPLICATION_STARTING_POINT);
+        $this->analyseInjections(0, $dependencies, $toCreate, $parameters['application_starting_point']);
 
         // Build dependencies tree and process request
         $this->inject($dependencies, $toCreate);
-        if (!($dependencies[self::APPLICATION_STARTING_POINT]['object'] instanceof ApplicationMiddlewareInterface)) {
+        if (!($dependencies[$parameters['application_starting_point']]['object'] instanceof ApplicationMiddlewareInterface)) {
             throw new \Exception('Application middleware has to implement ' . ApplicationMiddlewareInterface::class);
         }
-        $response = $dependencies[self::APPLICATION_STARTING_POINT]['object']->process($request);
+        $response = $dependencies[$parameters['application_starting_point']]['object']->process($request);
     }
 
-    private function checkRequiredPlaceholders(string $dependencies) : void
+    private function checkRequiredPlaceholders(string $dependencies, array $parameters) : void
     {
         if (
             !strpos($dependencies, self::ROUTED_CONTROLLER_PLACEHOLDER) ||
-            !strpos($dependencies, self::ROUTED_ACTION_PLACEHOLDER) ||
-            !strpos($dependencies, self::APPLICATION_STARTING_POINT)
+            !strpos($dependencies, self::ROUTED_ACTION_PLACEHOLDER)
         ) {
             throw new \Exception(
                 'Could not find ' .
                 self::ROUTED_CONTROLLER_PLACEHOLDER . ' placeholder or ' .
-                self::ROUTED_ACTION_PLACEHOLDER . ' placeholder or ' .
-                self::APPLICATION_STARTING_POINT . ' application starting point in dependencies.json, ' .
-                'make sure you specify application starting point and ' .
-                'set routed controller placeholder and routed action placeholder ' .
-                'as dependecies of object responsible for handling them.'
+                self::ROUTED_ACTION_PLACEHOLDER . ' placeholder in dependencies.json' .
+                'make sure you set routed controller placeholder and routed action placeholder ' .
+                'as dependencies of object responsible for handling them'
+            );
+
+
+        }
+
+        if(
+            !isset($parameters['application_starting_point']) ||
+            !strpos($dependencies, $parameters['application_starting_point'])
+        ) {
+            throw new \Exception(
+                'Could not find application_starting_point key in settings.json or placeholder in dependencies.json, ' .
+                'make sure you specify application_starting_point as one of the dependency object'
             );
         }
     }

@@ -8,12 +8,10 @@ use TinyApp\Model\Middleware\ApplicationMiddlewareInterface;
 
 class OutputMiddleware extends ApplicationMiddlewareAbstract
 {
-    const DEFAULT_CONTENT_TYPE = 'text/html';
-
     const CONTENT_TYPE_HTML = 'text/html';
     const CONTENT_TYPE_JSON = 'application/json';
 
-    const TEMPLATES_PATH = APP_ROOT_DIR . '/src/View/';
+    const TEMPLATES_PATH = APP_ROOT_DIR . '/src/View';
 
     private $assetsVersion;
 
@@ -32,7 +30,7 @@ class OutputMiddleware extends ApplicationMiddlewareAbstract
 
         $headers = $response->getHeaders();
         $location = $headers['Location'] ?? null;
-        $contentType = $headers['Content-Type'] ?? self::DEFAULT_CONTENT_TYPE;
+        $contentType = $headers['Content-Type'] ?? null;
         $this->setCookies($response->getCookies());
         $this->setHeaders($headers);
 
@@ -84,12 +82,12 @@ class OutputMiddleware extends ApplicationMiddlewareAbstract
 
     private function buildHtmlResponse(string $template, array $variables) : void
     {
-        if (empty($template) || !file_exists(self::TEMPLATES_PATH . $template)) {
+        if (empty($template) || !file_exists(self::TEMPLATES_PATH . '/' . $template)) {
             throw new \Exception('Template does not exist ' . var_export($template, true));
         }
         extract($variables);
         unset($variables);
         $assetsVersioning = '?v=' . $this->assetsVersion;
-        include(self::TEMPLATES_PATH . $template);
+        include(self::TEMPLATES_PATH . '/' . $template);
     }
 }
