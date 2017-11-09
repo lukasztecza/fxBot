@@ -39,9 +39,9 @@ class AuthenticationController implements ControllerInterface
                     password_verify($payload['password'], $this->inMemoryPasswordHash)
                 ) {
                     $this->sessionService->set(['roles' => ['ROLE_USER']]);
-                    extract($this->sessionService->get(['previousPath']));
-                    $this->sessionService->set(['previousPath' => null]);
-                    return new Response(null, [], [], ['Location' => $request->getHost() . $previousPath]);
+                    extract($this->sessionService->get(['previousNotAllowedPath']));
+                    $this->sessionService->set(['previousNotAllowedPath' => null]);
+                    return new Response(null, [], [], ['Location' => $request->getHost() . $previousNotAllowedPath]);
                 }
                 $error = 'Invalid credentials';
             }
