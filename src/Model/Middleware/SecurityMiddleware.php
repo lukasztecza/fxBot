@@ -58,7 +58,7 @@ class SecurityMiddleware extends ApplicationMiddlewareAbstract
         }
 
         if ($included && !$permitted) {
-            $this->sessionService->set(['previousPath' => $request->getPath()]);
+            $this->sessionService->set(['previousNotAllowedPath' => $request->getPath()]);
             return new Response(null, [], [], ['Location' => '/login']);
         }
 
