@@ -44,7 +44,6 @@ class SecurityMiddleware extends ApplicationMiddlewareAbstract
                 if (empty($roles)) {
                     break;
                 }
-
                 if (isset($rule['methods']) && !in_array($request->getMethod(), $rule['methods'])) {
                     continue;
                 }

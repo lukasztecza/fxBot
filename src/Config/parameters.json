@@ -1,12 +1,12 @@
 {
     "environment": "dev",
 
-    "database_engine": "mysql",
-    "database_host": "localhost:3306",
-    "database_name": "tiny_app",
-    "database_user": "user",
-    "database_password": "pass",
+    "databaseEngine": "mysql",
+    "databaseHost": "localhost:3306",
+    "databaseName": "tiny_app",
+    "databaseUser": "user",
+    "databasePassword": "pass",
 
-    "in_memory_username": "user",
-    "in_memory_password_hash": "$2y$10$.CboZVxvs1ExdAIAHwwN5udiUIucdRZds1ic2.XSYk4woVyGCuHsO"
+    "inMemoryUsername": "user",
+    "inMemoryPasswordHash": "$2y$10$.CboZVxvs1ExdAIAHwwN5udiUIucdRZds1ic2.XSYk4woVyGCuHsO"
 }

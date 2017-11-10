@@ -1,7 +1,9 @@
 {
-    "application_starting_point": "output_middleware",
+    "applicationStartingPoint": "outputMiddleware",
 
-    "security_list": [
+    "assetsVersion": "1",
+
+    "securityList": [
         {
             "route": "/restricted/*",
             "methods": ["GET"],
@@ -9,7 +11,7 @@
         }
     ],
 
-    "cache_list": [
+    "cacheList": [
         {
             "route": "/",
             "time": "10"

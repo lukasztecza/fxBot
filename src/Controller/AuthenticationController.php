@@ -62,4 +62,17 @@ class AuthenticationController implements ControllerInterface
 
         return new Response(null, [], [], ['Location' => $request->getHost() . '/']);
     }
+
+    public function proxy(Request $request) : Response
+    {
+        extract($request->getAttributes(['directory', 'file']));
+        extract($this->sessionService->get(['roles']));
+
+        // Allow any authenticated user to see private content
+        if (!is_null($roles)) {
+            return new Response(null, [], [], ['Location' => '/internal/' . $directory . '/' . $file]);
+        }
+
+        return new Response(null, ['status' => '@TODO restricted'], [], ['Content-Type' => 'application/json']);
+    }
 }
