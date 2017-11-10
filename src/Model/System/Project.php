@@ -7,10 +7,12 @@ use TinyApp\Model\Middleware\ApplicationMiddlewareInterface;
 
 class Project
 {
-    const ROUTED_CONTROLLER_PLACEHOLDER = '%routed_controller%';
-    const ROUTED_ACTION_PLACEHOLDER = '%routed_action%';
+    private const ROUTED_CONTROLLER_PLACEHOLDER = '%routedController%';
+    private const ROUTED_ACTION_PLACEHOLDER = '%routedAction%';
 
-    const CONFIG_PATH = APP_ROOT_DIR . '/src/Config/';
+    private const APPLICATION_STARTING_POINT_KEY = 'applicationStartingPoint';
+
+    private const CONFIG_PATH = APP_ROOT_DIR . '/src/Config/';
 
     public function run() : void
     {
@@ -32,14 +34,14 @@ class Project
 
         // Check classes to create
         $toCreate = [];
-        $this->analyseInjections(0, $dependencies, $toCreate, $parameters['application_starting_point']);
+        $this->analyseInjections(0, $dependencies, $toCreate, $parameters[self::APPLICATION_STARTING_POINT_KEY]);
 
         // Build dependencies tree and process request
         $this->inject($dependencies, $toCreate);
-        if (!($dependencies[$parameters['application_starting_point']]['object'] instanceof ApplicationMiddlewareInterface)) {
+        if (!($dependencies[$parameters[self::APPLICATION_STARTING_POINT_KEY]]['object'] instanceof ApplicationMiddlewareInterface)) {
             throw new \Exception('Application middleware has to implement ' . ApplicationMiddlewareInterface::class);
         }
-        $response = $dependencies[$parameters['application_starting_point']]['object']->process($request);
+        $response = $dependencies[$parameters[self::APPLICATION_STARTING_POINT_KEY]]['object']->process($request);
     }
 
     private function checkRequiredPlaceholders(string $dependencies, array $parameters) : void
@@ -52,20 +54,18 @@ class Project
                 'Could not find ' .
                 self::ROUTED_CONTROLLER_PLACEHOLDER . ' placeholder or ' .
                 self::ROUTED_ACTION_PLACEHOLDER . ' placeholder in dependencies.json' .
-                'make sure you set routed controller placeholder and routed action placeholder ' .
-                'as dependencies of object responsible for handling them'
+                'make sure you set these values as dependencies of object responsible for handling them'
             );
-
-
         }
 
         if(
-            !isset($parameters['application_starting_point']) ||
-            !strpos($dependencies, $parameters['application_starting_point'])
+            !isset($parameters[self::APPLICATION_STARTING_POINT_KEY]) ||
+            !strpos($dependencies, $parameters[self::APPLICATION_STARTING_POINT_KEY])
         ) {
             throw new \Exception(
-                'Could not find application_starting_point key in settings.json or placeholder in dependencies.json, ' .
-                'make sure you specify application_starting_point as one of the dependency object'
+                'Could not find ' .
+                self::APPLICATION_STARTING_POINT_KEY . ' key in settings.json or value in dependencies.json, ' .
+                'make sure you specify it as one of the dependency object'
             );
         }
     }

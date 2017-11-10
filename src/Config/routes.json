@@ -2,108 +2,115 @@
     {
         "path": "/files/add",
         "methods": ["GET", "POST"],
-        "controller": "files_controller",
+        "controller": "filesController",
         "action": "upload"
     },
     {
         "path": "/files",
         "methods": ["GET", "POST"],
-        "controller": "files_controller",
+        "controller": "filesController",
         "action": "list"
     },
     {
         "path": "/",
         "methods": ["GET"],
-        "controller": "items_controller",
+        "controller": "itemsController",
         "action": "home"
     },
     {
         "path": "/restricted",
         "methods": ["GET"],
-        "controller": "restricted_controller",
+        "controller": "restrictedController",
         "action": "restricted2"
     },
     {
         "path": "/restricted/{code}",
         "methods": ["GET"],
         "requirements": {"code": "\\w+"},
-        "controller": "restricted_controller",
+        "controller": "restrictedController",
         "action": "restricted"
     },
     {
         "path": "/login",
-        "controller": "authentication_controller",
+        "controller": "authenticationController",
         "action": "login"
     },
     {
         "path": "/logout",
-        "controller": "authentication_controller",
+        "controller": "authenticationController",
         "action": "logout"
     },
     {
         "path": "/items",
         "methods": ["GET", "POST"],
-        "controller": "items_controller",
+        "controller": "itemsController",
         "action": "list"
     },
     {
         "path": "/items/list/{page}",
         "methods": ["GET", "POST"],
         "requirements": {"page": "\\d+"},
-        "controller": "items_controller",
+        "controller": "itemsController",
         "action": "list"
     },
     {
         "path": "/items/add",
         "methods": ["GET", "POST"],
-        "controller": "items_controller",
+        "controller": "itemsController",
         "action": "add"
     },
     {
         "path": "/items/{id}",
         "methods": ["GET"],
         "requirements": {"id": "\\d+"},
-        "controller": "items_controller",
+        "controller": "itemsController",
         "action": "details"
     },
     {
         "path": "/items/{id}/edit",
         "methods": ["GET", "POST"],
         "requirements": {"id": "\\d+"},
-        "controller": "items_controller",
+        "controller": "itemsController",
         "action": "edit"
     },
     {
         "path": "/api/items",
         "methods": ["GET"],
-        "controller": "api_controller",
+        "controller": "apiController",
         "action": "cget"
     },
     {
         "path": "/api/items",
         "methods": ["POST"],
-        "controller": "api_controller",
+        "controller": "apiController",
         "action": "post"
     },
     {
         "path": "/api/items/{id}",
         "methods": ["GET"],
         "requirements": {"id": "\\d+"},
-        "controller": "api_controller",
+        "controller": "apiController",
         "action": "get"
     },
     {
         "path": "/api/items/{id}",
         "methods": ["PUT"],
         "requirements": {"id": "\\d+"},
-        "controller": "api_controller",
+        "controller": "apiController",
         "action": "put"
     },
     {
         "path": "/api/items/{id}",
         "methods": ["DELETE"],
         "requirements": {"id": "\\d+"},
-        "controller": "api_controller",
+        "controller": "apiController",
         "action": "delete"
+    },
+    {
+        "path": "/private/{directory}/{file}",
+        "methods": ["GET"],
+        "requirements": {"directory": "(images|files)", "file": "\\w{1,}\\.\\w{3,4}"},
+        "controller": "authenticationController",
+        "action": "proxy"
     }
 ]
