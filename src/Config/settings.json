@@ -1,9 +1,20 @@
 {
-    "security_list": [
+    "applicationStartingPoint": "outputMiddleware",
+
+    "assetsVersion": "1",
+
+    "securityList": [
         {
             "route": "/restricted/*",
             "methods": ["GET"],
             "allow": ["ROLE_USER"]
+        }
+    ],
+
+    "cacheList": [
+        {
+            "route": "/",
+            "time": "10"
         }
     ]
 }

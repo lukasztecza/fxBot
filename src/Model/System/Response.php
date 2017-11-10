@@ -3,6 +3,8 @@ namespace TinyApp\Model\System;
 
 class Response
 {
+    const DEFAULT_CONTENT_TYPE = 'text/html';
+
     const DEFAULT_RULE = 'sanitize';
 
     const SANITIZE = 'sanitize';
@@ -10,7 +12,21 @@ class Response
     const URL_ESCAPE = 'url';
     const NO_ESCAPE = 'raw';
 
-    private $template;
+    private const ALLOWED_HTML_TAGS = [
+        'h3',
+        'p',
+        'i',
+        'b',
+        'table',
+        'tr',
+        'th',
+        'td',
+        'ul',
+        'ol',
+        'li'
+    ];
+
+    private $file;
     private $variables;
     private $rules;
     private $headers;
@@ -27,9 +43,10 @@ class Response
 
     public function getFile() : string
     {
-        // Filter out .. or ../ and allow only alphanumeric characters and . and / for file names
-        return preg_replace(['/(\.\.\/)/', '/\.\./'], '', preg_replace('/[^a-zA-Z0-9\.\/]/', '', $this->file));
-        //@TODO ensure that . is before extension only
+        // Filter out anything that is not alphanumeric path to the file
+        preg_match('/([a-zA-Z0-9]{1,}){1}(\/{1}[a-zA-Z0-9]*){0,}(\.{1})([a-z]{3,4}){1}/', $this->file, $matches);
+
+        return $matches[0] ?? '';
 
         //@TODO change Exceptions to be HttpExceptions RuntimeExceptions etc
 
@@ -49,15 +66,21 @@ class Response
         // Return escaped variables by default but do not change class member
         $variables = $this->variables;
         $this->escapeArray(0, $variables, '');
+
         return $variables;
     }
 
     public function getHeaders() : array
     {
-    //@TODO add accepting only local js, css for all browsers
-    //@TODO X-Content-Security-Policy: default 'none'; script-src 'self' http://code.jquery.com; style-src 'self'
-    //@TODO X-Wbkit-CSP: default 'none'; script-src 'self' http://code.jquery.com; style-src 'self'
-        return $this->headers;
+        // Add content security policy headers to allow only trusted assets source
+        $headers = $this->headers;
+        $headers['Content-Type'] = $headers['Content-Type'] ?? self::DEFAULT_CONTENT_TYPE;
+        $headers['X-Content-Security-Policy'] = $headers['X-Webkit-CSP'] = "default 'none'; script-src 'self'; style-src 'self'";
+
+        //@TODO add accepting only local js, css for all browsers check if it works
+        // X-Content-Security-Policy: default 'none'; script-src 'self' http://code.jquery.com; style-src 'self'
+        // X-Wbkit-CSP: default 'none'; script-src 'self' http://code.jquery.com; style-src 'self'
+        return $headers;
     }
 
     public function getCookies() : array
@@ -80,31 +103,28 @@ class Response
 
     private function escapeArray(int $counter, array &$array, string $keyString)
     {
-        $this->handleCounter($counter);
-
-        // If value is not array apply rule else call self
         foreach ($array as $key => &$value) {
             $this->handleCounter($counter);
 
+            // Ensure safe array keys
             $originalKey = $key;
             $this->sanitizeValue($key);
             if ($key !== (string)$originalKey) {
                 unset($array[$originalKey]);
                 if (!empty($key)) {
                     $array[$key] = $value;
-                    trigger_error('Sanitized improper key ' . $originalKey . ' from ' . var_export($array, true) , E_USER_NOTICE);
+                    trigger_error('Sanitized improper key ' . $originalKey . ' into ' . $key . ' from ' . var_export($array, true) , E_USER_NOTICE);
                     continue;
                 }
                 trigger_error('Dropped improper key ' . $originalKey . ' from ' . var_export($array, true), E_USER_NOTICE);
                 continue;
             }
 
+            // If value is not array apply rule else call self
             $currentKeyString = empty($keyString) ? $key : $keyString . '.' . $key;
-
             if (is_string($value) || is_numeric($value)) {
                 $this->selectAndApplyRuleForValue($value, $currentKeyString);
             }
-
             if (is_array($value)) {
                 $this->escapeArray($counter, $value, $currentKeyString);
             }
@@ -115,7 +135,7 @@ class Response
     {
         $counter++;
         if (1000 < $counter) {
-            throw new \Exception('Too deep array or danger of infinite recurrence, reached counter ' . var_export($counter, true));
+            throw new \Exception('Too big or deep array or danger of infinite recurrence, reached counter ' . var_export($counter, true));
         }
     }
 
@@ -157,7 +177,16 @@ class Response
     private function htmlEscapeValue(&$value)
     {
         $value = htmlspecialchars($value, ENT_QUOTES);
-        //@TODO add whitelist of characters and change them back
+
+        // Unescape allowed html tags
+        $patterns = $replacements = [];
+        foreach (self::ALLOWED_HTML_TAGS as $tag) {
+            $patterns[] = '/&lt;' . $tag . '&gt;/';
+            $patterns[] = '/&lt;\/' . $tag . '&gt;/';
+            $replacements[] = '<' . $tag . '>';
+            $replacements[] = '</' . $tag . '>';
+        }
+        $value = preg_replace($patterns, $replacements, $value);
     }
 
     private function urlEscapeValue(&$value)

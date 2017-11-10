@@ -8,7 +8,7 @@ class ErrorHandler
     const CONTENT_TYPE_JSON = 'application_/json';
     const CONTENT_TYPE_HTML = 'text/html';
 
-    const LOGS_PATH = APP_ROOT_DIR . '/tmp/logs/';
+    const LOGS_PATH = APP_ROOT_DIR . '/tmp/logs';
 
     public function __construct(string $environment)
     {
@@ -38,7 +38,7 @@ class ErrorHandler
             mkdir(self::LOGS_PATH, 0775, true);
         }
         file_put_contents(
-            self::LOGS_PATH . 'php-' . date('Y-m-d') . '.log',
+            self::LOGS_PATH . '/' . 'php-' . date('Y-m-d') . '.log',
             date('Y-m-d H:i:s') . ' | ' . $reason .  ' | code: ' . $type . ' | file: ' . $file . ' | line: ' . $line .
             ' | with message: ' . $message . ' | with context: ' . $context . PHP_EOL . PHP_EOL,
             FILE_APPEND | LOCK_EX

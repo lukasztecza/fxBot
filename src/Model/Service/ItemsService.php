@@ -18,12 +18,13 @@ class ItemsService
         try {
             return [
                 'items' => $this->itemsRepository->getItems($page, self::PER_PAGE),
+                'page' => $page,
                 'pages' => $this->itemsRepository->getPages(self::PER_PAGE)
             ];
         } catch(\Exception $e) {
-            trigger_error('Failed to get items with message ' . $e->getMessage());
+            trigger_error('Failed to get items with message ' . $e->getMessage(), E_USER_NOTICE);
 
-            return ['items' => [], 'pages' => 0];
+            return ['items' => [], 'page' => null, 'pages' => 0];
         }
     }
 

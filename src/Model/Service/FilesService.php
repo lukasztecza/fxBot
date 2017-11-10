@@ -26,17 +26,35 @@ class FilesService
     }
 
     public function getPublicImages() : array
-    {//@TODO add try catch in all
-        return $this->filesRepository->getPublic(FilesRepository::IMAGE_PUBLIC);
+    {
+        try {
+            return $this->filesRepository->getPublic(FilesRepository::IMAGE_PUBLIC);
+        } catch(\Exception $e) {
+            trigger_error('Failed to get public images with message ' . $e->getMessage(), E_USER_NOTICE);
+
+            return [];
+        }
     }
 
     public function getPublicNotImages() : array
     {
-        return $this->filesRepository->getPublic(FilesRepository::FILE_PUBLIC);
+        try {
+            return $this->filesRepository->getPublic(FilesRepository::FILE_PUBLIC);
+        } catch(\Exception $e) {
+            trigger_error('Failed to get public not images with message ' . $e->getMessage(), E_USER_NOTICE);
+
+            return [];
+        }
     }
 
     public function deleteFiles(array $ids) : bool
     {
-        return $this->filesRepository->deleteFiles($ids);
+        try {
+            return $this->filesRepository->deleteFiles($ids);
+        } catch(\Exception $e) {
+            trigger_error('Failed to delete all files for ids ' . var_export($ids, true) . ' with message ' . $e->getMessage(), E_USER_NOTICE);
+
+            return false;
+        }
     }
 }

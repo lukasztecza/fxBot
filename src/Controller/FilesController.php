@@ -21,6 +21,7 @@ class FilesController implements ControllerInterface
 
     public function upload(Request $request) : Response
     {
+        // Upload file and redirect to files list
         $validator = $this->validatorFactory->create(FilesUploadValidator::class);
         if ($request->getMethod() === 'POST') {
             if ($validator->check($request)) {
@@ -33,6 +34,7 @@ class FilesController implements ControllerInterface
                 $error = 'Failed to upload files';
             }
         }
+
         return new Response(
             'files/upload.php',
             ['error' => isset($error) ? $error : $validator->getError(), 'csrfToken' => $validator->getCsrfToken()],
@@ -42,9 +44,11 @@ class FilesController implements ControllerInterface
 
     public function list(Request $request) : Response
     {
+        // Get images and other files
         $images = $this->filesService->getPublicImages();
         $otherFiles = $this->filesService->getPublicNotImages();
 
+        // Delete selected files and redirect to files list
         $validator = $this->validatorFactory->create(FilesDeleteValidator::class);
         if ($request->getMethod() === 'POST') {
             if ($validator->check($request)) {
@@ -55,6 +59,7 @@ class FilesController implements ControllerInterface
                 }
             }
         }
+
         return new Response(
             'files/list.php',
             [
