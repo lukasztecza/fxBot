@@ -15,10 +15,10 @@ class Request
     private $method;
     private $query;
     private $payload;
-    private $input;
-    private $cookie;
-    private $server;
     private $files;
+    private $input;
+    private $cookies;
+    private $server;
     private $routedController;
     private $routedAction;
 
@@ -28,11 +28,11 @@ class Request
         string $route,
         array $attributes,
         string $method,
-        array $get,
-        array $post,
+        array $query,
+        array $payload,
         array $files,
         string $input,
-        array $cookie,
+        array $cookies,
         array $server,
         string $routedController,
         string $routedAction
@@ -42,12 +42,12 @@ class Request
         $this->route = $route;
         $this->attributes = $attributes;
         $this->method = $method;
-        $this->get = $get;
-        $this->post = $post;
-        $this->input = $input;
-        $this->cookie = $cookie;
-        $this->server = $server;
+        $this->query = $query;
+        $this->payload = $payload;
         $this->files = $files;
+        $this->input = $input;
+        $this->cookies = $cookies;
+        $this->server = $server;
         $this->routedController = $routedController;
         $this->routedAction = $routedAction;
     }
@@ -67,6 +67,11 @@ class Request
         return $this->route;
     }
 
+    public function getAttributes(array $combinedKeys = []) : array
+    {
+        return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->attributes) : $this->attributes;
+    }
+
     public function getMethod() : string
     {
         return $this->method;
@@ -81,19 +86,19 @@ class Request
         return false;
     }
 
-    public function getAttributes(array $combinedKeys = []) : array
-    {
-        return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->attributes) : $this->attributes;
-    }
-
     public function getQuery(array $combinedKeys = []) : array
     {
-        return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->get) : $this->get;
+        return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->query) : $this->query;
     }
 
     public function getPayload(array $combinedKeys = []) : array
     {
-        return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->post) : $this->post;
+        return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->payload) : $this->payload;
+    }
+
+    public function getFiles(array $combinedKeys = []) : array
+    {
+        return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->files) : $this->files;
     }
 
     public function getInput(array $combinedKeys = [], string $type = self::DEFAULT_INPUT_TYPE) : array
@@ -113,17 +118,12 @@ class Request
 
     public function getCookies(array $combinedKeys = []) : array
     {
-        return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->cookie) : $this->cookie;
+        return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->cookies) : $this->cookies;
     }
 
     public function getServer(array $combinedKeys = []) : array
     {
         return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->server) : $this->server;
-    }
-
-    public function getFiles(array $combinedKeys = []) : array
-    {
-        return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->files) : $this->files;
     }
 
     public function getController() : string

@@ -1,101 +1,108 @@
 {
-    "output_middleware": {
+    "outputMiddleware": {
         "class": "TinyApp\\Model\\Middleware\\OutputMiddleware",
         "inject": [
-            "@security_middleware",
-            "1"
+            "@securityMiddleware",
+            "%assetsVersion%"
         ]
     },
-    "security_middleware": {
+    "securityMiddleware": {
         "class": "TinyApp\\Model\\Middleware\\SecurityMiddleware",
         "inject": [
-            "@controller_middleware",
-            "%security_list%",
-            "@session_service"
+            "@responseCacheMiddleware",
+            "%securityList%",
+            "@sessionService"
         ]
     },
-    "controller_middleware": {
+    "responseCacheMiddleware": {
+        "class": "TinyApp\\Model\\Middleware\\ResponseCacheMiddleware",
+        "inject": [
+            "@controllerMiddleware",
+            "%cacheList%"
+        ]
+    },
+    "controllerMiddleware": {
         "class": "TinyApp\\Model\\Middleware\\ControllerMiddleware",
         "inject": [
-            "%routed_controller%",
-            "%routed_action%"
+            "%routedController%",
+            "%routedAction%"
         ]
     },
-    "session_service": {
-        "class": "TinyApp\\Model\\Service\\SessionService"
-    },
-    "files_service": {
-        "class": "TinyApp\\Model\\Service\\FilesService",
-        "inject": [
-            "@files_repository"
-        ]
-    },
-    "files_repository" : {
-        "class": "TinyApp\\Model\\Repository\\FilesRepository",
-        "inject": [
-            "@write_connection@"
-        ]
-    },
-    "validator_factory": {
-        "class": "TinyApp\\Model\\Validator\\ValidatorFactory",
-        "inject": [
-            "@session_service"
-        ]
-    },
-    "items_controller": {
+    "itemsController": {
         "class": "TinyApp\\Controller\\ItemsController",
         "inject": [
-            "@items_service",
-            "@validator_factory",
-            "@files_service"
+            "@itemsService",
+            "@validatorFactory",
+            "@filesService"
         ]
     },
-    "restricted_controller": {
-        "class": "TinyApp\\Controller\\RestrictedController"
-    },
-    "files_controller": {
+    "filesController": {
         "class": "TinyApp\\Controller\\FilesController",
         "inject": [
-            "@files_service",
-            "@validator_factory"
+            "@filesService",
+            "@validatorFactory"
         ]
     },
-    "authentication_controller": {
+    "restrictedController": {
+        "class": "TinyApp\\Controller\\RestrictedController"
+    },
+    "authenticationController": {
         "class": "TinyApp\\Controller\\AuthenticationController",
         "inject": [
-            "@session_service",
-            "@validator_factory",
-            "%in_memory_username%",
-            "%in_memory_password_hash%"
+            "@sessionService",
+            "@validatorFactory",
+            "%inMemoryUsername%",
+            "%inMemoryPasswordHash%"
         ]
     },
-    "api_controller": {
+    "apiController": {
             "class": "TinyApp\\Controller\\ApiController",
         "inject": [
-            "@items_service@",
-            "@validator_factory"
+            "@itemsService",
+            "@validatorFactory"
         ]
     },
-    "items_service": {
+    "validatorFactory": {
+        "class": "TinyApp\\Model\\Validator\\ValidatorFactory",
+        "inject": [
+            "@sessionService"
+        ]
+    },
+    "sessionService": {
+        "class": "TinyApp\\Model\\Service\\SessionService"
+    },
+    "itemsService": {
         "class": "TinyApp\\Model\\Service\\ItemsService",
         "inject": [
-            "@items_repository@"
+            "@itemsRepository"
         ]
     },
-    "items_repository": {
-        "class": "TinyApp\\Model\\Repository\\ItemsRepository",
+    "filesService": {
+        "class": "TinyApp\\Model\\Service\\FilesService",
         "inject": [
-            "@write_connection@"
+            "@filesRepository"
         ]
     },
-    "write_connection": {
+    "writeConnection": {
         "class": "TinyApp\\Model\\Repository\\DatabaseConnection",
         "inject": [
-            "%database_engine%",
-            "%database_host%",
-            "%database_name%",
-            "%database_user%",
-            "%database_password%"
+            "%databaseEngine%",
+            "%databaseHost%",
+            "%databaseName%",
+            "%databaseUser%",
+            "%databasePassword%"
+        ]
+    },
+    "itemsRepository": {
+        "class": "TinyApp\\Model\\Repository\\ItemsRepository",
+        "inject": [
+            "@writeConnection"
+        ]
+    },
+    "filesRepository" : {
+        "class": "TinyApp\\Model\\Repository\\FilesRepository",
+        "inject": [
+            "@writeConnection"
         ]
     }
 }

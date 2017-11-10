@@ -27,8 +27,9 @@ class SecurityMiddleware extends ApplicationMiddlewareAbstract
     {
         extract($this->sessionService->get(['roles']));
 
+        $included = $permitted = false;
         foreach ($this->securityList as $ruleKey => $rule) {
-            if (!isset($rule['route'])) {
+            if (!isset($rule['route']) || !isset($rule['allow'])) {
                 throw new \Exception('Security rule with key ' . $ruleKey . ' must contain route and allow parameters ' . var_export($rule, true));
             }
 
@@ -43,7 +44,6 @@ class SecurityMiddleware extends ApplicationMiddlewareAbstract
                 if (empty($roles)) {
                     break;
                 }
-
                 if (isset($rule['methods']) && !in_array($request->getMethod(), $rule['methods'])) {
                     continue;
                 }
@@ -56,8 +56,8 @@ class SecurityMiddleware extends ApplicationMiddlewareAbstract
             }
         }
 
-        if (!empty($included) && empty($permitted)) {
-            $this->sessionService->set(['previousPath' => $request->getPath()]);
+        if ($included && !$permitted) {
+            $this->sessionService->set(['previousNotAllowedPath' => $request->getPath()]);
             return new Response(null, [], [], ['Location' => '/login']);
         }
 

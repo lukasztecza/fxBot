@@ -28,26 +28,29 @@ class ItemsController implements ControllerInterface
 
     public function list(Request $request) : Response
     {
+        // Get items for page and redirect to first page if empty
         extract($request->getAttributes(['page']));
         $page = $page ?? 1;
         $itemsPack = $this->itemsService->getItems($page);
-//@TODO finish pagination
-//@TODO create manifest.json and get rid of parameters.json -> remove from git
+        if (empty($itemsPack['items'])) {
+            return new Response(null, [], [], ['Location' => '/items']);
+        }
 
-var_dump($itemsPack);exit;
+        // Delete selected items and redirect to current page
         $validator = $this->validatorFactory->create(ItemsDeleteValidator::class);
         if ($request->getMethod() === 'POST') {
             if ($validator->check($request)) {
                 extract($request->getPayload(['ids']));
                 if (!empty($ids)) {
                     $this->itemsService->deleteItems($ids);
-                    return new Response(null, [], [], ['Location' => '/items']);
+                    return new Response(null, [], [], ['Location' => '/items/list/' . $page]);
                 }
             }
         }
 
+        // Set html escape rule for items names and error
         $rules = [];
-        foreach ($items as $key => $item) {
+        foreach ($itemsPack['items'] as $key => $item) {
             $rules['items.' . $key . '.name'] = 'html';
         }
         $rules['error'] = 'html';
@@ -56,6 +59,7 @@ var_dump($itemsPack);exit;
             'items/list.php',
             [
                 'items' => $itemsPack['items'],
+                'page' => $itemsPack['page'],
                 'pages' => $itemsPack['pages'],
                 'error' => isset($error) ? $error : $validator->getError(),
                 'csrfToken' => $validator->getCsrfToken()
@@ -66,6 +70,7 @@ var_dump($itemsPack);exit;
 
     public function details(Request $request) : Response
     {
+        // Get item details and redirect to items list if empty
         extract($request->getAttributes(['id']));
         $item = $this->itemsService->getItem($id);
         if (empty($item)) {
@@ -81,6 +86,7 @@ var_dump($itemsPack);exit;
 
     public function add(Request $request) : Response
     {
+        // Create items and redirect items list
         $validator = $this->validatorFactory->create(ItemsAddValidator::class);
         if ($request->getMethod() === 'POST') {
             if ($validator->check($request)) {
@@ -102,12 +108,14 @@ var_dump($itemsPack);exit;
 
     public function edit(Request $request) : Response
     {
+        // Get item and redirect to items list if empty
         extract($request->getAttributes(['id']));
         $item = $this->itemsService->getItem($id);
         if (empty($item)) {
             return new Response(null, [], [], ['Location' => '/items']);
         }
 
+        // Edit item and redirect to item details page
         $validator = $this->validatorFactory->create(ItemEditValidator::class);
         if ($request->getMethod() === 'POST') {
             if ($validator->check($request)) {
@@ -125,15 +133,6 @@ var_dump($itemsPack);exit;
             'items/editForm.php',
             ['error' => isset($error) ? $error : $validator->getError(), 'item' => $item, 'csrfToken' => $validator->getCsrfToken()],
             ['error' => 'html']
-        );
-    }
-
-    public function restricted(Request $request)
-    {
-        return new Response(
-            'restricted.php',
-            ['restrictedValue' => '<p style="color:red">This is restrictd site '. $request->getAttributes(['code'])['code'] .'</p>'],
-            ['restrictedValue' => 'raw']
         );
     }
 }

@@ -14,7 +14,7 @@ class SessionService
         ini_set('session.save_path', self::SESSIONS_PATH);
         ini_set('session.gc_probability', 1);
         ini_set('session.gc_divisor', 10);
-        ini_set('session.gc_maxlifetime', 600);
+        ini_set('session.gc_maxlifetime', 60);
         $this->regenerate();
     }
 

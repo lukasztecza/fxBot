@@ -29,6 +29,7 @@ class AuthenticationController implements ControllerInterface
 
     public function login(Request $request) : Response
     {
+        // Login user and redirect to previous path if exists (user could be redirected here by Security Middleware)
         $validator = $this->validatorFactory->create(LoginValidator::class);
         if ($request->getMethod() === 'POST') {
             if ($validator->check($request)) {
@@ -38,9 +39,9 @@ class AuthenticationController implements ControllerInterface
                     password_verify($payload['password'], $this->inMemoryPasswordHash)
                 ) {
                     $this->sessionService->set(['roles' => ['ROLE_USER']]);
-                    extract($this->sessionService->get(['previousPath']));
-                    $this->sessionService->set(['previousPath' => null]);
-                    return new Response(null, [], [], ['Location' => $request->getHost() . $previousPath]);
+                    extract($this->sessionService->get(['previousNotAllowedPath']));
+                    $this->sessionService->set(['previousNotAllowedPath' => null]);
+                    return new Response(null, [], [], ['Location' => $request->getHost() . $previousNotAllowedPath]);
                 }
                 $error = 'Invalid credentials';
             }
@@ -55,8 +56,23 @@ class AuthenticationController implements ControllerInterface
 
     public function logout(Request $request) : Response
     {
+        // Logout user
         $this->sessionService->set(['roles' => null]);
         $this->sessionService->destroy();
+
         return new Response(null, [], [], ['Location' => $request->getHost() . '/']);
+    }
+
+    public function proxy(Request $request) : Response
+    {
+        extract($request->getAttributes(['directory', 'file']));
+        extract($this->sessionService->get(['roles']));
+
+        // Allow any authenticated user to see private content
+        if (!is_null($roles)) {
+            return new Response(null, [], [], ['Location' => '/internal/' . $directory . '/' . $file]);
+        }
+
+        return new Response(null, ['status' => '@TODO restricted'], [], ['Content-Type' => 'application/json']);
     }
 }
