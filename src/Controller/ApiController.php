@@ -23,8 +23,8 @@ class ApiController implements ControllerInterface
     public function cget(Request $request) : Response
     {
         // Get items for page
-        extract($request->getQuery(['page']));
-        if (empty($page) || $page < 1) {
+        $page = $request->getQuery(['page']);
+        if ($page < 1) {
             return $this->errorResponse('Query parameter page 1 or higher is required');
         }
         $itemsPack = $this->itemsService->getItems($page);
@@ -44,7 +44,7 @@ class ApiController implements ControllerInterface
     public function get(Request $request) : Response
     {
         // Get selected item
-        list($id) = array_values($request->getAttributes(['id']));
+        $id = $request->getAttributes(['id'])['id'];
         $item = $this->itemsService->getItem($id);
         if (empty($item)) {
             return $this->errorResponse('No item found for id ' . $id);
@@ -78,7 +78,7 @@ class ApiController implements ControllerInterface
     public function put(Request $request) : Response
     {
         // Modify item
-        list($id) = array_values($request->getAttributes(['id']));
+        $id = $request->getAttributes(['id'])['id'];
         $validator = $this->validatorFactory->create(ItemEditValidator::class);
         if ($validator->check($request, false, false)) {
             $payload = $request->getInput(['name']);
@@ -97,7 +97,7 @@ class ApiController implements ControllerInterface
     public function delete(Request $request) : Response
     {
         // Delete item
-        list($id) = array_values($request->getAttributes(['id']));
+        $id = $request->getAttributes(['id'])['id'];
         $deletedId = $this->itemsService->deleteItem($id);
         if (empty($deletedId)) {
             return $this->errorResponse('Nothing deleted');

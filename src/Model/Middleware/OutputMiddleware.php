@@ -35,7 +35,7 @@ class OutputMiddleware extends ApplicationMiddlewareAbstract
         $this->setHeaders($headers);
 
         switch (true) {
-            case $location:
+            case $location || $contentType === null:
                 break;
             case $contentType === self::CONTENT_TYPE_HTML:
                 $variables = $response->getVariables();
@@ -56,7 +56,11 @@ class OutputMiddleware extends ApplicationMiddlewareAbstract
     private function setHeaders(array $headers) : void
     {
         foreach ($headers as $key => $value) {
-            header($key . ': ' . $value);
+            if (!is_numeric($key)) {
+                header($key . ': ' . $value);
+            } else {
+                header($value);
+            }
         }
     }
 

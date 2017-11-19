@@ -26,7 +26,7 @@ class ValidatorFactory
 
     private function generateCsrfToken() : string
     {
-        extract($this->sessionService->get(['csrfToken']));
+        $csrfToken = $this->sessionService->get(['csrfToken'])['csrfToken'];
         if ($csrfToken !== null) {
             return $csrfToken;
         }

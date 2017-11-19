@@ -55,6 +55,13 @@
             "%inMemoryPasswordHash%"
         ]
     },
+    "privateContentController": {
+        "class": "TinyApp\\Controller\\PrivateContentController",
+        "inject": [
+            "@sessionService",
+            "@filesService"
+        ]
+    },
     "apiController": {
             "class": "TinyApp\\Controller\\ApiController",
         "inject": [

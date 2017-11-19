@@ -29,18 +29,13 @@ class ItemsController implements ControllerInterface
     public function list(Request $request) : Response
     {
         // Get items for page and redirect to first page if empty
-        extract($request->getAttributes(['page']));
-        $page = $page ?? 1;
-        $itemsPack = $this->itemsService->getItems($page);
-        if (empty($itemsPack['items'])) {
-            return new Response(null, [], [], ['Location' => '/items']);
-        }
+        $page = $request->getAttributes(['page'])['page'] ?? 1;
 
         // Delete selected items and redirect to current page
         $validator = $this->validatorFactory->create(ItemsDeleteValidator::class);
         if ($request->getMethod() === 'POST') {
             if ($validator->check($request)) {
-                extract($request->getPayload(['ids']));
+                $ids = $request->getPayload(['ids'])['ids'];
                 if (!empty($ids)) {
                     $this->itemsService->deleteItems($ids);
                     return new Response(null, [], [], ['Location' => '/items/list/' . $page]);
@@ -48,12 +43,17 @@ class ItemsController implements ControllerInterface
             }
         }
 
+        // Get items
+        $itemsPack = $this->itemsService->getItems($page);
+        if (empty($itemsPack['items'])) {
+            return new Response(null, [], [], ['Location' => '/items']);
+        }
+
         // Set html escape rule for items names and error
-        $rules = [];
+        $rules = ['error' => 'html'];
         foreach ($itemsPack['items'] as $key => $item) {
             $rules['items.' . $key . '.name'] = 'html';
         }
-        $rules['error'] = 'html';
 
         return new Response(
             'items/list.php',
@@ -71,8 +71,7 @@ class ItemsController implements ControllerInterface
     public function details(Request $request) : Response
     {
         // Get item details and redirect to items list if empty
-        extract($request->getAttributes(['id']));
-        $item = $this->itemsService->getItem($id);
+        $item = $this->itemsService->getItem($request->getAttributes(['id'])['id']);
         if (empty($item)) {
             return new Response(null, [], [], ['Location' => '/items']);
         }
@@ -90,10 +89,9 @@ class ItemsController implements ControllerInterface
         $validator = $this->validatorFactory->create(ItemsAddValidator::class);
         if ($request->getMethod() === 'POST') {
             if ($validator->check($request)) {
-                $payload = $request->getPayload(['items']);
-                $ids = $this->itemsService->saveItems($payload['items']);
+                $ids = $this->itemsService->saveItems($request->getPayload(['items'])['items']);
                 if (!empty($ids)) {
-                    return new Response(null, [], [], ['Location' => $request->getHost() . '/app.php/items']);
+                    return new Response(null, [], [], ['Location' => '/items']);
                 }
                 $error = 'Failed to update item';
             }
@@ -109,7 +107,7 @@ class ItemsController implements ControllerInterface
     public function edit(Request $request) : Response
     {
         // Get item and redirect to items list if empty
-        extract($request->getAttributes(['id']));
+        $id = $request->getAttributes(['id'])['id'];
         $item = $this->itemsService->getItem($id);
         if (empty($item)) {
             return new Response(null, [], [], ['Location' => '/items']);
@@ -123,7 +121,7 @@ class ItemsController implements ControllerInterface
                 $payload['id'] = $id;
                 $updatedId = $this->itemsService->updateItem($payload);
                 if (!empty($updatedId)) {
-                    return new Response(null, [], [], ['Location' => $request->getHost() . '/app.php/items/' . $id]);
+                    return new Response(null, [], [], ['Location' => '/items/' . $id]);
                 }
                 $error = 'Failed to update item';
             }

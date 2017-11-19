@@ -5,18 +5,16 @@ use TinyApp\Model\Repository\DatabaseConnection;
 
 class FilesRepository
 {
+    public const IMAGE_PUBLIC = 1;
+    public const FILE_PUBLIC = 2;
+    public const IMAGE_PRIVATE = 3;
+    public const FILE_PRIVATE = 4;
+
     private const UPLOAD_TMP_DIR = APP_ROOT_DIR . '/tmp/upload';
-
-    private const PRIVATE_STORAGE_PATH = APP_ROOT_DIR . '/private';
-    private const PUBLIC_UPLOADS_PATH = APP_ROOT_DIR . '/public/upload';
-
+    private const PUBLIC_UPLOAD_PATH = APP_ROOT_DIR . '/public/upload';
+    private const PRIVATE_UPLOAD_PATH = APP_ROOT_DIR . '/private';
     private const IMAGES = '/images';
     private const FILES = '/files';
-
-    public const IMAGE_PUBLIC = 1;
-    public const IMAGE_PRIVATE = 2;
-    public const FILE_PUBLIC = 3;
-    public const FILE_PRIVATE = 4;
 
     private const IMAGES_MIME = [
         "jpg" => "image/jpeg",
@@ -42,7 +40,7 @@ class FilesRepository
     ];
 
     private $write;
-//@TODO add the way to serve private files through internal proxy forward and security key update also csrfToken to use that key with time()
+
     public function __construct(DatabaseConnection $write)
     {
         $this->write = $write;
@@ -52,49 +50,82 @@ class FilesRepository
         }
     }
 
-    public function getPublic(int $type) : array
+    public function getByType(int $type, int $page, int $perPage) : array
     {
-        $items = $this->write->fetch(
-            'SELECT * FROM `files` WHERE `type` = :type', ['type' => $type]
+        $files = $this->write->fetch(
+            'SELECT * FROM `files` WHERE `type` = :type LIMIT ' . --$page * $perPage . ', ' . $perPage, ['type' => $type]
         );
 
-        return $items ?? [];
+        return $files ?? [];
+    }
+
+    public function getByName(string $name) : array
+    {
+        $files = $this->write->fetch(
+            'SELECT * FROM `files` WHERE `name` = :name', ['name' => $name]
+        );
+
+        return $files ?? [];
+    }
+
+    public function getPages(int $perPage) : int
+    {
+        if ($perPage < 1) {
+            throw new \Exception('Need at least one per page');
+        }
+
+        $total = $this->write->fetch('SELECT COUNT(*) as count FROM `files`');
+        if (!empty($total[0]['count'])) {
+            $pages = $total[0]['count'] / $perPage;
+            return (int)$pages < $pages ? $pages + 1 : $pages;
+        }
+
+        return 0;
     }
 
     public function uploadFiles(array $files, bool $public = false) : array
     {
         try {
             $this->write->begin();
-            $uploaded = [];
-            foreach ($files as $file) {
-                $uploaded[] = $this->uploadFile($file, $public);
+            $uploadedFiles = [];
+            foreach ($files as $key => $file) {
+                $uploadedFiles[$key] = $this->uploadFile($file, $public);
+                $uploadedFiles[$key]['id'] = $this->saveFile(
+                    $uploadedFiles[$key]['name'],
+                    $uploadedFiles[$key]['path'],
+                    $uploadedFiles[$key]['type']
+                );
             }
             $this->write->commit();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             trigger_error(
-                'Rolling back after failed attempt to upload files with message ' . $e->getMessage() . ' with payload ' . var_export([$files, $public], true)
+                'Rolling back after failed attempt to upload files with message ' .
+                $e->getMessage() . ' with payload ' . var_export([$files, $public], true),
+                E_USER_NOTICE
             );
-            foreach ($uploaded as $file) {
-                unlink($file['uploadPath']);
+
+            foreach ($uploadedFiles as $file) {
+                unlink($file['path']);
             }
             $this->write->rollBack();
             throw $e;
         }
 
-        return $uploaded;
+        return $uploadedFiles;
     }
 
     public function deleteFiles(array $ids) : bool
     {
-        $this->write->prepare('SELECT * FROM `files` WHERE `id` = :id');
-        $files = [];
+        $placeholders = '';
+        $params = [];
         foreach ($ids as $id) {
-            $output = $this->write->fetch(null, ['id' => $id]);
-            if (!empty($output)) {
-                $files[] = array_pop($output);
-            }
+            $placeholder = ':id' . $id;
+            $placeholders .= $placeholder . ',';
+            $params[$placeholder] = $id;
         }
-        $this->write->clean();
+        $placeholders = trim($placeholders, ',');
+        $placeholders = trim($placeholders, ',');
+        $files = $this->write->fetch('SELECT * FROM `files` WHERE `id` IN(' . $placeholders . ')', $params);
 
         if (empty($files)) {
             return false;
@@ -102,19 +133,34 @@ class FilesRepository
 
         $this->write->prepare('DELETE FROM `files` WHERE `id` = :id');
         foreach ($files as $file) {
-            $this->deleteFile($file);
+            $this->write->execute(null, ['id' => $file['id']]);
+            unlink($file['path']);
         }
         $this->write->clean();
 
         return true;
     }
 
+    private function getUploadPathByType(int $type) : string
+    {
+        switch($type) {
+            case self::IMAGE_PUBLIC:
+                return self::PUBLIC_UPLOAD_PATH . '/' . self::IMAGES;
+            case self::FILE_PUBLIC:
+                return self::PUBLIC_UPLOAD_PATH . '/' . self::FILES;
+            case self::IMAGE_PRIVATE:
+                return self::PRIVATE_UPLOAD_PATH . '/' . self::IMAGES;
+            case self::FILE_PRIVATE:
+                return self::PRIVATE_UPLOAD_PATH . '/' . self::FILES;
+            default:
+                throw new \Exception('Unsupported file type ' . var_export($type, true));
+        }
+    }
+
     private function uploadFile(array $file, bool $public) : array
     {
-        $uploadPath = $public ? self::PUBLIC_UPLOADS_PATH : self::PRIVATE_STORAGE_PATH;
-
-        $name = date('YdmHis') . preg_replace('/[^a-zA-Z0-9]/', '', pathinfo($file['name'], PATHINFO_FILENAME));
-        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $name = date('YdmHis') . strtolower(preg_replace('/[^a-zA-Z0-9]/', '', pathinfo($file['name'], PATHINFO_FILENAME))) . '.' . $extension;
         $mime = mime_content_type($file["tmp_name"]);
 
         // Check if image or other accepted file
@@ -122,82 +168,57 @@ class FilesRepository
             case
                 getimagesize($file['tmp_name']) &&
                 array_key_exists(strtolower($extension), self::IMAGES_MIME) &&
+                isset(self::IMAGES_MIME[$extension]) &&
                 self::IMAGES_MIME[$extension] === $mime
             :
-                $uploadPath .= self::IMAGES;
                 $type = $public ? self::IMAGE_PUBLIC : self::IMAGE_PRIVATE;
                 break;
             case
                 array_key_exists(strtolower($extension), self::FILES_MIME) &&
+                isset(self::FILES_MIME[$extension]) &&
                 self::FILES_MIME[$extension] === $mime
             :
-                $uploadPath .= self::FILES;
                 $type = $public ? self::FILE_PUBLIC : self::FILE_PRIVATE;
                 break;
             default:
-                throw new \Exception(
-                    'Unsupported file extension and mime content type ' . var_export($mime, true) . ' for file ' . var_export([$file, $public], true)
-                );
+                throw new \Exception('Unsupported file extension and mime content type ' . var_export($mime, true));
         }
 
+        $path = $this->getUploadPathByType($type);
+
         // Create directory if it does not exist
-        if (!file_exists($uploadPath)) {
-            mkdir($uploadPath, 0755, true);
+        if (!file_exists($path)) {
+            mkdir($path, 0755, true);
         }
 
         // Finalise preparation of paths
-        $uploadPath .= '/' . $name . '.' . $extension;
-        if (file_exists($uploadPath)) {
-            throw new \Exception('File already exists ' . var_export($uploadPath, true ) . ' with payload ' . var_export($file, true));
+        $path .= '/' . $name;
+        if (file_exists($path)) {
+            throw new \Exception('File already exists ' . var_export($path, true ));
         }
 
         // Move uploaded file and store its new path in db
-        if (!move_uploaded_file($file['tmp_name'], $uploadPath)) {
-            throw new \Exception('Failed to move uploaded file to ' . var_export($uploadPath, true) . ' with payload ' . var_export($file, true));
+        if (!move_uploaded_file($file['tmp_name'], $path)) {
+            throw new \Exception('Failed to move uploaded file to ' . var_export($path, true));
         }
-        $id = $this->saveFile($name, $extension, $type);
 
         return [
-            'id' => $id,
             'name' => $name,
-            'extension' => $extension,
             'type' => $type,
-            'uploadPath' => $uploadPath
+            'path' => $path
         ];
     }
 
-    private function saveFile(string $name, string $extension, int $type) : int
+    private function saveFile(string $name, string $path, int $type) : int
     {
         $affectedId = $this->write->execute(
-            'INSERT INTO `files` (`name`, `extension`, `type`) VALUES (:name, :extension, :type)', [
+            'INSERT INTO `files` (`name`, `path`, `type`) VALUES (:name, :path, :type)', [
                 'name' => $name,
-                'extension' => $extension,
+                'path' => $path,
                 'type' => $type
             ]
         );
 
         return (int)$affectedId;
-    }
-
-    private function deleteFile(array $file) : void
-    {
-        $uploadPath = '';
-        switch ($file['type']) {
-            case self::IMAGE_PUBLIC:
-                $uploadPath .= self::PUBLIC_UPLOADS_PATH . self::IMAGES;
-                break;
-            case self::IMAGE_PRIVATE:
-                $uploadPath .= self::PRIVATE_STORAGE_PATH . self::IMAGES;
-                break;
-            case self::FILE_PUBLIC:
-                $uploadPath .= self::PUBLIC_UPLOADS_PATH . self::FILES;
-                break;
-            case self::IMAGE_PRIVATE:
-                $uploadPath .= self::PRIVATE_STORAGE_PATH . self::FILES;
-                break;
-        }
-        $uploadPath .= '/' . $file['name'] . '.' . $file['extension'];
-        $this->write->execute(null, ['id' => $file['id']]);
-        unlink($uploadPath);
     }
 }

@@ -25,7 +25,7 @@ class SecurityMiddleware extends ApplicationMiddlewareAbstract
 
     public function process(Request $request) : Response
     {
-        extract($this->sessionService->get(['roles']));
+        $roles = $this->sessionService->get(['roles'])['roles'];
 
         $included = $permitted = false;
         foreach ($this->securityList as $ruleKey => $rule) {
