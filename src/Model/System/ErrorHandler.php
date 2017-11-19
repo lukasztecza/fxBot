@@ -92,7 +92,7 @@ class ErrorHandler
                     '<!Doctype html>' .
                     '<html>' .
                     '<head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"></head>' .
-                    '<body><p>Status: error</p><p>Code: ' . $type . '</p></body>' .
+                    '<body><p>Status: error</p><p>Code: ' . $type . '</p><p><a href="/">Go to home page</a></p></body>' .
                     '</html>'
                 ;
                 break;

@@ -8,6 +8,11 @@
             "route": "/restricted/*",
             "methods": ["GET"],
             "allow": ["ROLE_USER"]
+        },
+        {
+            "route": "/private/{directory}/{file}",
+            "methods": ["GET"],
+            "allow": ["ROLE_USER"]
         }
     ],
 

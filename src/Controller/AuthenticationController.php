@@ -29,6 +29,11 @@ class AuthenticationController implements ControllerInterface
 
     public function login(Request $request) : Response
     {
+        // Redirect to home users which are already logged in
+        if (!empty($this->sessionService->get(['user'])['user'])) {
+            return new Response(null, [], [], ['Location' => '/']);
+        }
+
         // Login user and redirect to previous path if exists (user could be redirected here by Security Middleware)
         $validator = $this->validatorFactory->create(LoginValidator::class);
         if ($request->getMethod() === 'POST') {
@@ -39,9 +44,11 @@ class AuthenticationController implements ControllerInterface
                     password_verify($payload['password'], $this->inMemoryPasswordHash)
                 ) {
                     $this->sessionService->set(['roles' => ['ROLE_USER']]);
-                    extract($this->sessionService->get(['previousNotAllowedPath']));
+                    $this->sessionService->set(['user' => $payload['username']]);
+                    $previousNotAllowedPath = $this->sessionService->get(['previousNotAllowedPath'])['previousNotAllowedPath'] ?? '/';
                     $this->sessionService->set(['previousNotAllowedPath' => null]);
-                    return new Response(null, [], [], ['Location' => $request->getHost() . $previousNotAllowedPath]);
+
+                    return new Response(null, [], [], ['Location' => $previousNotAllowedPath]);
                 }
                 $error = 'Invalid credentials';
             }
@@ -58,21 +65,9 @@ class AuthenticationController implements ControllerInterface
     {
         // Logout user
         $this->sessionService->set(['roles' => null]);
+        $this->sessionService->set(['user' => null]);
         $this->sessionService->destroy();
 
-        return new Response(null, [], [], ['Location' => $request->getHost() . '/']);
-    }
-
-    public function proxy(Request $request) : Response
-    {
-        extract($request->getAttributes(['directory', 'file']));
-        extract($this->sessionService->get(['roles']));
-
-        // Allow any authenticated user to see private content
-        if (!is_null($roles)) {
-            return new Response(null, [], [], ['Location' => '/internal/' . $directory . '/' . $file]);
-        }
-
-        return new Response(null, ['status' => '@TODO restricted'], [], ['Content-Type' => 'application/json']);
+        return new Response(null, [], [], ['Location' => '/']);
     }
 }

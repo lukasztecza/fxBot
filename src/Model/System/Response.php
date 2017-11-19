@@ -10,21 +10,10 @@ class Response
     const SANITIZE = 'sanitize';
     const HTML_ESCAPE = 'html';
     const URL_ESCAPE = 'url';
+    const FILE_ESCAPE = 'file';
     const NO_ESCAPE = 'raw';
 
-    private const ALLOWED_HTML_TAGS = [
-        'h3',
-        'p',
-        'i',
-        'b',
-        'table',
-        'tr',
-        'th',
-        'td',
-        'ul',
-        'ol',
-        'li'
-    ];
+    private const ALLOWED_HTML_TAGS = ['h3', 'p', 'i', 'b', 'table', 'tr', 'th', 'td', 'ul', 'ol', 'li'];
 
     private $file;
     private $variables;
@@ -43,10 +32,9 @@ class Response
 
     public function getFile() : string
     {
-        // Filter out anything that is not alphanumeric path to the file
-        preg_match('/([a-zA-Z0-9]{1,}){1}(\/{1}[a-zA-Z0-9]*){0,}(\.{1})([a-z]{3,4}){1}/', $this->file, $matches);
-
-        return $matches[0] ?? '';
+        $filename = $this->file;
+        $this->fileEscapeValue($filename);
+        return $filename;
 
         //@TODO change Exceptions to be HttpExceptions RuntimeExceptions etc
 
@@ -101,7 +89,7 @@ class Response
         return $cookies;
     }
 
-    private function escapeArray(int $counter, array &$array, string $keyString)
+    private function escapeArray(int $counter, array &$array, string $keyString) : void
     {
         foreach ($array as $key => &$value) {
             $this->handleCounter($counter);
@@ -131,7 +119,7 @@ class Response
         }
     }
 
-    private function handleCounter(&$counter) : void
+    private function handleCounter(int &$counter) : void
     {
         $counter++;
         if (1000 < $counter) {
@@ -139,7 +127,7 @@ class Response
         }
     }
 
-    private function selectAndApplyRuleForValue(&$value, $currentKeyString)
+    private function selectAndApplyRuleForValue(string &$value, string $currentKeyString) : void
     {
         // Search for passed rule or use the default one
         $selectedRule = self::DEFAULT_RULE;
@@ -162,6 +150,9 @@ class Response
             case self::URL_ESCAPE:
                 $this->urlEscapeValue($value);
                 break;
+            case self::FILE_ESCAPE:
+                $this->fileEscapeValue($value);
+                break;
             case self::NO_ESCAPE:
                 break;
             default:
@@ -169,12 +160,12 @@ class Response
         }
     }
 
-    private function sanitizeValue(&$value)
+    private function sanitizeValue(string &$value) : void
     {
         $value = preg_replace('/[^a-zA-Z0-9]/', '', $value);
     }
 
-    private function htmlEscapeValue(&$value)
+    private function htmlEscapeValue(string &$value) : void
     {
         $value = htmlspecialchars($value, ENT_QUOTES);
 
@@ -189,8 +180,18 @@ class Response
         $value = preg_replace($patterns, $replacements, $value);
     }
 
-    private function urlEscapeValue(&$value)
+    private function urlEscapeValue(string &$value) : void
     {
         $value = rawurlencode($value);
+    }
+
+    private function fileEscapeValue(string &$value) : void
+    {
+        preg_match('/(\/{0,1}[a-zA-Z0-9]{1,}){1,}(\.{1})([a-z]{3,4}){1}/', $value, $matches);
+        if (isset($matches[0])) {
+            $value = $matches[0];
+        } else {
+            $value = '';
+        }
     }
 }

@@ -8,7 +8,7 @@ class FilesDeleteValidator extends ValidatorAbstract
 {
     public function validate(Request $request) : bool
     {
-        extract($request->getPayload(['ids']));
+        $ids = $request->getPayload(['ids'])['ids'];
 
         if (empty($ids)) {
             $this->error = 'Needs at least one id';

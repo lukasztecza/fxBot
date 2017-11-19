@@ -26,8 +26,7 @@ class FilesController implements ControllerInterface
         if ($request->getMethod() === 'POST') {
             if ($validator->check($request)) {
                 $files = $request->getFiles();
-                extract($request->getPayload(['public']));
-                $result = $this->filesService->uploadFiles($files, (bool)$public);
+                $result = $this->filesService->uploadFiles($files, (bool)$request->getPayload(['public'])['public']);
                 if (!empty($result)) {
                      return new Response(null, [], [], ['Location' => '/files']);
                 }
@@ -44,31 +43,54 @@ class FilesController implements ControllerInterface
 
     public function list(Request $request) : Response
     {
-        // Get images and other files
-        $images = $this->filesService->getPublicImages();
-        $otherFiles = $this->filesService->getPublicNotImages();
+        return new Response(
+            'files/list.php',
+            ['types' => $this->filesService->getTypes()],
+            ['types' => 'html']
+        );
+    }
+
+    public function listPaginated(Request $request) : Response
+    {
+        $type = $request->getAttributes(['type'])['type'];
+        $page = $request->getAttributes(['page'])['page'];
 
         // Delete selected files and redirect to files list
         $validator = $this->validatorFactory->create(FilesDeleteValidator::class);
         if ($request->getMethod() === 'POST') {
             if ($validator->check($request)) {
-                extract($request->getPayload(['ids']));
+                $ids = $request->getPayload(['ids'])['ids'];
                 if (!empty($ids)) {
                     $this->filesService->deleteFiles($ids);
-                    return new Response(null, [], [], ['Location' => '/files']);
+                    return new Response(null, [], [], ['Location' => '/files/list/' . (int)$type . '/' . (int)$page]);
                 }
             }
         }
 
+        // Get files
+        $filesPack = $this->filesService->getByType($type, $page);
+        if (empty($filesPack['files'])) {
+            return new Response(null, [], [], ['Location' => '/files']);
+        }
+
+        // Set escape rules
+        $rules = ['error' => 'html'];
+        foreach ($filesPack['files'] as $key => $file) {
+            $rules['files.' . $key . '.name'] = 'file';
+        }
+// @TODO After succes redirect to page from which comes POST
         return new Response(
-            'files/list.php',
+            $this->filesService->isTypeImage($type) ? 'files/listImages.php' : 'files/listFiles.php',
             [
-                'images' => $images,
-                'otherFiles' => $otherFiles,
+                'files' => $filesPack['files'],
+                'type' => $type,
+                'page' => $filesPack['page'],
+                'pages' => $filesPack['pages'],
+                'private' => $this->filesService->isTypePrivate($type),
                 'error' => isset($error) ? $error : $validator->getError(),
                 'csrfToken' => $validator->getCsrfToken()
             ],
-            ['error' => 'html']
+            $rules
         );
     }
 }
