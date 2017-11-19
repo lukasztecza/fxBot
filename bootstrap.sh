@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS `items` (
 CREATE TABLE IF NOT EXISTS `files` (
     `id` INT(11) NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(255) COLLATE utf8_general_ci NOT NULL,
-    `extension` VARCHAR(16) COLLATE utf8_general_ci NOT NULL,
+    `path` VARCHAR(255) COLLATE utf8_general_ci NOT NULL,
     `type` TINYINT(4) NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
