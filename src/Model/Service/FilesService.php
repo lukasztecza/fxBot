@@ -5,6 +5,8 @@ use TinyApp\Model\Repository\FilesRepository;
 
 class FilesService
 {
+    private const PER_PAGE = 1;
+
     private $filesRepository;
 
     public function __construct(FilesRepository $filesRepository)
@@ -25,23 +27,51 @@ class FilesService
         }
     }
 
-    public function getPublicImages() : array
+    public function getTypes() : array
+    {
+        return [
+            FilesRepository::IMAGE_PUBLIC => 'Public images',
+            FilesRepository::FILE_PUBLIC => 'Public files',
+            FilesRepository::IMAGE_PRIVATE => 'Private images',
+            FilesRepository::FILE_PRIVATE => 'Private files'
+        ];
+    }
+
+    public function isTypeImage(int $type) : bool
+    {
+        return in_array($type, [FilesRepository::IMAGE_PUBLIC, FilesRepository::IMAGE_PRIVATE]);
+    }
+
+    public function isTypePrivate(int $type) : bool
+    {
+        return in_array($type, [FilesRepository::IMAGE_PRIVATE, FilesRepository::FILE_PRIVATE]);
+    }
+
+    public function getByType(int $type, int $page) : array
     {
         try {
-            return $this->filesRepository->getPublic(FilesRepository::IMAGE_PUBLIC);
+            return [
+                'files' => $this->filesRepository->getByType($type, $page, self::PER_PAGE),
+                'page' => $page,
+                'pages' => $this->filesRepository->getPages(self::PER_PAGE)
+            ];
         } catch(\Exception $e) {
-            trigger_error('Failed to get public images with message ' . $e->getMessage(), E_USER_NOTICE);
+            trigger_error(
+                'Failed to get files for type ' . var_export($type, true) .
+                ' and page ' . var_export($page, true) . ' with message ' . $e->getMessage(),
+                E_USER_NOTICE
+            );
 
             return [];
         }
     }
 
-    public function getPublicNotImages() : array
+    public function getByName(string $name) : array
     {
         try {
-            return $this->filesRepository->getPublic(FilesRepository::FILE_PUBLIC);
+            return $this->filesRepository->getByName($name);
         } catch(\Exception $e) {
-            trigger_error('Failed to get public not images with message ' . $e->getMessage(), E_USER_NOTICE);
+            trigger_error('Failed to get file for name ' . var_export($name, true) . ' with message ' . $e->getMessage(), E_USER_NOTICE);
 
             return [];
         }

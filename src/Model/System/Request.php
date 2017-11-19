@@ -126,6 +126,11 @@ class Request
         return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->server) : $this->server;
     }
 
+    public function getServerProtocol() : string
+    {
+        return $this->server['SERVER_PROTOCOL'] ?? '';
+    }
+
     public function getController() : string
     {
         return $this->routedController;

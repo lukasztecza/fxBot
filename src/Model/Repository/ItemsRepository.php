@@ -20,7 +20,7 @@ class ItemsRepository
 
         return $items ?? [];
     }
-
+// @TODO create abstract repository which will contain perPage
     public function getPages(int $perPage) : int
     {
         if ($perPage < 1) {

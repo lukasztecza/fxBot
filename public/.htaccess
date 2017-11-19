@@ -18,24 +18,16 @@ Options -Indexes
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Determine the RewriteBase automatically and set it as environment variable.
-    RewriteCond %{REQUEST_URI}::$1 ^(/.+)/(.*)::\2$
-    RewriteRule ^(.*) - [E=BASE:%1]
-
-    # Sets the HTTP_AUTHORIZATION header removed by Apache
-    RewriteCond %{HTTP:Authorization} .
-    RewriteRule ^ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-
     # Redirect to URI without front controller
     RewriteCond %{ENV:REDIRECT_STATUS} ^$
-    RewriteRule ^app\.php(?:/(.*)|$) %{ENV:BASE}/$1 [R=301,L]
+    RewriteRule ^app\.php(?:/(.*)|$) /$1 [R=301,L]
 
     # If the requested filename exists, simply serve it.
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteRule ^ - [L]
 
     # Rewrite all other queries to the front controller.
-    RewriteRule ^ %{ENV:BASE}/app.php [L]
+    RewriteRule ^ /app.php [L]
 </IfModule>
 
 <IfModule !mod_rewrite.c>
