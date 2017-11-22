@@ -5,6 +5,7 @@ use TinyApp\Controller\ControllerInterface;
 use TinyApp\Model\System\Request;
 use TinyApp\Model\System\Response;
 use TinyApp\Model\Service\FilesService;
+use TinyApp\Model\Service\SessionService;
 use TinyApp\Model\Validator\ValidatorFactory;
 use TinyApp\Model\Validator\FilesUploadValidator;
 use TinyApp\Model\Validator\FilesDeleteValidator;
@@ -12,11 +13,13 @@ use TinyApp\Model\Validator\FilesDeleteValidator;
 class FilesController implements ControllerInterface
 {
     private $filesService;
+    private $sessionService;
 
-    public function __construct(FilesService $filesService, ValidatorFactory $validatorFactory)
+    public function __construct(FilesService $filesService, ValidatorFactory $validatorFactory, SessionService $sessionService)
     {
         $this->filesService = $filesService;
         $this->validatorFactory = $validatorFactory;
+        $this->sessionService = $sessionService;
     }
 
     public function upload(Request $request) : Response
@@ -25,10 +28,11 @@ class FilesController implements ControllerInterface
         $validator = $this->validatorFactory->create(FilesUploadValidator::class);
         if ($request->getMethod() === 'POST') {
             if ($validator->check($request)) {
-                $files = $request->getFiles();
+                $files = $request->getFiles(['someFile']);
                 $result = $this->filesService->uploadFiles($files, (bool)$request->getPayload(['public'])['public']);
                 if (!empty($result)) {
-                     return new Response(null, [], [], ['Location' => '/files']);
+                    $this->sessionService->set(['flash' => ['type' => 'success', 'text' => 'Files are added']]);
+                    return new Response(null, [], [], ['Location' => '/files']);
                 }
                 $error = 'Failed to upload files';
             }
@@ -45,8 +49,8 @@ class FilesController implements ControllerInterface
     {
         return new Response(
             'files/list.php',
-            ['types' => $this->filesService->getTypes()],
-            ['types' => 'html']
+            ['types' => $this->filesService->getTypes(), 'flash' => $this->sessionService->get(['flash'], true)['flash']],
+            ['types' => 'html', 'flash' => 'html']
         );
     }
 
@@ -61,7 +65,12 @@ class FilesController implements ControllerInterface
             if ($validator->check($request)) {
                 $ids = $request->getPayload(['ids'])['ids'];
                 if (!empty($ids)) {
-                    $this->filesService->deleteFiles($ids);
+                    if ($this->filesService->deleteFiles($ids)) {
+                        $this->sessionService->set(['flash' => ['type' => 'success', 'text' => 'Files are deleted']]);
+                    } else {
+                        $this->sessionService->set(['flash' => ['type' => 'fail', 'text' => 'Files are not deleted']]);
+                    }
+
                     return new Response(null, [], [], ['Location' => '/files/list/' . (int)$type . '/' . (int)$page]);
                 }
             }
@@ -74,11 +83,11 @@ class FilesController implements ControllerInterface
         }
 
         // Set escape rules
-        $rules = ['error' => 'html'];
+        $rules = ['error' => 'html', 'flash' => 'html'];
         foreach ($filesPack['files'] as $key => $file) {
             $rules['files.' . $key . '.name'] = 'file';
         }
-// @TODO After succes redirect to page from which comes POST
+
         return new Response(
             $this->filesService->isTypeImage($type) ? 'files/listImages.php' : 'files/listFiles.php',
             [
@@ -87,6 +96,7 @@ class FilesController implements ControllerInterface
                 'page' => $filesPack['page'],
                 'pages' => $filesPack['pages'],
                 'private' => $this->filesService->isTypePrivate($type),
+                'flash' => $this->sessionService->get(['flash'], true)['flash'],
                 'error' => isset($error) ? $error : $validator->getError(),
                 'csrfToken' => $validator->getCsrfToken()
             ],

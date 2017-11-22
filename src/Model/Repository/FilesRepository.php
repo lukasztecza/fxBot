@@ -1,9 +1,7 @@
 <?php
 namespace TinyApp\Model\Repository;
 
-use TinyApp\Model\Repository\DatabaseConnection;
-
-class FilesRepository
+class FilesRepository extends RepositoryAbstract
 {
     public const IMAGE_PUBLIC = 1;
     public const FILE_PUBLIC = 2;
@@ -39,11 +37,9 @@ class FilesRepository
         "wav" => "audio/x-wav"
     ];
 
-    private $write;
-
     public function __construct(DatabaseConnection $write)
     {
-        $this->write = $write;
+        parent::__construct($write);
         // Create tmp upload directory if it does not exist (has to be set in php.ini because it can not be set on runtime using ini_set)
         if (!file_exists(self::UPLOAD_TMP_DIR)) {
             mkdir(self::UPLOAD_TMP_DIR, 0775, true);
@@ -52,41 +48,28 @@ class FilesRepository
 
     public function getByType(int $type, int $page, int $perPage) : array
     {
-        $files = $this->write->fetch(
-            'SELECT * FROM `files` WHERE `type` = :type LIMIT ' . --$page * $perPage . ', ' . $perPage, ['type' => $type]
+        $files = $this->getRead()->fetch(
+            'SELECT * FROM `files` WHERE `type` = :type LIMIT ' . ($page - 1) * $perPage . ', ' . $perPage, ['type' => $type]
         );
 
-        return $files ?? [];
+        $pages = $this->getPages('SELECT COUNT(*) as count FROM `files`', [], $perPage);
+
+        return ['files' => $files, 'page' => $page, 'pages' => $pages];
     }
 
     public function getByName(string $name) : array
     {
-        $files = $this->write->fetch(
+        $files = $this->getRead()->fetch(
             'SELECT * FROM `files` WHERE `name` = :name', ['name' => $name]
         );
 
         return $files ?? [];
     }
 
-    public function getPages(int $perPage) : int
-    {
-        if ($perPage < 1) {
-            throw new \Exception('Need at least one per page');
-        }
-
-        $total = $this->write->fetch('SELECT COUNT(*) as count FROM `files`');
-        if (!empty($total[0]['count'])) {
-            $pages = $total[0]['count'] / $perPage;
-            return (int)$pages < $pages ? $pages + 1 : $pages;
-        }
-
-        return 0;
-    }
-
     public function uploadFiles(array $files, bool $public = false) : array
     {
         try {
-            $this->write->begin();
+            $this->getWrite()->begin();
             $uploadedFiles = [];
             foreach ($files as $key => $file) {
                 $uploadedFiles[$key] = $this->uploadFile($file, $public);
@@ -96,7 +79,7 @@ class FilesRepository
                     $uploadedFiles[$key]['type']
                 );
             }
-            $this->write->commit();
+            $this->getWrite()->commit();
         } catch (\Throwable $e) {
             trigger_error(
                 'Rolling back after failed attempt to upload files with message ' .
@@ -107,7 +90,7 @@ class FilesRepository
             foreach ($uploadedFiles as $file) {
                 unlink($file['path']);
             }
-            $this->write->rollBack();
+            $this->getWrite()->rollBack();
             throw $e;
         }
 
@@ -125,18 +108,18 @@ class FilesRepository
         }
         $placeholders = trim($placeholders, ',');
         $placeholders = trim($placeholders, ',');
-        $files = $this->write->fetch('SELECT * FROM `files` WHERE `id` IN(' . $placeholders . ')', $params);
+        $files = $this->getWrite()->fetch('SELECT * FROM `files` WHERE `id` IN(' . $placeholders . ')', $params);
 
         if (empty($files)) {
             return false;
         }
 
-        $this->write->prepare('DELETE FROM `files` WHERE `id` = :id');
+        $this->getWrite()->prepare('DELETE FROM `files` WHERE `id` = :id');
         foreach ($files as $file) {
-            $this->write->execute(null, ['id' => $file['id']]);
+            $this->getWrite()->execute(null, ['id' => $file['id']]);
             unlink($file['path']);
         }
-        $this->write->clean();
+        $this->getWrite()->clean();
 
         return true;
     }
@@ -211,7 +194,7 @@ class FilesRepository
 
     private function saveFile(string $name, string $path, int $type) : int
     {
-        $affectedId = $this->write->execute(
+        $affectedId = $this->getWrite()->execute(
             'INSERT INTO `files` (`name`, `path`, `type`) VALUES (:name, :path, :type)', [
                 'name' => $name,
                 'path' => $path,

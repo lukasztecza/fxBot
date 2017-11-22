@@ -98,7 +98,24 @@ class Request
 
     public function getFiles(array $combinedKeys = []) : array
     {
-        return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $this->files) : $this->files;
+        // Ensure consistent file array structure
+        $files = [];
+        foreach ($this->files as $inputName => $file) {
+            if (!is_array($file['name'])) {
+                $files[$inputName] = $file;
+            } else {
+                $keys = array_keys($file);
+                foreach ($file['name'] as $index => $value) {
+                    foreach($keys as $key) {
+                        $content[$key] =$file[$key][$index];
+                    }
+                    $files[$inputName][] = $content;
+                }
+
+            }
+        }
+
+        return !empty($combinedKeys) ? $this->getFromArray($combinedKeys, $files) : $files;
     }
 
     public function getInput(array $combinedKeys = [], string $type = self::DEFAULT_INPUT_TYPE) : array

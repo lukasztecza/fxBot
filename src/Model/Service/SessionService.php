@@ -26,7 +26,7 @@ class SessionService
         session_regenerate_id();
     }
 
-    public function get(array $keys = []) : array
+    public function get(array $keys = [], bool $destroy = false) : array
     {
         if (empty($keys)) {
             return $_SESSION;
@@ -38,6 +38,9 @@ class SessionService
                 $return[$key] = $_SESSION[$key];
             } else {
                 $return[$key] = null;
+            }
+            if ($destroy) {
+                $this->set([$key => null]);
             }
         }
 

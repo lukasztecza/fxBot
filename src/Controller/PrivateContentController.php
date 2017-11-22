@@ -22,7 +22,7 @@ class PrivateContentController implements ControllerInterface
     {
         $attributes = $request->getAttributes(['directory', 'file']);
 
-        $file = $this->filesService->getByName($attributes['file']);
+        $file = $this->filesService->getPrivateByName($attributes['file']);
 
         var_dump($file);exit;
         if (1) {

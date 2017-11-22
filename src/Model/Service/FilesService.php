@@ -5,7 +5,7 @@ use TinyApp\Model\Repository\FilesRepository;
 
 class FilesService
 {
-    private const PER_PAGE = 1;
+    private const PER_PAGE = 5;
 
     private $filesRepository;
 
@@ -50,11 +50,7 @@ class FilesService
     public function getByType(int $type, int $page) : array
     {
         try {
-            return [
-                'files' => $this->filesRepository->getByType($type, $page, self::PER_PAGE),
-                'page' => $page,
-                'pages' => $this->filesRepository->getPages(self::PER_PAGE)
-            ];
+            return $this->filesRepository->getByType($type, $page, self::PER_PAGE);
         } catch(\Exception $e) {
             trigger_error(
                 'Failed to get files for type ' . var_export($type, true) .
@@ -62,14 +58,14 @@ class FilesService
                 E_USER_NOTICE
             );
 
-            return [];
+            return ['files' => [], 'page' => null, 'pages' => 0];
         }
     }
 
-    public function getByName(string $name) : array
+    public function getPrivateByName(string $name) : array
     {
         try {
-            return $this->filesRepository->getByName($name);
+            return $this->filesRepository->getPrivateByName($name);
         } catch(\Exception $e) {
             trigger_error('Failed to get file for name ' . var_export($name, true) . ' with message ' . $e->getMessage(), E_USER_NOTICE);
 

@@ -33,14 +33,15 @@
         "inject": [
             "@itemsService",
             "@validatorFactory",
-            "@filesService"
+            "@sessionService"
         ]
     },
     "filesController": {
         "class": "TinyApp\\Controller\\FilesController",
         "inject": [
             "@filesService",
-            "@validatorFactory"
+            "@validatorFactory",
+            "@sessionService"
         ]
     },
     "restrictedController": {
