@@ -45,10 +45,10 @@ class AuthenticationController implements ControllerInterface
                 ) {
                     $this->sessionService->set(['roles' => ['ROLE_USER']]);
                     $this->sessionService->set(['user' => $payload['username']]);
-                    $previousNotAllowedPath = $this->sessionService->get(['previousNotAllowedPath'])['previousNotAllowedPath'] ?? '/';
-                    $this->sessionService->set(['previousNotAllowedPath' => null]);
 
-                    return new Response(null, [], [], ['Location' => $previousNotAllowedPath]);
+                    return new Response(null, [], [], [
+                        'Location' => ($this->sessionService->get(['previousNotAllowedPath'], true)['previousNotAllowedPath'] ?? '/')
+                    ]);
                 }
                 $error = 'Invalid credentials';
             }
