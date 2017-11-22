@@ -5,6 +5,7 @@ use TinyApp\Controller\ControllerInterface;
 use TinyApp\Model\System\Request;
 use TinyApp\Model\System\Response;
 use TinyApp\Model\Service\ItemsService;
+use TinyApp\Model\Service\SessionService;
 use TinyApp\Model\Validator\ValidatorFactory;
 use TinyApp\Model\Validator\ItemsAddValidator;
 use TinyApp\Model\Validator\ItemsDeleteValidator;
@@ -14,11 +15,13 @@ class ItemsController implements ControllerInterface
 {
     private $itemsService;
     private $validatorFactory;
+    private $sessionService;
 
-    public function __construct(ItemsService $itemsService, ValidatorFactory $validatorFactory)
+    public function __construct(ItemsService $itemsService, ValidatorFactory $validatorFactory, SessionService $sessionService)
     {
         $this->itemsService = $itemsService;
         $this->validatorFactory = $validatorFactory;
+        $this->sessionService = $sessionService;
     }
 
     public function home(Request $request) : Response
@@ -37,7 +40,12 @@ class ItemsController implements ControllerInterface
             if ($validator->check($request)) {
                 $ids = $request->getPayload(['ids'])['ids'];
                 if (!empty($ids)) {
-                    $this->itemsService->deleteItems($ids);
+                    if ($this->itemsService->deleteItems($ids)) {
+                        $this->sessionService->set(['flash' => ['type' => 'success', 'text' => 'Items are deleted']]);
+                    } else {
+                        $this->sessionService->set(['flash' => ['type' => 'fail', 'text' => 'Items are not deleted']]);
+                    }
+
                     return new Response(null, [], [], ['Location' => '/items/list/' . $page]);
                 }
             }
@@ -50,7 +58,7 @@ class ItemsController implements ControllerInterface
         }
 
         // Set html escape rule for items names and error
-        $rules = ['error' => 'html'];
+        $rules = ['error' => 'html', 'flash' => 'html'];
         foreach ($itemsPack['items'] as $key => $item) {
             $rules['items.' . $key . '.name'] = 'html';
         }
@@ -61,6 +69,7 @@ class ItemsController implements ControllerInterface
                 'items' => $itemsPack['items'],
                 'page' => $itemsPack['page'],
                 'pages' => $itemsPack['pages'],
+                'flash' => $this->sessionService->get(['flash'], true)['flash'],
                 'error' => isset($error) ? $error : $validator->getError(),
                 'csrfToken' => $validator->getCsrfToken()
             ],
@@ -91,6 +100,7 @@ class ItemsController implements ControllerInterface
             if ($validator->check($request)) {
                 $ids = $this->itemsService->saveItems($request->getPayload(['items'])['items']);
                 if (!empty($ids)) {
+                    $this->sessionService->set(['flash' => ['type' => 'success', 'text' => 'Items are added']]);
                     return new Response(null, [], [], ['Location' => '/items']);
                 }
                 $error = 'Failed to update item';

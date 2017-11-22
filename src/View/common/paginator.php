@@ -1,3 +1,4 @@
+<p>Pages:</p>
 <ul>
     <?php for($i = 1; $i <= $pages; $i++): ?>
         <li>

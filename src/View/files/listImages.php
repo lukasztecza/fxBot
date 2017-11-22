@@ -1,6 +1,9 @@
 <?php include(__DIR__ . '/../common/head.php'); ?>
 <h3>Images list</h3>
 <p class="error"><?php echo $error; ?></p>
+<?php if(isset($flash)): ?>
+    <p class="<?php echo $flash['type']; ?>"><?php echo $flash['text']; ?></p>
+<?php endif; ?>
 <?php $prefix = '/files/list/' . $type . '/'; include(__DIR__ . '/../common/paginator.php'); ?>
 <form method="post">
 <p>Images:</p>
