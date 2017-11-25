@@ -30,6 +30,7 @@ class FilesService
     public function getTypes() : array
     {
         return [
+        //@TODO all these constants should be private
             FilesRepository::IMAGE_PUBLIC => 'Public images',
             FilesRepository::FILE_PUBLIC => 'Public files',
             FilesRepository::IMAGE_PRIVATE => 'Private images',
@@ -47,6 +48,35 @@ class FilesService
         return in_array($type, [FilesRepository::IMAGE_PRIVATE, FilesRepository::FILE_PRIVATE]);
     }
 
+    public function getUploadPathByType(int $type) : string
+    {
+        try {
+            return $this->filesRepository->getUploadPathByType($type);
+        } catch (\Exception $e) {
+            trigger_error('Failed to get upload path by type ' . var_export($type, true) . ' with message ' . $e->getMessage(), E_USER_NOTICE);
+
+            return '';
+        }
+    }
+
+    public function getContentTypeByExtension(string $extension) : string
+    {
+        try {
+            return $this->filesRepository->getSupportedMimeByExtension($extension);
+        } catch (\Exception $e) {
+            trigger_error(
+                'Failed to get content type by extension ' . var_export($extension, true) . ' with message ' . $e->getMessage(), E_USER_NOTICE
+            );
+
+            return '';
+        }
+    }
+
+    public function isImageContentType(string $contentType) : bool
+    {
+        return $this->filesRepository->isImageMime($contentType);
+    }
+
     public function getByType(int $type, int $page) : array
     {
         try {
@@ -62,10 +92,10 @@ class FilesService
         }
     }
 
-    public function getPrivateByName(string $name) : array
+    public function getByName(string $name) : array
     {
         try {
-            return $this->filesRepository->getPrivateByName($name);
+            return $this->filesRepository->getByName($name);
         } catch(\Exception $e) {
             trigger_error('Failed to get file for name ' . var_export($name, true) . ' with message ' . $e->getMessage(), E_USER_NOTICE);
 

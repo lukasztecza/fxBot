@@ -8,11 +8,12 @@ class FilesRepository extends RepositoryAbstract
     public const IMAGE_PRIVATE = 3;
     public const FILE_PRIVATE = 4;
 
-    private const UPLOAD_TMP_DIR = APP_ROOT_DIR . '/tmp/upload';
-    private const PUBLIC_UPLOAD_PATH = APP_ROOT_DIR . '/public/upload';
-    private const PRIVATE_UPLOAD_PATH = APP_ROOT_DIR . '/private';
     private const IMAGES = '/images';
     private const FILES = '/files';
+
+    private const PUBLIC_UPLOAD_PATH = APP_ROOT_DIR . '/public/upload';
+    private const PRIVATE_UPLOAD_PATH = APP_ROOT_DIR . '/private/upload';
+    private const UPLOAD_TMP_DIR = APP_ROOT_DIR . '/tmp/upload';
 
     private const IMAGES_MIME = [
         "jpg" => "image/jpeg",
@@ -46,12 +47,44 @@ class FilesRepository extends RepositoryAbstract
         }
     }
 
+    public function getUploadPathByType(int $type) : string
+    {
+        switch($type) {
+            case self::IMAGE_PUBLIC:
+                return self::PUBLIC_UPLOAD_PATH . self::IMAGES;
+            case self::FILE_PUBLIC:
+                return self::PUBLIC_UPLOAD_PATH . self::FILES;
+            case self::IMAGE_PRIVATE:
+                return self::PRIVATE_UPLOAD_PATH . self::IMAGES;
+            case self::FILE_PRIVATE:
+                return self::PRIVATE_UPLOAD_PATH . self::FILES;
+            default:
+                throw new \Exception('Unsupported file type ' . var_export($type, true));
+        }
+    }
+
+    public function getSupportedMimeByExtension(string $extension) : string
+    {
+        switch(true) {
+            case isset(self::IMAGES_MIME[$extension]):
+                return self::IMAGES_MIME[$extension];
+            case isset(self::FILES_MIME[$extension]):
+                return self::FILES_MIME[$extension];
+            default:
+                throw new \Exception('Unsupported file extension ' . var_export($extension, true));
+        }
+    }
+
+    public function isImageMime(string $mime) : bool
+    {
+        return in_array($mime, self::IMAGES_MIME);
+    }
+
     public function getByType(int $type, int $page, int $perPage) : array
     {
         $files = $this->getRead()->fetch(
             'SELECT * FROM `files` WHERE `type` = :type LIMIT ' . ($page - 1) * $perPage . ', ' . $perPage, ['type' => $type]
         );
-
         $pages = $this->getPages('SELECT COUNT(*) as count FROM `files`', [], $perPage);
 
         return ['files' => $files, 'page' => $page, 'pages' => $pages];
@@ -75,7 +108,6 @@ class FilesRepository extends RepositoryAbstract
                 $uploadedFiles[$key] = $this->uploadFile($file, $public);
                 $uploadedFiles[$key]['id'] = $this->saveFile(
                     $uploadedFiles[$key]['name'],
-                    $uploadedFiles[$key]['path'],
                     $uploadedFiles[$key]['type']
                 );
             }
@@ -124,47 +156,27 @@ class FilesRepository extends RepositoryAbstract
         return true;
     }
 
-    private function getUploadPathByType(int $type) : string
-    {
-        switch($type) {
-            case self::IMAGE_PUBLIC:
-                return self::PUBLIC_UPLOAD_PATH . '/' . self::IMAGES;
-            case self::FILE_PUBLIC:
-                return self::PUBLIC_UPLOAD_PATH . '/' . self::FILES;
-            case self::IMAGE_PRIVATE:
-                return self::PRIVATE_UPLOAD_PATH . '/' . self::IMAGES;
-            case self::FILE_PRIVATE:
-                return self::PRIVATE_UPLOAD_PATH . '/' . self::FILES;
-            default:
-                throw new \Exception('Unsupported file type ' . var_export($type, true));
-        }
-    }
-
     private function uploadFile(array $file, bool $public) : array
     {
         $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
         $name = date('YdmHis') . strtolower(preg_replace('/[^a-zA-Z0-9]/', '', pathinfo($file['name'], PATHINFO_FILENAME))) . '.' . $extension;
         $mime = mime_content_type($file["tmp_name"]);
+        $supportedMime = $this->getSupportedMimeByExtension($extension);
 
         // Check if image or other accepted file
         switch (true) {
-            case
-                getimagesize($file['tmp_name']) &&
-                array_key_exists(strtolower($extension), self::IMAGES_MIME) &&
-                isset(self::IMAGES_MIME[$extension]) &&
-                self::IMAGES_MIME[$extension] === $mime
-            :
+            case getimagesize($file['tmp_name']) && $supportedMime === $mime:
                 $type = $public ? self::IMAGE_PUBLIC : self::IMAGE_PRIVATE;
                 break;
-            case
-                array_key_exists(strtolower($extension), self::FILES_MIME) &&
-                isset(self::FILES_MIME[$extension]) &&
-                self::FILES_MIME[$extension] === $mime
-            :
+            case $supportedMime === $mime:
                 $type = $public ? self::FILE_PUBLIC : self::FILE_PRIVATE;
                 break;
             default:
-                throw new \Exception('Unsupported file extension and mime content type ' . var_export($mime, true));
+                throw new \Exception(
+                    'Unsupported mime content type ' . var_export($mime, true) .
+                    ' or does not match mapped ' . var_export($supportedMime, true) .
+                    ' by file extension ' . var_export($extension, true)
+                );
         }
 
         $path = $this->getUploadPathByType($type);
@@ -192,12 +204,11 @@ class FilesRepository extends RepositoryAbstract
         ];
     }
 
-    private function saveFile(string $name, string $path, int $type) : int
+    private function saveFile(string $name, int $type) : int
     {
         $affectedId = $this->getWrite()->execute(
-            'INSERT INTO `files` (`name`, `path`, `type`) VALUES (:name, :path, :type)', [
+            'INSERT INTO `files` (`name`, `type`) VALUES (:name, :type)', [
                 'name' => $name,
-                'path' => $path,
                 'type' => $type
             ]
         );

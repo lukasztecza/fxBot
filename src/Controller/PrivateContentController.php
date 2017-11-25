@@ -22,14 +22,28 @@ class PrivateContentController implements ControllerInterface
     {
         $attributes = $request->getAttributes(['directory', 'file']);
 
-        $file = $this->filesService->getPrivateByName($attributes['file']);
-
-        var_dump($file);exit;
-        if (1) {
-            return new Response('403.php', [], [], [$request->getServerProtocol() . ' 403 Forbidden']);
+        $file = $this->filesService->getByName($attributes['file']);
+        if (empty($file[0]['name']) || empty($file[0]['type'])) {
+            return $this->getNotFoundResponse($request);
         }
 
-        return new Response($direcotry . '/' . $file, [], [], ['Content-Type' => 'image/png']);
-        //@TODO return image/* content type and update outputmiddleware to serve it
+        $contentType = $this->filesService->getContentTypeByExtension(pathinfo($file[0]['name'], PATHINFO_EXTENSION));
+        if (empty($contentType)) {
+            return $this->getNotFoundResponse($request);
+        }
+
+        if (!empty($file)) {
+            return new Response(
+                $file[0]['name'],
+                ['type' => $file[0]['type']],
+                [],
+                ['Content-Type' => ($this->filesService->isImageContentType($contentType) ? $contentType : 'application/octet-stream')]
+            );
+        }
+    }
+
+    private function getNotFoundResponse(Request $request) : Response
+    {
+        return new Response('404.php', [], [], [$request->getServerProtocol() . ' 404 Not Found']);
     }
 }

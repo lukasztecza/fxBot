@@ -10,7 +10,7 @@
             "allow": ["ROLE_USER"]
         },
         {
-            "route": "/private/{directory}/{file}",
+            "route": "/private/upload/{directory}/{file}",
             "methods": ["GET"],
             "allow": ["ROLE_USER"]
         }

@@ -10,16 +10,16 @@
 <ul>
     <?php foreach ($files as $file): ?>
         <li>
-            <a href="<?php echo ($private ? '/private/images/' : '/upload/images/') . $file['name']; ?>"><noscript><img
+            <a href="<?php echo ($private ? '/private' : '') . '/upload/images/' . $file['name']; ?>"><noscript><img
                 width="100px"
                 height="100px"
-                src="<?php echo ($private ? '/private/images/' : '/upload/images/') . $file['name']; ?>"
+                src="<?php echo ($private ? '/private' : '') . '/upload/images/' . $file['name']; ?>"
                 alt="<?php echo $file['name']; ?>"
             /></noscript><img
                 width="100px"
                 height="100px"
-                <?php /* move it to data-src */ ?>
-                src="<?php echo ($private ? '/private/images/' : '/upload/images/') . $file['name']; ?>"
+                <?php /* @TODO move it to data-src for lazy loading */ ?>
+                src="<?php echo ($private ? '/private' : '') . '/upload/images/' . $file['name']; ?>"
                 alt="<?php echo $file['name']; ?>"
                 data-src=""
             /></a>

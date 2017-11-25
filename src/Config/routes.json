@@ -114,7 +114,7 @@
         "action": "delete"
     },
     {
-        "path": "/private/{directory}/{file}",
+        "path": "/private/upload/{directory}/{file}",
         "methods": ["GET"],
         "requirements": {"directory": "(images|files)", "file": "[a-z0-9]{1,}\\.[a-z]{3,4}"},
         "controller": "privateContentController",

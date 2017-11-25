@@ -3,7 +3,8 @@
         "class": "TinyApp\\Model\\Middleware\\OutputMiddleware",
         "inject": [
             "@securityMiddleware",
-            "%assetsVersion%"
+            "%assetsVersion%",
+            "@filesService"
         ]
     },
     "securityMiddleware": {
