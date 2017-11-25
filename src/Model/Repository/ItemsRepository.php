@@ -1,78 +1,55 @@
 <?php
 namespace TinyApp\Model\Repository;
 
-use TinyApp\Model\Repository\DatabaseConnection;
-
-class ItemsRepository
+class ItemsRepository extends RepositoryAbstract
 {
-    private $write;
-
-    public function __construct(DatabaseConnection $write)
-    {
-        $this->write = $write;
-    }
-
     public function getItems(int $page, int $perPage) : array
     {
-        $items = $this->write->fetch(
-            'SELECT * FROM `items` LIMIT ' . --$page * $perPage . ', ' . $perPage
+        $items = $this->getRead()->fetch(
+            'SELECT * FROM `items` LIMIT ' . ($page - 1) * $perPage . ', ' . $perPage
         );
+        $pages = $this->getPages('SELECT COUNT(*) as count FROM `items`', [], $perPage);
 
-        return $items ?? [];
-    }
-// @TODO create abstract repository which will contain perPage
-    public function getPages(int $perPage) : int
-    {
-        if ($perPage < 1) {
-            throw new \Exception('Need at least one per page');
-        }
-
-        $total = $this->write->fetch('SELECT COUNT(*) as count FROM `items`');
-        if (!empty($total[0]['count'])) {
-            $pages = $total[0]['count'] / $perPage;
-            return (int)$pages < $pages ? $pages + 1 : $pages;
-        }
-
-        return 0;
+        return ['items' => $items, 'page' => $page, 'pages' => $pages];
     }
 
     public function saveItems(array $items) : array
     {
-        $this->write->begin();
+        $this->getWrite()->begin();
         try {
-            $this->write->prepare(
+            $this->getWrite()->prepare(
                 'INSERT INTO `items`(`name`) VALUES (:name)'
             );
             $affectedIds = [];
             foreach ($items as $item) {
-                $affectedIds[] = $this->write->execute(null, ['name' => $item['name']]);
+                $affectedIds[] = $this->getWrite()->execute(null, ['name' => $item['name']]);
             }
         } catch(\Exception $e) {
-            $this->write->rollBack();
+            $this->getWrite()->rollBack();
             trigger_error(
                 'Rolling back after failed attempt to save items with message ' . $e->getMessage() . ' with payload ' . var_export($items, true)
             );
             throw $e;
         }
-        $this->write->commit();
+        $this->getWrite()->commit();
 
         return $affectedIds;
     }
 
     public function deleteItems(array $ids) : bool
     {
-        $this->write->prepare('DELETE FROM `items` WHERE `id` = :id');
+        $this->getWrite()->prepare('DELETE FROM `items` WHERE `id` = :id');
         foreach ($ids as $id) {
-            $this->write->execute(null, ['id' => $id]);
+            $this->getWrite()->execute(null, ['id' => $id]);
         }
-        $this->write->clean();
+        $this->getWrite()->clean();
 
         return true;
     }
 
     public function getItem(int $id) : array
     {
-        $items = $this->write->fetch(
+        $items = $this->getRead()->fetch(
             'SELECT * FROM `items` WHERE `id` = :id',
             ['id' => $id]
         );
@@ -82,7 +59,7 @@ class ItemsRepository
 
     public function saveItem(array $item) : int
     {
-        $affectedId = $this->write->execute(
+        $affectedId = $this->getWrite()->execute(
             'INSERT INTO `items` (`name`) VALUES (:name)', ['name' => $item['name']]
         );
 
@@ -91,7 +68,7 @@ class ItemsRepository
 
     public function updateItem(array $item) : int
     {
-        $affectedId = $this->write->execute(
+        $affectedId = $this->getWrite()->execute(
             'UPDATE `items` SET `name` = :name WHERE `id` = :id AND `id` = last_insert_id(`id`)', ['name' => $item['name'], 'id' => $item['id']]
         );
 
@@ -100,7 +77,7 @@ class ItemsRepository
 
     public function deleteItem(int $id) : bool
     {
-        $this->write->execute(
+        $this->getWrite()->execute(
             'DELETE FROM `items` WHERE `id` = :id', ['id' => $id]
         );
 
