@@ -68,6 +68,7 @@ class Response
         //@TODO add accepting only local js, css for all browsers check if it works
         // X-Content-Security-Policy: default 'none'; script-src 'self' http://code.jquery.com; style-src 'self'
         // X-Wbkit-CSP: default 'none'; script-src 'self' http://code.jquery.com; style-src 'self'
+        // maybe add this to meta tag or in htaccess set these headers
         return $headers;
     }
 

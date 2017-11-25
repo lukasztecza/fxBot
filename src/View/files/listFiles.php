@@ -10,7 +10,7 @@
 <ul>
     <?php foreach ($files as $file): ?>
         <li>
-            <a href="<?php echo ($private ? '/private/images/' : '/upload/images/') . $file['name']; ?>"><?php echo $file['name']; ?></a>
+            <a href="<?php echo ($private ? '/private' : '') . '/upload/files/' . $file['name']; ?>"><?php echo $file['name']; ?></a>
             <input type="checkbox" name="ids[]" value="<?php echo $file['id']; ?>" />
         </li>
     <?php endforeach; ?>

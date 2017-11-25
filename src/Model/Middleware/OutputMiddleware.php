@@ -5,20 +5,25 @@ use TinyApp\Model\System\Request;
 use TinyApp\Model\System\Response;
 use TinyApp\Model\Middleware\ApplicationMiddlewareAbstract;
 use TinyApp\Model\Middleware\ApplicationMiddlewareInterface;
+use TinyApp\Model\Service\FilesService;
 
 class OutputMiddleware extends ApplicationMiddlewareAbstract
 {
-    const CONTENT_TYPE_HTML = 'text/html';
-    const CONTENT_TYPE_JSON = 'application/json';
+    private const CONTENT_TYPE_HTML = 'text/html';
+    private const CONTENT_TYPE_JSON = 'application/json';
+    private const CONTENT_TYPE_STREAM = 'application/octet-stream';
+    //@TODO do the rest
 
-    const TEMPLATES_PATH = APP_ROOT_DIR . '/src/View';
+    private const TEMPLATES_PATH = APP_ROOT_DIR . '/src/View';
 
     private $assetsVersion;
+    private $filesService;
 
-    public function __construct(ApplicationMiddlewareInterface $next, string $assetsVersion)
+    public function __construct(ApplicationMiddlewareInterface $next, string $assetsVersion, FilesService $filesService)
     {
         parent::__construct($next);
         $this->assetsVersion = $assetsVersion;
+        $this->filesService = $filesService;
     }
 
     public function process(Request $request) : Response
@@ -31,22 +36,24 @@ class OutputMiddleware extends ApplicationMiddlewareAbstract
         $headers = $response->getHeaders();
         $location = $headers['Location'] ?? null;
         $contentType = $headers['Content-Type'] ?? null;
-        $this->setCookies($response->getCookies());
-        $this->setHeaders($headers);
 
         switch (true) {
-            case $location || $contentType === null:
+            case $location:
+                $this->setHeaders($headers);
                 break;
             case $contentType === self::CONTENT_TYPE_HTML:
-                $variables = $response->getVariables();
-                $this->buildHtmlResponse($response->getFile(), $variables);
+                $this->buildHtmlResponse($response->getFile(), $response->getVariables(), $headers, $response->getCookies());
                 break;
             case $contentType === self::CONTENT_TYPE_JSON:
-                $variables = $response->getVariables();
-                $this->buildJsonResponse($variables);
+                $this->buildJsonResponse($response->getVariables(), $headers);
                 break;
-            //@TODO add download file content type
+            case $this->filesService->isImageContentType($contentType):
+                $this->buildImageResponse($response->getFile(), $response->getVariables(), $headers);
+                break;
+            case $contentType === self::CONTENT_TYPE_STREAM:
+                $this->buildDownloadResponse($response->getFile(), $response->getVariables(), $headers);
             default:
+                //@TODO default download
                 throw new \Exception('Not supported Content-Type ' . $contentType);
         }
 
@@ -79,19 +86,54 @@ class OutputMiddleware extends ApplicationMiddlewareAbstract
         }
     }
 
-    private function buildJsonResponse(array $variables) : void
+    private function buildJsonResponse(array $variables, array $headers) : void
     {
+        $this->setHeaders($headers);
         echo json_encode($variables);
     }
 
-    private function buildHtmlResponse(string $template, array $variables) : void
+    private function buildHtmlResponse(string $template, array $variables, array $headers, array $cookies) : void
     {
         if (empty($template) || !file_exists(self::TEMPLATES_PATH . '/' . $template)) {
             throw new \Exception('Template does not exist ' . var_export($template, true));
         }
+
+        $this->setHeaders($headers);
+        $this->setCookies($cookies);
         extract($variables);
         unset($variables);
+        unset($headers);
+        unset($cookies);
         $assetsVersioning = '?v=' . $this->assetsVersion;
         include(self::TEMPLATES_PATH . '/' . $template);
+    }
+
+    private function buildImageResponse(string $file, array $variables, array $headers) : void
+    {
+        $path = isset($variables['type']) ? $this->filesService->getUploadPathByType($variables['type']) : null;
+        if (empty($path) || !file_exists($path . '/' . $file)) {
+            throw new \Exception(
+                'Image does not exists or can not be accessed ' . var_export($path . '/' . $file, true) .
+                ' for provided variables ' . var_export($variables, true)
+            );
+        }
+
+        $this->setHeaders($headers);
+        readfile($path . '/' . $file);
+    }
+
+    private function buildDownloadResponse(string $file, array $variables, array $headers) : void
+    {
+        $path = isset($variables['type']) ? $this->filesService->getUploadPathByType($variables['type']) : null;
+        if (empty($path) || !file_exists($path . '/' . $file)) {
+            throw new \Exception(
+                'File does not exists or can not be accessed ' . var_export($path . '/' . $file, true) .
+                ' for provided variables ' . var_export($variables, true)
+            );
+        }
+        var_dump($headers);exit;
+//@TODO add download headers here
+        $this->setHeaders($headers);
+        readfile($path . '/' . $file);
     }
 }
