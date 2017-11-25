@@ -1,3 +1,7 @@
 .error {
-    color: pink;
+    color: coral;
+}
+
+.success {
+    color: green;
 }

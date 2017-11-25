@@ -9,7 +9,7 @@ class FilesUploadValidator extends ValidatorAbstract
     public function validate(Request $request) : bool
     {
         $files = $request->getFiles();
-        if (empty($files['files']['name'])) {
+        if (empty($files['someFile']['name'])) {
             $this->error = 'Needs at least one file';
 
             return false;

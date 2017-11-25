@@ -5,7 +5,7 @@ use TinyApp\Model\Repository\FilesRepository;
 
 class FilesService
 {
-    private const PER_PAGE = 1;
+    private const PER_PAGE = 5;
 
     private $filesRepository;
 
@@ -30,6 +30,7 @@ class FilesService
     public function getTypes() : array
     {
         return [
+        //@TODO all these constants should be private
             FilesRepository::IMAGE_PUBLIC => 'Public images',
             FilesRepository::FILE_PUBLIC => 'Public files',
             FilesRepository::IMAGE_PRIVATE => 'Private images',
@@ -47,14 +48,39 @@ class FilesService
         return in_array($type, [FilesRepository::IMAGE_PRIVATE, FilesRepository::FILE_PRIVATE]);
     }
 
+    public function getUploadPathByType(int $type) : string
+    {
+        try {
+            return $this->filesRepository->getUploadPathByType($type);
+        } catch (\Exception $e) {
+            trigger_error('Failed to get upload path by type ' . var_export($type, true) . ' with message ' . $e->getMessage(), E_USER_NOTICE);
+
+            return '';
+        }
+    }
+
+    public function getContentTypeByExtension(string $extension) : string
+    {
+        try {
+            return $this->filesRepository->getSupportedMimeByExtension($extension);
+        } catch (\Exception $e) {
+            trigger_error(
+                'Failed to get content type by extension ' . var_export($extension, true) . ' with message ' . $e->getMessage(), E_USER_NOTICE
+            );
+
+            return '';
+        }
+    }
+
+    public function isImageContentType(string $contentType) : bool
+    {
+        return $this->filesRepository->isImageMime($contentType);
+    }
+
     public function getByType(int $type, int $page) : array
     {
         try {
-            return [
-                'files' => $this->filesRepository->getByType($type, $page, self::PER_PAGE),
-                'page' => $page,
-                'pages' => $this->filesRepository->getPages(self::PER_PAGE)
-            ];
+            return $this->filesRepository->getByType($type, $page, self::PER_PAGE);
         } catch(\Exception $e) {
             trigger_error(
                 'Failed to get files for type ' . var_export($type, true) .
@@ -62,7 +88,7 @@ class FilesService
                 E_USER_NOTICE
             );
 
-            return [];
+            return ['files' => [], 'page' => null, 'pages' => 0];
         }
     }
 

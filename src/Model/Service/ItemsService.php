@@ -16,11 +16,7 @@ class ItemsService
     public function getItems(int $page) : array
     {
         try {
-            return [
-                'items' => $this->itemsRepository->getItems($page, self::PER_PAGE),
-                'page' => $page,
-                'pages' => $this->itemsRepository->getPages(self::PER_PAGE)
-            ];
+            return $this->itemsRepository->getItems($page, self::PER_PAGE);
         } catch(\Exception $e) {
             trigger_error('Failed to get items with message ' . $e->getMessage(), E_USER_NOTICE);
 
