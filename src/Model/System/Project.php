@@ -32,9 +32,10 @@ class Project
         $dependencies = json_decode($dependencies, true);
         $dependencies = $this->replacePlaceholders($dependencies, $parameters, $request);
 
-        // Check classes to create
+        // Check classes to create and sort by dependency requirements
         $toCreate = [];
         $this->analyseInjections(0, $dependencies, $toCreate, $parameters[self::APPLICATION_STARTING_POINT_KEY]);
+        $toCreate = array_values($toCreate);
 
         // Build dependencies tree and process request
         $this->inject($dependencies, $toCreate);
@@ -102,6 +103,10 @@ class Project
             throw new \Exception('Unrecognized dependency ' . $name);
         }
 
+        $existing = array_search($name, $toCreate);
+        if ($existing) {
+            unset($toCreate[$existing]);
+        }
         $toCreate[] = $name;
 
         if (isset($dependencies[$name]['inject'])) {
@@ -118,15 +123,15 @@ class Project
     {
         $index = count($toCreate);
         while ($index--) {
-            if (isset($dependencies[$toCreate[$index]]['inject'])) {
-                foreach ($dependencies[$toCreate[$index]]['inject'] as &$injection) {
-                    if (is_string($injection) && strpos($injection, '@') === 0) {
-                        $injection = $dependencies[trim($injection, '@')]['object'];
+            if (empty($dependencies[$toCreate[$index]]['object'])) {
+                if (isset($dependencies[$toCreate[$index]]['inject'])) {
+                    foreach ($dependencies[$toCreate[$index]]['inject'] as &$injection) {
+                        if (is_string($injection) && strpos($injection, '@') === 0) {
+                            $injection = $dependencies[trim($injection, '@')]['object'];
+                        }
                     }
                 }
-            }
 
-            if (empty($dependencies[$toCreate[$index]]['object'])) {
                 if (isset($dependencies[$toCreate[$index]]['inject'])) {
                     $dependencies[$toCreate[$index]]['object'] = new $dependencies[$toCreate[$index]]['class'](
                         ...$dependencies[$toCreate[$index]]['inject']
