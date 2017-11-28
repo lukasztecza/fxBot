@@ -12,7 +12,6 @@ class OutputMiddleware extends ApplicationMiddlewareAbstract
     private const CONTENT_TYPE_HTML = 'text/html';
     private const CONTENT_TYPE_JSON = 'application/json';
     private const CONTENT_TYPE_STREAM = 'application/octet-stream';
-    //@TODO do the rest
 
     private const TEMPLATES_PATH = APP_ROOT_DIR . '/src/View';
 
@@ -53,7 +52,6 @@ class OutputMiddleware extends ApplicationMiddlewareAbstract
             case $contentType === self::CONTENT_TYPE_STREAM:
                 $this->buildDownloadResponse($response->getFile(), $response->getVariables(), $headers);
             default:
-                //@TODO default download
                 throw new \Exception('Not supported Content-Type ' . $contentType);
         }
 
@@ -131,9 +129,16 @@ class OutputMiddleware extends ApplicationMiddlewareAbstract
                 ' for provided variables ' . var_export($variables, true)
             );
         }
-        var_dump($headers);exit;
-//@TODO add download headers here
+        $file = $path . '/' . $file;
+
+        $headers['Content-Description'] = 'File Transfer';
+        $headers['Content-Disposition'] = 'attachment; filename="' . basename($file)  . '"';
+        $headers['Expires'] = '0';
+        $headers['Cache-Control'] = 'must-revalidate';
+        $headers['Pragma'] = 'public';
+        $headers['Content-Length'] = filesize($file);
+
         $this->setHeaders($headers);
-        readfile($path . '/' . $file);
+        readfile($file);
     }
 }
