@@ -104,7 +104,7 @@ class Project
         }
 
         $existing = array_search($name, $toCreate);
-        if ($existing) {
+        if ($existing !== false) {
             unset($toCreate[$existing]);
         }
         $toCreate[] = $name;
