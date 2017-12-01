@@ -10,7 +10,7 @@ use TinyApp\Model\Middleware\ApplicationMiddlewareInterface;
 
 class SecurityMiddleware extends ApplicationMiddlewareAbstract
 {
-    const LOGIN_ROUTE = '/login';
+    private const LOGIN_ROUTE = '/login';
 
     private $securityList;
     private $sessionService;

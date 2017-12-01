@@ -2,3 +2,5 @@ vendor
 tmp
 .vagrant
 index.html
+private
+public/upload

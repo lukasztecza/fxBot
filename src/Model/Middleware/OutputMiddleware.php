@@ -15,12 +15,18 @@ class OutputMiddleware extends ApplicationMiddlewareAbstract
 
     private const TEMPLATES_PATH = APP_ROOT_DIR . '/src/View';
 
+    private $defaultContentType;
     private $assetsVersion;
     private $filesService;
 
-    public function __construct(ApplicationMiddlewareInterface $next, string $assetsVersion, FilesService $filesService)
-    {
+    public function __construct(
+        ApplicationMiddlewareInterface $next,
+        string $defaultContentType,
+        string $assetsVersion,
+        FilesService $filesService
+    ) {
         parent::__construct($next);
+        $this->defaultContentType = $defaultContentType;
         $this->assetsVersion = $assetsVersion;
         $this->filesService = $filesService;
     }
@@ -33,6 +39,7 @@ class OutputMiddleware extends ApplicationMiddlewareAbstract
         }
 
         $headers = $response->getHeaders();
+        $headers['Content-Type'] = $headers['Content-Type'] ?? $this->defaultContentType;
         $location = $headers['Location'] ?? null;
         $contentType = $headers['Content-Type'] ?? null;
 
@@ -95,6 +102,13 @@ class OutputMiddleware extends ApplicationMiddlewareAbstract
         if (empty($template) || !file_exists(self::TEMPLATES_PATH . '/' . $template)) {
             throw new \Exception('Template does not exist ' . var_export($template, true));
         }
+
+        $headers['X-Content-Security-Policy'] = $headers['X-Webkit-CSP'] = "default 'none'; script-src 'self'; style-src 'self'";
+
+        //@TODO add accepting only local js, css for all browsers check if it works
+        // X-Content-Security-Policy: default 'none'; script-src 'self' http://code.jquery.com; style-src 'self'
+        // X-Wbkit-CSP: default 'none'; script-src 'self' http://code.jquery.com; style-src 'self'
+        // maybe add this to meta tag or in htaccess set these headers
 
         $this->setHeaders($headers);
         $this->setCookies($cookies);
