@@ -116,4 +116,6 @@ EOL
 # Restart apache
 service apache2 restart
 
+# @TODO create parameters.json here
+
 echo "[Info] Your project will be accessible via url: http://$HOST:$PORT"
