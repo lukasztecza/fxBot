@@ -1,11 +1,12 @@
 {
     "environment": "",
 
-    "database_engine": "",
-    "database_host": "",
-    "database_name": "",
-    "database_user": "",
-    "database_password": "",
-    "in_memory_username": "",
-    "in_memory_password_hash": ""
+    "databaseEngine": "",
+    "databaseHost": "",
+    "databaseName": "",
+    "databaseUser": "",
+    "databasePassword": "",
+
+    "inMemoryUsername": "",
+    "inMemoryPasswordHash": ""
 }

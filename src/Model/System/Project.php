@@ -3,46 +3,134 @@ namespace TinyApp\Model\System;
 
 use TinyApp\Model\System\ErrorHandler;
 use TinyApp\Model\System\Router;
+use TinyApp\Model\System\Request;
+use TinyApp\Model\System\Response;
 use TinyApp\Model\Middleware\ApplicationMiddlewareInterface;
+use TinyApp\Model\Command\CommandInterface;
 
 class Project
 {
+    private const PARAMETER_ENVIRONMENT = 'environment';
+    private const PARAMETER_DEFAULT_CONTENT_TYPE = 'defaultContentType';
+    private const PARAMETER_APPLICATION_STARTING_POINT = 'applicationStartingPoint';
+    private const PARAMETER_ASSETS_VERSION = 'assetsVersion';
+
     private const ROUTED_CONTROLLER_PLACEHOLDER = '%routedController%';
     private const ROUTED_ACTION_PLACEHOLDER = '%routedAction%';
-
-    private const APPLICATION_STARTING_POINT_KEY = 'applicationStartingPoint';
 
     private const CONFIG_PATH = APP_ROOT_DIR . '/src/Config/';
 
     public function run() : void
     {
         // Get project parameters and create error handler
-        $parameters = json_decode(file_get_contents(self::CONFIG_PATH . 'parameters.json'), true);
-        new ErrorHandler($parameters['environment']);
+        $parameters = $this->getParameters();
+        $this->appendSettings($parameters);
+        $this->checkRequiredParameters($parameters);
+        new ErrorHandler($parameters[self::PARAMETER_ENVIRONMENT], $parameters[self::PARAMETER_DEFAULT_CONTENT_TYPE]);
 
         // Get routes and build request object
-        $routes = json_decode(file_get_contents(self::CONFIG_PATH . 'routes.json'), true);
-        $request = (new Router($routes))->buildRequest();
+        $request = $this->getRequest();
 
         // Check and replace dependencies placeholders from settings and parameters
-        $settings = json_decode(file_get_contents(self::CONFIG_PATH . 'settings.json'), true);
-        $parameters += $settings;
-        $dependencies = file_get_contents(self::CONFIG_PATH . 'dependencies.json');
-        $this->checkRequiredPlaceholders($dependencies, $parameters);
-        $dependencies = json_decode($dependencies, true);
-        $dependencies = $this->replacePlaceholders($dependencies, $parameters, $request);
+        $dependencies = $this->getDependencies($parameters, $request);
 
         // Check classes to create and sort by dependency requirements
         $toCreate = [];
-        $this->analyseInjections(0, $dependencies, $toCreate, $parameters[self::APPLICATION_STARTING_POINT_KEY]);
+        $this->analyseInjections(0, $dependencies, $toCreate, $parameters[self::PARAMETER_APPLICATION_STARTING_POINT]);
         $toCreate = array_values($toCreate);
 
         // Build dependencies tree and process request
         $this->inject($dependencies, $toCreate);
-        if (!($dependencies[$parameters[self::APPLICATION_STARTING_POINT_KEY]]['object'] instanceof ApplicationMiddlewareInterface)) {
+        if (!($dependencies[$parameters[self::PARAMETER_APPLICATION_STARTING_POINT]]['object'] instanceof ApplicationMiddlewareInterface)) {
             throw new \Exception('Application middleware has to implement ' . ApplicationMiddlewareInterface::class);
         }
-        $response = $dependencies[$parameters[self::APPLICATION_STARTING_POINT_KEY]]['object']->process($request);
+        $dependencies[$parameters[self::PARAMETER_APPLICATION_STARTING_POINT]]['object']->process($request);
+    }
+
+    public function runCommand(string $objectName) : string
+    {
+        // Get project parameters and create error handler
+        $parameters = $this->getParameters();
+        $this->appendSettings($parameters);
+        $this->checkRequiredParameters($parameters);
+        new ErrorHandler($parameters[self::PARAMETER_ENVIRONMENT]);
+
+        // Check and replace dependencies placeholders from settings and parameters
+        $dependencies = $this->getDependencies($parameters);
+        if (!isset($dependencies[$objectName]) || !class_exists($dependencies[$objectName]['class'])) {
+            throw new \Exception(
+                'Class for object name ' . var_export($objectName, 1) . ' does not exist,' .
+                ' check dependecies.json and parameters passed with command'
+            );
+        }
+
+        // Check classes to create and sort by dependency requirements
+        $toCreate = [];
+        $this->analyseInjections(0, $dependencies, $toCreate, $objectName);
+        $toCreate = array_values($toCreate);
+
+        // Build dependencies tree and process request
+        $this->inject($dependencies, $toCreate);
+        if (!($dependencies[$objectName]['object'] instanceof CommandInterface)) {
+            throw new \Exception('Command has to implement ' . CommandInterface::class);
+        }
+        $commandResult = $dependencies[$objectName]['object']->execute();
+        return ($commandResult->getStatus() ? 'Command succedded' : 'Command failed') .
+            ' with message ' . $commandResult->getMessage() . PHP_EOL
+        ;
+    }
+
+    private function getParameters() : array
+    {
+        return json_decode(file_get_contents(self::CONFIG_PATH . 'parameters.json'), true);
+    }
+
+    private function appendSettings(array &$parameters) : void
+    {
+        $settings = json_decode(file_get_contents(self::CONFIG_PATH . 'settings.json'), true);
+        $parameters += $settings;
+    }
+
+    private function checkRequiredParameters(array $parameters) : void
+    {
+        if (
+            !array_key_exists(self::PARAMETER_ENVIRONMENT, $parameters) ||
+            !array_key_exists(self::PARAMETER_DEFAULT_CONTENT_TYPE, $parameters) ||
+            !array_key_exists(self::PARAMETER_APPLICATION_STARTING_POINT, $parameters) ||
+            !array_key_exists(self::PARAMETER_ASSETS_VERSION, $parameters)
+        ) {
+            throw new \Exception(
+                'Could not find ' .
+                self::PARAMETER_ENVIRONMENT . ' placeholder or ' .
+                self::PARAMETER_DEFAULT_CONTENT_TYPE . ' placeholder or ' .
+                self::PARAMETER_APPLICATION_STARTING_POINT . ' placeholder or ' .
+                self::PARAMETER_ASSETS_VERSION . ' placeholder in parameters.json or settings.json,' .
+                ' make sure you set these values'
+            );
+        }
+    }
+
+    private function setErrorHandler(array $parameters) : void
+    {
+    }
+
+    private function getRequest() : Request
+    {
+        $routes = json_decode(file_get_contents(self::CONFIG_PATH . 'routes.json'), true);
+        return (new Router($routes))->buildRequest();
+    }
+
+    private function getDependencies(array $parameters, Request $request = null) : array
+    {
+        $dependencies = file_get_contents(self::CONFIG_PATH . 'dependencies.json');
+        $this->checkRequiredPlaceholders($dependencies, $parameters);
+
+        $dependencies = json_decode($dependencies, true);
+        if ($request) {
+            return $this->replacePlaceholders($dependencies, $parameters, $request);
+        }
+
+        return $this->replacePlaceholders($dependencies, $parameters);
     }
 
     private function checkRequiredPlaceholders(string $dependencies, array $parameters) : void
@@ -55,26 +143,28 @@ class Project
                 'Could not find ' .
                 self::ROUTED_CONTROLLER_PLACEHOLDER . ' placeholder or ' .
                 self::ROUTED_ACTION_PLACEHOLDER . ' placeholder in dependencies.json' .
-                'make sure you set these values as dependencies of object responsible for handling them'
+                ' make sure you set these values as dependencies of object responsible for handling them'
             );
         }
 
         if(
-            !isset($parameters[self::APPLICATION_STARTING_POINT_KEY]) ||
-            !strpos($dependencies, $parameters[self::APPLICATION_STARTING_POINT_KEY])
+            !strpos($dependencies, $parameters[self::PARAMETER_APPLICATION_STARTING_POINT])
         ) {
             throw new \Exception(
                 'Could not find ' .
-                self::APPLICATION_STARTING_POINT_KEY . ' key in settings.json or value in dependencies.json, ' .
-                'make sure you specify it as one of the dependency object'
+                self::PARAMETER_APPLICATION_STARTING_POINT . ' value in dependencies.json,' .
+                ' make sure you specify it as one of the dependencies'
             );
         }
     }
 
-    private function replacePlaceholders(array $dependencies, array $parameters, Request $request) : array
+    private function replacePlaceholders(array $dependencies, array $parameters, Request $request = null) : array
     {
-        $replacements[self::ROUTED_CONTROLLER_PLACEHOLDER] = '@' . $request->getController() . '@';
-        $replacements[self::ROUTED_ACTION_PLACEHOLDER] = $request->getAction();
+        if ($request) {
+            $replacements[self::ROUTED_CONTROLLER_PLACEHOLDER] = '@' . $request->getController() . '@';
+            $replacements[self::ROUTED_ACTION_PLACEHOLDER] = $request->getAction();
+        }
+
         foreach ($parameters as $placeholder => $value) {
             $replacements['%' . $placeholder . '%'] = $value;
         }
