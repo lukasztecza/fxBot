@@ -75,7 +75,7 @@ class Project
             throw new \Exception('Command has to implement ' . CommandInterface::class);
         }
         $commandResult = $dependencies[$objectName]['object']->execute();
-        return ($commandResult->getStatus() ? 'Command succedded' : 'Command failed') .
+        return ($commandResult->getStatus() ? 'Command succeded' : 'Command failed') .
             ' with message ' . $commandResult->getMessage() . PHP_EOL
         ;
     }
@@ -108,10 +108,6 @@ class Project
                 ' make sure you set these values'
             );
         }
-    }
-
-    private function setErrorHandler(array $parameters) : void
-    {
     }
 
     private function getRequest() : Request
