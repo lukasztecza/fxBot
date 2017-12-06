@@ -3,10 +3,10 @@ namespace TinyApp\Model\Repository;
 
 class FilesRepository extends RepositoryAbstract
 {
-    public const IMAGE_PUBLIC = 1;
-    public const FILE_PUBLIC = 2;
-    public const IMAGE_PRIVATE = 3;
-    public const FILE_PRIVATE = 4;
+    private const IMAGE_PUBLIC = 1;
+    private const FILE_PUBLIC = 2;
+    private const IMAGE_PRIVATE = 3;
+    private const FILE_PRIVATE = 4;
 
     private const IMAGES = '/images';
     private const FILES = '/files';
@@ -73,6 +73,26 @@ class FilesRepository extends RepositoryAbstract
             default:
                 throw new \Exception('Unsupported file extension ' . var_export($extension, true));
         }
+    }
+
+    public function getTypes() : array
+    {
+        return [
+            self::IMAGE_PUBLIC => 'Public images',
+            self::FILE_PUBLIC => 'Public files',
+            self::IMAGE_PRIVATE => 'Private images',
+            self::FILE_PRIVATE => 'Private files'
+        ];
+    }
+
+    public function isTypeImage(int $type) : bool
+    {
+        return in_array($type, [self::IMAGE_PUBLIC, self::IMAGE_PRIVATE]);
+    }
+
+    public function isTypePrivate(int $type) : bool
+    {
+        return in_array($type, [self::IMAGE_PRIVATE, self::FILE_PRIVATE]);
     }
 
     public function isImageMime(string $mime) : bool

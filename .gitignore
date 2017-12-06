@@ -2,3 +2,6 @@ vendor
 tmp
 .vagrant
 index.html
+private
+public/upload
+src/Config/parameters.json

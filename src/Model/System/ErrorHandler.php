@@ -3,17 +3,22 @@ namespace TinyApp\Model\System;
 
 class ErrorHandler
 {
-    const DEFAULT_CONTENT_TYPE = 'application/json';
+    private const CONTENT_TYPE_JSON = 'application/json';
+    private const CONTENT_TYPE_HTML = 'text/html';
 
-    const CONTENT_TYPE_JSON = 'application_/json';
-    const CONTENT_TYPE_HTML = 'text/html';
+    private const LOGS_PATH = APP_ROOT_DIR . '/tmp/logs';
 
-    const LOGS_PATH = APP_ROOT_DIR . '/tmp/logs';
+    private const PRODUCTION_ENVIRONMENT = 'prod';
 
-    public function __construct(string $environment)
+    private $defaultContentType;
+
+    public function __construct(string $environment, string $defaultContentType = null)
     {
+        // Set default content type
+        $this->defaultContentType = $defaultContentType;
+
         // Set custom error/exception/shutdown handling for production environment
-        if ('prod' === $environment) {
+        if (self::PRODUCTION_ENVIRONMENT === $environment) {
             // Address all errors/warnings/notices except E_USER_NOTICE which will be logged only
             error_reporting(E_ALL & ~E_USER_NOTICE);
             set_error_handler([$this, 'handleError']);
@@ -21,7 +26,7 @@ class ErrorHandler
             register_shutdown_function([$this, 'handleShutDown']);
             return;
         }
-
+//@TODO add apache logs
         // Other environments should report everything
         error_reporting(E_ALL);
     }
@@ -78,24 +83,25 @@ class ErrorHandler
         $this->displayErorPage($exception->getCode());
     }
 
-    private function displayErorPage(int $type = null) : void
+    private function displayErorPage(int $code = null) : void
     {
         // Display error page according to default content type
-        switch (self::DEFAULT_CONTENT_TYPE) {
+        switch ($this->defaultContentType) {
             case self::CONTENT_TYPE_JSON:
                 header('Content-Type: application/json');
-                echo json_encode(['status' => 'error', 'code' => $type]);
+                echo json_encode(['status' => 'error', 'code' => $code]);
                 break;
             case self::CONTENT_TYPE_HTML:
-            default:
                 echo
                     '<!Doctype html>' .
                     '<html>' .
                     '<head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"></head>' .
-                    '<body><p>Status: error</p><p>Code: ' . $type . '</p><p><a href="/">Go to home page</a></p></body>' .
+                    '<body><p>Status: error</p><p>Code: ' . $code . '</p><p><a href="/">Go to home page</a></p></body>' .
                     '</html>'
                 ;
                 break;
+            default:
+                echo 'Could not finish because of error code ' . $code . ', see logs for details' . PHP_EOL;
         }
         exit;
     }

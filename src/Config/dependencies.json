@@ -3,6 +3,7 @@
         "class": "TinyApp\\Model\\Middleware\\OutputMiddleware",
         "inject": [
             "@securityMiddleware",
+            "%defaultContentType%",
             "%assetsVersion%",
             "@filesService"
         ]
@@ -112,6 +113,13 @@
         "class": "TinyApp\\Model\\Repository\\FilesRepository",
         "inject": [
             "@writeConnection"
+        ]
+    },
+    "itemsCommand": {
+        "class": "TinyApp\\Model\\Command\\ItemsCommand",
+        "inject": [
+            "@itemsRepository",
+            "%itemsFixtures%"
         ]
     }
 }

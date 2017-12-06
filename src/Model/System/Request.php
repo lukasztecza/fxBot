@@ -3,10 +3,10 @@ namespace TinyApp\Model\System;
 
 class Request
 {
-    const DEFAULT_INPUT_TYPE = 'query';
+    private const DEFAULT_INPUT_TYPE = 'query';
 
-    const INPUT_TYPE_QUERY = 'query';
-    const INPUT_TYPE_JSON = 'json';
+    private const INPUT_TYPE_QUERY = 'query';
+    private const INPUT_TYPE_JSON = 'json';
 
     private $host;
     private $path;
