@@ -9,7 +9,7 @@ class ResponseCacheMiddleware extends ApplicationMiddlewareAbstract
 {
     private $cacheList;
 
-    const CACHE_PATH = APP_ROOT_DIR . '/tmp/cache';
+    private const CACHE_PATH = APP_ROOT_DIR . '/tmp/cache';
 
     public function __construct(ApplicationMiddlewareInterface $next, array $cacheList)
     {

@@ -29,23 +29,22 @@ class FilesService
 
     public function getTypes() : array
     {
-        return [
-        //@TODO all these constants should be private
-            FilesRepository::IMAGE_PUBLIC => 'Public images',
-            FilesRepository::FILE_PUBLIC => 'Public files',
-            FilesRepository::IMAGE_PRIVATE => 'Private images',
-            FilesRepository::FILE_PRIVATE => 'Private files'
-        ];
+        return $this->filesRepository->getTypes();
     }
 
     public function isTypeImage(int $type) : bool
     {
-        return in_array($type, [FilesRepository::IMAGE_PUBLIC, FilesRepository::IMAGE_PRIVATE]);
+        return $this->filesRepository->isTypeImage($type);
     }
 
     public function isTypePrivate(int $type) : bool
     {
-        return in_array($type, [FilesRepository::IMAGE_PRIVATE, FilesRepository::FILE_PRIVATE]);
+        return $this->filesRepository->isTypePrivate($type);
+    }
+
+    public function isImageContentType(string $contentType) : bool
+    {
+        return $this->filesRepository->isImageMime($contentType);
     }
 
     public function getUploadPathByType(int $type) : string
@@ -70,11 +69,6 @@ class FilesService
 
             return '';
         }
-    }
-
-    public function isImageContentType(string $contentType) : bool
-    {
-        return $this->filesRepository->isImageMime($contentType);
     }
 
     public function getByType(int $type, int $page) : array

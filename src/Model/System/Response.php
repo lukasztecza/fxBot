@@ -3,15 +3,13 @@ namespace TinyApp\Model\System;
 
 class Response
 {
-    const DEFAULT_CONTENT_TYPE = 'text/html';
+    private const DEFAULT_RULE = 'sanitize';
 
-    const DEFAULT_RULE = 'sanitize';
-
-    const SANITIZE = 'sanitize';
-    const HTML_ESCAPE = 'html';
-    const URL_ESCAPE = 'url';
-    const FILE_ESCAPE = 'file';
-    const NO_ESCAPE = 'raw';
+    private const SANITIZE = 'sanitize';
+    private const HTML_ESCAPE = 'html';
+    private const URL_ESCAPE = 'url';
+    private const FILE_ESCAPE = 'file';
+    private const NO_ESCAPE = 'raw';
 
     private const ALLOWED_HTML_TAGS = ['h3', 'p', 'i', 'b', 'table', 'tr', 'th', 'td', 'ul', 'ol', 'li'];
 
@@ -61,15 +59,7 @@ class Response
     public function getHeaders() : array
     {
         // Add content security policy headers to allow only trusted assets source
-        $headers = $this->headers;
-        $headers['Content-Type'] = $headers['Content-Type'] ?? self::DEFAULT_CONTENT_TYPE;
-        $headers['X-Content-Security-Policy'] = $headers['X-Webkit-CSP'] = "default 'none'; script-src 'self'; style-src 'self'";
-
-        //@TODO add accepting only local js, css for all browsers check if it works
-        // X-Content-Security-Policy: default 'none'; script-src 'self' http://code.jquery.com; style-src 'self'
-        // X-Wbkit-CSP: default 'none'; script-src 'self' http://code.jquery.com; style-src 'self'
-        // maybe add this to meta tag or in htaccess set these headers
-        return $headers;
+        return $this->headers;
     }
 
     public function getCookies() : array

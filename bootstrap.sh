@@ -63,6 +63,11 @@ sed -i "s/post_max_size = .*/post_max_size = 24M/" /etc/php/"$PHP_VERSION"/apach
 # Set php upload tmp directory
 sed -i "s/;upload_tmp_dir =/upload_tmp_dir = \/vagrant\/tmp\/upload/" /etc/php/"$PHP_VERSION"/apache2/php.ini
 
+# Create logs directory if not exists
+if ! [ -L /var/www/html/tmp/logs ]; then
+    mkdir /var/www/html/tmp/logs
+fi
+
 # Allow usage of .htaccess files inside /var/www/html
 if ! fgrep "/var/www/html" /etc/apache2/apache2.conf; then
     cat >> /etc/apache2/apache2.conf <<EOL
@@ -82,6 +87,8 @@ Listen $PORT
             RewriteEngine Off
         </IfModule>
     </Directory>
+    CustomLog /var/www/html/tmp/logs/access_log vhost_combined
+    ErrorLog /var/www/html/tmp/logs/error_log
 </VirtualHost>
 EOL
 fi
@@ -115,5 +122,7 @@ EOL
 
 # Restart apache
 service apache2 restart
+
+# @TODO create parameters.json here
 
 echo "[Info] Your project will be accessible via url: http://$HOST:$PORT"
