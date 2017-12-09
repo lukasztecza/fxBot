@@ -132,7 +132,7 @@ class FilesRepository extends RepositoryAbstract
                 );
             }
             $this->getWrite()->commit();
-        } catch (\Throwable $e) {
+        } catch(\Throwable $e) {
             trigger_error(
                 'Rolling back after failed attempt to upload files with message ' .
                 $e->getMessage() . ' with payload ' . var_export([$files, $public], true),

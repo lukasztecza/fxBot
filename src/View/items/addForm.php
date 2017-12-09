@@ -9,6 +9,5 @@
     <input type="hidden" name="csrfToken" value="<?php echo $csrfToken; ?>" /><br />
     <input type="submit" />
 </form>
-<script src="http://code.jquery.com"></script><!-- @TODO test if content restriction works -->
 <script src="/assets/js/core.js<?php echo $assetsVersioning; ?>"></script>
 <?php include(__DIR__ . '/../common/foot.php'); ?>

@@ -93,6 +93,8 @@ Listen $PORT
 EOL
 fi
 
+#@TODO create apache logs per day
+
 # Set up database (note no space after -p)
 mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<EOL
 CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE CHARACTER SET utf8 COLLATE utf8_general_ci;

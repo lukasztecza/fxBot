@@ -34,8 +34,6 @@ class Response
         $this->fileEscapeValue($filename);
         return $filename;
 
-        //@TODO change Exceptions to be HttpExceptions RuntimeExceptions etc
-
         //@TODO add TCPDF composer lib
 
         //@TODO add tinymce or some kind of editor handling and whitelist of html escape tags

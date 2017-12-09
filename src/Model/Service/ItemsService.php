@@ -17,7 +17,7 @@ class ItemsService
     {
         try {
             return $this->itemsRepository->getItems($page, self::PER_PAGE);
-        } catch(\Exception $e) {
+        } catch(\Throwable $e) {
             trigger_error('Failed to get items with message ' . $e->getMessage(), E_USER_NOTICE);
 
             return ['items' => [], 'page' => null, 'pages' => 0];
@@ -33,7 +33,7 @@ class ItemsService
             }
 
             return $this->itemsRepository->saveItems($items);
-        } catch (\Exception $e) {
+        } catch(\Throwable $e) {
             trigger_error('Failed to save items with message ' . $e->getMessage() . ' with paylaod ' . var_export($names, true), E_USER_NOTICE);
 
             return [];
@@ -44,7 +44,7 @@ class ItemsService
     {
         try {
             return $this->itemsRepository->deleteItems($ids);
-        } catch (\Exception $e) {
+        } catch(\Throwable $e) {
             trigger_error('Failed to delete items with message ' . $e->getMessage() . ' with ids ' . var_export($ids, true), E_USER_NOTICE);
 
             return false;
@@ -55,7 +55,7 @@ class ItemsService
     {
         try {
             return $this->itemsRepository->getItem($id);
-        } catch(\Exception $e) {
+        } catch(\Throwable $e) {
             trigger_error('Failed to get item with message ' . $e->getMessage() . ' with id ' . var_export($id, true), E_USER_NOTICE);
 
             return [];
@@ -66,7 +66,7 @@ class ItemsService
     {
         try {
             return $this->itemsRepository->saveItem($item);
-        } catch (\Exception $e) {
+        } catch(\Throwable $e) {
             trigger_error('Failed to save item with message ' . $e->getMessage() . ' with payload ' . var_export($item, true), E_USER_NOTICE);
 
             return 0;
@@ -77,7 +77,7 @@ class ItemsService
     {
         try {
             return $this->itemsRepository->updateItem($item);
-        } catch (\Exception $e) {
+        } catch(\Throwable $e) {
             trigger_error('Failed to update item with message ' . $e->getMessage() . ' with paylaod '  .  var_export($item, true), E_USER_NOTICE);
 
             return 0;
@@ -88,7 +88,7 @@ class ItemsService
     {
         try {
             return $this->itemsRepository->deleteItem($id);
-        } catch (\Exception $e) {
+        } catch(\Throwable $e) {
             trigger_error('Failed to delete item with message ' . $e->getMessage() . ' with id ' . var_export($id, true), E_USER_NOTICE);
 
             return false;
