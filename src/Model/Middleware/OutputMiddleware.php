@@ -103,19 +103,15 @@ class OutputMiddleware extends ApplicationMiddlewareAbstract
             throw new \Exception('Template does not exist ' . var_export($template, true));
         }
 
-        $headers['X-Content-Security-Policy'] = $headers['X-Webkit-CSP'] = "default 'none'; script-src 'self'; style-src 'self'";
-
-        //@TODO add accepting only local js, css for all browsers check if it works
-        // X-Content-Security-Policy: default 'none'; script-src 'self' http://code.jquery.com; style-src 'self'
-        // X-Wbkit-CSP: default 'none'; script-src 'self' http://code.jquery.com; style-src 'self'
-        // maybe add this to meta tag or in htaccess set these headers
-
+        $headers['Content-Security-Policy'] = "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'";
         $this->setHeaders($headers);
         $this->setCookies($cookies);
+
         extract($variables);
         unset($variables);
         unset($headers);
         unset($cookies);
+
         $assetsVersioning = '?v=' . $this->assetsVersion;
         include(self::TEMPLATES_PATH . '/' . $template);
     }

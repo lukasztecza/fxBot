@@ -26,7 +26,7 @@ class ErrorHandler
             register_shutdown_function([$this, 'handleShutDown']);
             return;
         }
-//@TODO add apache logs
+
         // Other environments should report everything
         error_reporting(E_ALL);
     }

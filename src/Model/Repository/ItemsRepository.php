@@ -24,7 +24,7 @@ class ItemsRepository extends RepositoryAbstract
             foreach ($items as $item) {
                 $affectedIds[] = $this->getWrite()->execute(null, ['name' => $item['name']]);
             }
-        } catch(\Exception $e) {
+        } catch(\Throwable $e) {
             $this->getWrite()->rollBack();
             trigger_error(
                 'Rolling back after failed attempt to save items with message ' . $e->getMessage() . ' with payload ' . var_export($items, true)
