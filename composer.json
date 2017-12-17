@@ -21,7 +21,7 @@
         "lukasztecza/httpClient": "dev-master"
     },
     "require-dev": {
-        "phpunit/phpunit": "^6.3.0"
+        "codeception/codeception": "2.3.*"
     },
     "autoload": {
         "psr-4": { "TinyApp\\": "src/" }
