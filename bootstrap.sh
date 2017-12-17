@@ -49,7 +49,13 @@ if ! fgrep key_buffer_size /etc/mysql/my.cnf; then
 fi
 
 # Install php and modules
-apt-get install -y php"$PHP_VERSION" php"$PHP_VERSION"-curl php"$PHP_VERSION"-mysql php"$PHP_VERSION"-gd php"$PHP_VERSION"-mbstring php"$PHP_VERSION"-dom
+apt-get install -y php"$PHP_VERSION" \
+    php"$PHP_VERSION"-curl \
+    php"$PHP_VERSION"-mysql \
+    php"$PHP_VERSION"-gd \
+    php"$PHP_VERSION"-mbstring \
+    php"$PHP_VERSION"-dom \
+    php"$PHP_VERSION"-zip
 
 # Display all errors for php
 sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/"$PHP_VERSION"/apache2/php.ini
@@ -93,8 +99,6 @@ Listen $PORT
 EOL
 fi
 
-#@TODO create apache logs per day
-
 # Set up database (note no space after -p)
 mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<EOL
 CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE CHARACTER SET utf8 COLLATE utf8_general_ci;
@@ -125,8 +129,20 @@ EOL
 # Restart apache
 service apache2 restart
 
-# @TODO create parameters.json here
+# Install git
+apt-get install -y git
 
-# @TODO run composer install here
+# Install composer and run install packages
+if ! [ -L /usr/bin/composer ]; then
+    curl -Ss https://getcomposer.org/installer | php
+    mv composer.phar /usr/bin/composer
+fi
+cd /vagrant
+composer install
 
+#@TODO create parameters here
+
+#@TODO install webpack
+
+# Information for user
 echo "[Info] Your project will be accessible via url: http://$HOST:$PORT"
