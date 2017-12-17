@@ -49,7 +49,7 @@ if ! fgrep key_buffer_size /etc/mysql/my.cnf; then
 fi
 
 # Install php and modules
-apt-get install -y php"$PHP_VERSION" php"$PHP_VERSION"-curl php"$PHP_VERSION"-mysql php"$PHP_VERSION"-gd
+apt-get install -y php"$PHP_VERSION" php"$PHP_VERSION"-curl php"$PHP_VERSION"-mysql php"$PHP_VERSION"-gd php"$PHP_VERSION"-mbstring php"$PHP_VERSION"-dom
 
 # Display all errors for php
 sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/"$PHP_VERSION"/apache2/php.ini
@@ -126,5 +126,7 @@ EOL
 service apache2 restart
 
 # @TODO create parameters.json here
+
+# @TODO run composer install here
 
 echo "[Info] Your project will be accessible via url: http://$HOST:$PORT"

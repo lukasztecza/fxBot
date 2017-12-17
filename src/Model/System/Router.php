@@ -5,7 +5,7 @@ use TinyApp\Model\System\Request;
 
 class Router
 {
-    private $routing;
+    private $routes;
 
     public function __construct(array $routes)
     {
