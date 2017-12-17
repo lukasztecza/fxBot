@@ -65,7 +65,7 @@ sed -i "s/;upload_tmp_dir =/upload_tmp_dir = \/vagrant\/tmp\/upload/" /etc/php/"
 
 # Create logs directory if not exists
 if ! [ -L /var/www/html/tmp/logs ]; then
-    mkdir /var/www/html/tmp/logs
+    mkdir -p /var/www/html/tmp/logs
 fi
 
 # Allow usage of .htaccess files inside /var/www/html
