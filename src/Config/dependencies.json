@@ -2,24 +2,24 @@
     "outputMiddleware": {
         "class": "TinyApp\\Model\\Middleware\\OutputMiddleware",
         "inject": [
-            "@securityMiddleware",
+            "@securityMiddleware@",
             "%defaultContentType%",
             "%assetsVersion%",
-            "@filesService"
+            "@filesService@"
         ]
     },
     "securityMiddleware": {
         "class": "TinyApp\\Model\\Middleware\\SecurityMiddleware",
         "inject": [
-            "@responseCacheMiddleware",
+            "@responseCacheMiddleware@",
             "%securityList%",
-            "@sessionService"
+            "@sessionService@"
         ]
     },
     "responseCacheMiddleware": {
         "class": "TinyApp\\Model\\Middleware\\ResponseCacheMiddleware",
         "inject": [
-            "@controllerMiddleware",
+            "@controllerMiddleware@",
             "%cacheList%"
         ]
     },
@@ -36,17 +36,17 @@
     "itemsController": {
         "class": "TinyApp\\Controller\\ItemsController",
         "inject": [
-            "@itemsService",
-            "@validatorFactory",
-            "@sessionService"
+            "@itemsService@",
+            "@validatorFactory@",
+            "@sessionService@"
         ]
     },
     "filesController": {
         "class": "TinyApp\\Controller\\FilesController",
         "inject": [
-            "@filesService",
-            "@validatorFactory",
-            "@sessionService"
+            "@filesService@",
+            "@validatorFactory@",
+            "@sessionService@"
         ]
     },
     "restrictedController": {
@@ -55,8 +55,8 @@
     "authenticationController": {
         "class": "TinyApp\\Controller\\AuthenticationController",
         "inject": [
-            "@sessionService",
-            "@validatorFactory",
+            "@sessionService@",
+            "@validatorFactory@",
             "%inMemoryUsername%",
             "%inMemoryPasswordHash%"
         ]
@@ -64,15 +64,15 @@
     "privateContentController": {
         "class": "TinyApp\\Controller\\PrivateContentController",
         "inject": [
-            "@sessionService",
-            "@filesService"
+            "@sessionService@",
+            "@filesService@"
         ]
     },
     "apiController": {
             "class": "TinyApp\\Controller\\ApiController",
         "inject": [
-            "@itemsService",
-            "@validatorFactory"
+            "@itemsService@",
+            "@validatorFactory@"
         ]
     },
 
@@ -81,7 +81,7 @@
     "validatorFactory": {
         "class": "TinyApp\\Model\\Validator\\ValidatorFactory",
         "inject": [
-            "@sessionService"
+            "@sessionService@"
         ]
     },
     "sessionService": {
@@ -90,19 +90,19 @@
     "itemsService": {
         "class": "TinyApp\\Model\\Service\\ItemsService",
         "inject": [
-            "@itemsRepository"
+            "@itemsRepository@"
         ]
     },
-    "marketService": {
-        "class": "TinyApp\\Model\\Service\\MarketService",
+    "priceService": {
+        "class": "TinyApp\\Model\\Service\\PriceService",
         "inject": [
-            "@marketRepository"
+            "@priceRepository@"
         ]
     },
     "filesService": {
         "class": "TinyApp\\Model\\Service\\FilesService",
         "inject": [
-            "@filesRepository"
+            "@filesRepository@"
         ]
     },
     "clientFactory": {
@@ -127,19 +127,19 @@
     "itemsRepository": {
         "class": "TinyApp\\Model\\Repository\\ItemsRepository",
         "inject": [
-            "@writeConnection"
+            "@writeConnection@"
         ]
     },
-    "marketRepository": {
-        "class": "TinyApp\\Model\\Repository\\MarketRepository",
+    "priceRepository": {
+        "class": "TinyApp\\Model\\Repository\\PriceRepository",
         "inject": [
-            "@writeConnection"
+            "@writeConnection@"
         ]
     },
     "filesRepository" : {
         "class": "TinyApp\\Model\\Repository\\FilesRepository",
         "inject": [
-            "@writeConnection"
+            "@writeConnection@"
         ]
     },
 
@@ -148,20 +148,20 @@
     "itemsCommand": {
         "class": "TinyApp\\Model\\Command\\ItemsCommand",
         "inject": [
-            "@itemsRepository",
+            "@itemsRepository@",
             "%itemsFixtures%"
         ]
     },
     "populateRandomCommand": {
         "class": "TinyApp\\Model\\Command\\PopulateRandomCommand",
         "inject": [
-            "@marketService"
+            "@priceService@"
         ]
     },
     "populateRealCommand": {
         "class": "TinyApp\\Model\\Command\\PopulateRealCommand",
         "inject": [
-            "@marketService",
+            "@priceService@",
             "@clientFactory"
         ]
     }
