@@ -1,0 +1,168 @@
+{
+    "outputMiddleware": {
+        "class": "TinyApp\\Model\\Middleware\\OutputMiddleware",
+        "inject": [
+            "@securityMiddleware",
+            "%defaultContentType%",
+            "%assetsVersion%",
+            "@filesService"
+        ]
+    },
+    "securityMiddleware": {
+        "class": "TinyApp\\Model\\Middleware\\SecurityMiddleware",
+        "inject": [
+            "@responseCacheMiddleware",
+            "%securityList%",
+            "@sessionService"
+        ]
+    },
+    "responseCacheMiddleware": {
+        "class": "TinyApp\\Model\\Middleware\\ResponseCacheMiddleware",
+        "inject": [
+            "@controllerMiddleware",
+            "%cacheList%"
+        ]
+    },
+    "controllerMiddleware": {
+        "class": "TinyApp\\Model\\Middleware\\ControllerMiddleware",
+        "inject": [
+            "%routedController%",
+            "%routedAction%"
+        ]
+    },
+
+
+
+    "itemsController": {
+        "class": "TinyApp\\Controller\\ItemsController",
+        "inject": [
+            "@itemsService",
+            "@validatorFactory",
+            "@sessionService"
+        ]
+    },
+    "filesController": {
+        "class": "TinyApp\\Controller\\FilesController",
+        "inject": [
+            "@filesService",
+            "@validatorFactory",
+            "@sessionService"
+        ]
+    },
+    "restrictedController": {
+        "class": "TinyApp\\Controller\\RestrictedController"
+    },
+    "authenticationController": {
+        "class": "TinyApp\\Controller\\AuthenticationController",
+        "inject": [
+            "@sessionService",
+            "@validatorFactory",
+            "%inMemoryUsername%",
+            "%inMemoryPasswordHash%"
+        ]
+    },
+    "privateContentController": {
+        "class": "TinyApp\\Controller\\PrivateContentController",
+        "inject": [
+            "@sessionService",
+            "@filesService"
+        ]
+    },
+    "apiController": {
+            "class": "TinyApp\\Controller\\ApiController",
+        "inject": [
+            "@itemsService",
+            "@validatorFactory"
+        ]
+    },
+
+
+
+    "validatorFactory": {
+        "class": "TinyApp\\Model\\Validator\\ValidatorFactory",
+        "inject": [
+            "@sessionService"
+        ]
+    },
+    "sessionService": {
+        "class": "TinyApp\\Model\\Service\\SessionService"
+    },
+    "itemsService": {
+        "class": "TinyApp\\Model\\Service\\ItemsService",
+        "inject": [
+            "@itemsRepository"
+        ]
+    },
+    "marketService": {
+        "class": "TinyApp\\Model\\Service\\MarketService",
+        "inject": [
+            "@marketRepository"
+        ]
+    },
+    "filesService": {
+        "class": "TinyApp\\Model\\Service\\FilesService",
+        "inject": [
+            "@filesRepository"
+        ]
+    },
+    "clientFactory": {
+        "class": "HttpClient\\ClientFactory",
+        "inject": [
+            "%clientConfiguration%"
+        ]
+    },
+
+
+
+    "writeConnection": {
+        "class": "TinyApp\\Model\\Repository\\DatabaseConnection",
+        "inject": [
+            "%databaseEngine%",
+            "%databaseHost%",
+            "%databaseName%",
+            "%databaseUser%",
+            "%databasePassword%"
+        ]
+    },
+    "itemsRepository": {
+        "class": "TinyApp\\Model\\Repository\\ItemsRepository",
+        "inject": [
+            "@writeConnection"
+        ]
+    },
+    "marketRepository": {
+        "class": "TinyApp\\Model\\Repository\\MarketRepository",
+        "inject": [
+            "@writeConnection"
+        ]
+    },
+    "filesRepository" : {
+        "class": "TinyApp\\Model\\Repository\\FilesRepository",
+        "inject": [
+            "@writeConnection"
+        ]
+    },
+
+
+
+    "itemsCommand": {
+        "class": "TinyApp\\Model\\Command\\ItemsCommand",
+        "inject": [
+            "@itemsRepository",
+            "%itemsFixtures%"
+        ]
+    },
+    "populateRandomCommand": {
+        "class": "TinyApp\\Model\\Command\\PopulateRandomCommand",
+        "inject": [
+            "@marketService"
+        ]
+    },
+    "populateRealCommand": {
+        "class": "TinyApp\\Model\\Command\\PopulateRealCommand",
+        "inject": [
+            "@marketService",
+            "@clientFactory"
+        ]
+    }
+}

@@ -1,0 +1,25 @@
+# created by composer
+vendor
+
+# created by application
+tmp
+
+# created by vagrant
+.vagrant
+
+# created by apache
+index.html
+
+# needed for application
+private
+public/upload
+src/Config/parameters.json
+
+# created by codeception
+tests/*
+codeception.yml
+
+# application test classes
+!tests/acceptance/
+!tests/functional/
+!tests/unit/

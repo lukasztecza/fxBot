@@ -1,0 +1,123 @@
+[
+    {
+        "path": "/",
+        "methods": ["GET"],
+        "controller": "itemsController",
+        "action": "home"
+    },
+    {
+        "path": "/restricted",
+        "methods": ["GET"],
+        "controller": "restrictedController",
+        "action": "restricted2"
+    },
+    {
+        "path": "/restricted/{code}",
+        "methods": ["GET"],
+        "requirements": {"code": "\\w+"},
+        "controller": "restrictedController",
+        "action": "restricted"
+    },
+    {
+        "path": "/login",
+        "controller": "authenticationController",
+        "action": "login"
+    },
+    {
+        "path": "/logout",
+        "controller": "authenticationController",
+        "action": "logout"
+    },
+    {
+        "path": "/items",
+        "methods": ["GET", "POST"],
+        "controller": "itemsController",
+        "action": "list"
+    },
+    {
+        "path": "/items/list/{page}",
+        "methods": ["GET", "POST"],
+        "requirements": {"page": "\\d+"},
+        "controller": "itemsController",
+        "action": "list"
+    },
+    {
+        "path": "/items/add",
+        "methods": ["GET", "POST"],
+        "controller": "itemsController",
+        "action": "add"
+    },
+    {
+        "path": "/items/{id}",
+        "methods": ["GET"],
+        "requirements": {"id": "\\d+"},
+        "controller": "itemsController",
+        "action": "details"
+    },
+    {
+        "path": "/items/{id}/edit",
+        "methods": ["GET", "POST"],
+        "requirements": {"id": "\\d+"},
+        "controller": "itemsController",
+        "action": "edit"
+    },
+    {
+        "path": "/files/add",
+        "methods": ["GET", "POST"],
+        "controller": "filesController",
+        "action": "upload"
+    },
+    {
+        "path": "/files",
+        "methods": ["GET", "POST"],
+        "controller": "filesController",
+        "action": "list"
+    },
+    {
+        "path": "/files/list/{type}/{page}",
+        "methods": ["GET", "POST"],
+        "requirements": {"type": "\\d+", "page": "\\d+"},
+        "controller": "filesController",
+        "action": "listPaginated"
+    },
+    {
+        "path": "/api/items",
+        "methods": ["GET"],
+        "controller": "apiController",
+        "action": "cget"
+    },
+    {
+        "path": "/api/items",
+        "methods": ["POST"],
+        "controller": "apiController",
+        "action": "post"
+    },
+    {
+        "path": "/api/items/{id}",
+        "methods": ["GET"],
+        "requirements": {"id": "\\d+"},
+        "controller": "apiController",
+        "action": "get"
+    },
+    {
+        "path": "/api/items/{id}",
+        "methods": ["PUT"],
+        "requirements": {"id": "\\d+"},
+        "controller": "apiController",
+        "action": "put"
+    },
+    {
+        "path": "/api/items/{id}",
+        "methods": ["DELETE"],
+        "requirements": {"id": "\\d+"},
+        "controller": "apiController",
+        "action": "delete"
+    },
+    {
+        "path": "/private/upload/{directory}/{file}",
+        "methods": ["GET"],
+        "requirements": {"directory": "(images|files)", "file": "[a-z0-9]{1,}\\.[a-z]{3,4}"},
+        "controller": "privateContentController",
+        "action": "serve"
+    }
+]
