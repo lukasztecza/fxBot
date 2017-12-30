@@ -2,29 +2,31 @@
 namespace TinyApp\Model\Command;
 
 use TinyApp\Model\Command\CommandResult;
-use TinyApp\Model\Service\MarketService;
+use TinyApp\Model\Service\PriceService;
 
 class PopulateRandomCommand implements CommandInterface
 {
-    private $marketService;
+    private const DEFAULT_INSTRUMENT = 'EUR_USD';
 
-    public function __construct(MarketService $marketService)
+    private $priceService;
+
+    public function __construct(PriceService $priceService)
     {
-        $this->marketService = $marketService;
+        $this->priceService = $priceService;
     }
 
     public function execute() : CommandResult
     {
-        $values = $this->getRandomValues();
-        $result = $this->marketService->saveValues($values);
+        $prices = $this->getRandomPrices();
+        $result = $this->priceService->savePrices($prices);
 
         return new CommandResult(true, 'inserted');
     }
 
-    private function getRandomValues() : array
+    private function getRandomPrices() : array
     {
         $pack = 'test_' . md5(time() . rand(1,1000000));
-        $price = 100000; // work on ints instead of float
+        $price = 100000; // work on ints instead of floats
         $itertions = 5000;
         $priceChangeFactor = 200; // 20 pips
         $priceFluctuation = 50; // 5 pips
@@ -37,19 +39,20 @@ class PopulateRandomCommand implements CommandInterface
             $close = $price + rand(-$priceChangeFactor, $priceChangeFactor);
             $high = $open < $close ? $close + rand(0, $priceFluctuation) : $open + rand(0, $priceFluctuation);
             $low = $open < $close ? $open - rand(0, $priceFluctuation) : $close - rand(0, $priceFluctuation);
-            $values[] = [
+            $prices[] = [
+                'pack' => $pack,
+                'instrument' => self::DEFAULT_INSTRUMENT,
                 'datetime' => $dateString,
                 'open' => $open,
                 'high' => $high,
                 'low' => $low,
                 'average' => round(($high + $low) / 2),
                 'close' => $close,
-                'extrema' => null,
-                'pack' => $pack
+                'extrema' => null
             ];
             $price = $close;
         }
 
-        return $values;
+        return $prices;
     }
 }

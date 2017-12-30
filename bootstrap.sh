@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS `fundamental` (
     `content` TEXT COLLATE utf8_general_ci NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-CREATE TABLE IF NOT EXISTS `market` (
+CREATE TABLE IF NOT EXISTS `price` (
     `id` INT(11) NOT NULL AUTO_INCREMENT,
     `pack` varchar(37) COLLATE utf8_general_ci NOT NULL,
     `instrument` char(7) COLLATE utf8_general_ci NOT NULL,
