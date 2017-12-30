@@ -1,0 +1,15 @@
+{
+    "environment": "",
+
+    "databaseEngine": "",
+    "databaseHost": "",
+    "databaseName": "",
+    "databaseUser": "",
+    "databasePassword": "",
+
+    "inMemoryUsername": "",
+    "inMemoryPasswordHash": "",
+
+    "oandaApiUri": "",
+    "oandaApiKey": "",
+}
