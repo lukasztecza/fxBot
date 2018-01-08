@@ -4,9 +4,9 @@ namespace TinyApp\Model\Middleware;
 use TinyApp\Controller\ControllerInterface;
 use TinyApp\Model\System\Request;
 use TinyApp\Model\System\Response;
-use TinyApp\Model\Middleware\ApplicationMiddlewareAbstract;
+use TinyApp\Model\Middleware\MiddlewareAbstract;
 
-class ControllerMiddleware extends ApplicationMiddlewareAbstract
+class ControllerMiddleware extends MiddlewareAbstract
 {
     private $routedController;
     private $routedAction;

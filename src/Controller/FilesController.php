@@ -68,7 +68,7 @@ class FilesController implements ControllerInterface
                     if ($this->filesService->deleteFiles($ids)) {
                         $this->sessionService->set(['flash' => ['type' => 'success', 'text' => 'Files are deleted']]);
                     } else {
-                        $this->sessionService->set(['flash' => ['type' => 'fail', 'text' => 'Files are not deleted']]);
+                        $this->sessionService->set(['flash' => ['type' => 'error', 'text' => 'Files are not deleted']]);
                     }
 
                     return new Response(null, [], [], ['Location' => '/files/list/' . (int)$type . '/' . (int)$page]);
@@ -79,6 +79,7 @@ class FilesController implements ControllerInterface
         // Get files
         $filesPack = $this->filesService->getByType($type, $page);
         if (empty($filesPack['files'])) {
+            $this->sessionService->set(['flash' => ['type' => 'error', 'text' => 'There is no files under selected category']]);
             return new Response(null, [], [], ['Location' => '/files']);
         }
 
