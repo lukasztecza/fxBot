@@ -5,7 +5,7 @@ use TinyApp\Model\System\ErrorHandler;
 use TinyApp\Model\System\Router;
 use TinyApp\Model\System\Request;
 use TinyApp\Model\System\Response;
-use TinyApp\Model\Middleware\ApplicationMiddlewareInterface;
+use TinyApp\Model\Middleware\MiddlewareInterface;
 use TinyApp\Model\Command\CommandInterface;
 
 class Project
@@ -40,8 +40,8 @@ class Project
 
         // Build dependencies tree and process request
         $this->inject($dependencies, $toCreate);
-        if (!($dependencies[$parameters[self::PARAMETER_APPLICATION_STARTING_POINT]]['object'] instanceof ApplicationMiddlewareInterface)) {
-            throw new \Exception('Application middleware has to implement ' . ApplicationMiddlewareInterface::class);
+        if (!($dependencies[$parameters[self::PARAMETER_APPLICATION_STARTING_POINT]]['object'] instanceof MiddlewareInterface)) {
+            throw new \Exception('Application middleware has to implement ' . MiddlewareInterface::class);
         }
         $dependencies[$parameters[self::PARAMETER_APPLICATION_STARTING_POINT]]['object']->process($request);
     }
