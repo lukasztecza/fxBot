@@ -73,6 +73,8 @@ class Project
             throw new \Exception('Command has to implement ' . CommandInterface::class);
         }
         $commandResult = $dependencies[$objectName]['object']->execute();
+        trigger_error('Command ended with the result:' . var_export($commandResult, true), E_USER_NOTICE);
+
         return ($commandResult->getStatus() ? 'Command succeded' : 'Command failed') .
             ' with message ' . $commandResult->getMessage() . PHP_EOL
         ;

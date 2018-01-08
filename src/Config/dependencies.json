@@ -34,6 +34,7 @@
 
 
 
+
     "filesController": {
         "class": "TinyApp\\Controller\\FilesController",
         "inject": [
@@ -64,6 +65,7 @@
 
 
 
+
     "sessionService": {
         "class": "TinyApp\\Model\\Service\\SessionService"
     },
@@ -91,6 +93,13 @@
             "@priceRepository@"
         ]
     },
+    "marketService": {
+        "class": "TinyApp\\Model\\Service\\MarketService",
+        "inject": [
+            "@marketRepository@"
+        ]
+    },
+
 
 
 
@@ -116,6 +125,13 @@
             "@writeConnection@"
         ]
     },
+    "marketRepository": {
+        "class": "TinyApp\\Model\\Repository\\MarketRepository",
+        "inject": [
+            "@writeConnection@"
+        ]
+    },
+
 
 
 
@@ -125,10 +141,17 @@
             "@priceService@"
         ]
     },
-    "populateRealCommand": {
-        "class": "TinyApp\\Model\\Command\\PopulateRealCommand",
+    "populatePricesCommand": {
+        "class": "TinyApp\\Model\\Command\\PopulatePricesCommand",
         "inject": [
             "@priceService@",
+            "@clientFactory"
+        ]
+    },
+    "populateMarketCommand": {
+        "class": "TinyApp\\Model\\Command\\PopulateMarketCommand",
+        "inject": [
+            "@marketService@",
             "@clientFactory"
         ]
     }
