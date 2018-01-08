@@ -5,25 +5,17 @@
 
     "securityList": [
         {
-            "route": "/restricted/*",
-            "methods": ["GET"],
-            "allow": ["ROLE_USER"]
-        },
-        {
             "route": "/private/upload/{directory}/{file}",
             "methods": ["GET"],
             "allow": ["ROLE_USER"]
         }
     ],
-
     "cacheList": [
         {
-            "route": "/",
-            "time": "1"
+            "route": "/files",
+            "time": "10"
         }
     ],
-
-    "itemsFixtures": ["first dummy item", "second dummy item", "third dummy item"],
 
     "clientConfiguration": {
         "oandaClient": {

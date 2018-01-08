@@ -1,17 +1,17 @@
 <?php
 namespace TinyApp\Model\Middleware;
 
-use TinyApp\Model\Middleware\ApplicationMiddlewareAbstract;
+use TinyApp\Model\Middleware\MiddlewareAbstract;
 use TinyApp\Model\System\Request;
 use TinyApp\Model\System\Response;
 
-class ResponseCacheMiddleware extends ApplicationMiddlewareAbstract
+class ResponseCacheMiddleware extends MiddlewareAbstract
 {
     private $cacheList;
 
     private const CACHE_PATH = APP_ROOT_DIR . '/tmp/cache';
 
-    public function __construct(ApplicationMiddlewareInterface $next, array $cacheList)
+    public function __construct(MiddlewareInterface $next, array $cacheList)
     {
         parent::__construct($next);
         $this->cacheList = $cacheList;

@@ -113,11 +113,13 @@ fi
 
 # Create tables needed by tinyCms
 mysql -u "$MYSQL_USER" -p"$MYSQL_USER_PASSWORD" -h $MYSQL_HOST $MYSQL_DATABASE <<"EOL"
-CREATE TABLE IF NOT EXISTS `technical` (
+CREATE TABLE IF NOT EXISTS `files` (
     `id` INT(11) NOT NULL AUTO_INCREMENT,
-    `datetime` DATETIME NOT NULL,
-    `content` TEXT COLLATE utf8_general_ci NOT NULL,
-    PRIMARY KEY (`id`)
+    `name` VARCHAR(255) COLLATE utf8_general_ci NOT NULL,
+    `type` TINYINT(4) NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY (`name`),
+    KEY (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 CREATE TABLE IF NOT EXISTS `fundamental` (
     `id` INT(11) NOT NULL AUTO_INCREMENT,

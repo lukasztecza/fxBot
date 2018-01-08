@@ -3,11 +3,12 @@ namespace TinyApp\Model\Middleware;
 
 use TinyApp\Model\System\Request;
 use TinyApp\Model\System\Response;
-use TinyApp\Model\Middleware\ApplicationMiddlewareAbstract;
-use TinyApp\Model\Middleware\ApplicationMiddlewareInterface;
+use TinyApp\Model\Middleware\MiddlewareAbstract;
+use TinyApp\Model\Middleware\MiddlewareInterface;
 use TinyApp\Model\Service\FilesService;
+use TinyApp\Model\Service\SessionService;
 
-class OutputMiddleware extends ApplicationMiddlewareAbstract
+class OutputMiddleware extends MiddlewareAbstract
 {
     private const CONTENT_TYPE_HTML = 'text/html';
     private const CONTENT_TYPE_JSON = 'application/json';
@@ -18,17 +19,20 @@ class OutputMiddleware extends ApplicationMiddlewareAbstract
     private $defaultContentType;
     private $assetsVersion;
     private $filesService;
+    private $sessionService;
 
     public function __construct(
-        ApplicationMiddlewareInterface $next,
+        MiddlewareInterface $next,
         string $defaultContentType,
         string $assetsVersion,
-        FilesService $filesService
+        FilesService $filesService,
+        SessionService $sessionService
     ) {
         parent::__construct($next);
         $this->defaultContentType = $defaultContentType;
         $this->assetsVersion = $assetsVersion;
         $this->filesService = $filesService;
+        $this->sessionService = $sessionService;
     }
 
     public function process(Request $request) : Response
@@ -42,13 +46,14 @@ class OutputMiddleware extends ApplicationMiddlewareAbstract
         $headers['Content-Type'] = $headers['Content-Type'] ?? $this->defaultContentType;
         $location = $headers['Location'] ?? null;
         $contentType = $headers['Content-Type'] ?? null;
+        $loggedIn = $this->sessionService->get(['user'])['user'];
 
         switch (true) {
             case $location:
                 $this->setHeaders($headers);
                 break;
             case $contentType === self::CONTENT_TYPE_HTML:
-                $this->buildHtmlResponse($response->getFile(), $response->getVariables(), $headers, $response->getCookies());
+                $this->buildHtmlResponse($response->getFile(), $response->getVariables(), $headers, $response->getCookies(), $loggedIn);
                 break;
             case $contentType === self::CONTENT_TYPE_JSON:
                 $this->buildJsonResponse($response->getVariables(), $headers);
@@ -97,7 +102,7 @@ class OutputMiddleware extends ApplicationMiddlewareAbstract
         echo json_encode($variables);
     }
 
-    private function buildHtmlResponse(string $template, array $variables, array $headers, array $cookies) : void
+    private function buildHtmlResponse(string $template, array $variables, array $headers, array $cookies, $loggedIn) : void
     {
         if (empty($template) || !file_exists(self::TEMPLATES_PATH . '/' . $template)) {
             throw new \Exception('Template does not exist ' . var_export($template, true));

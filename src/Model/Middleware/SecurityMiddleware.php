@@ -5,17 +5,17 @@ use TinyApp\Model\Service\SessionService;
 use TinyApp\Controller\ControllerInterface;
 use TinyApp\Model\System\Request;
 use TinyApp\Model\System\Response;
-use TinyApp\Model\Middleware\ApplicationMiddlewareAbstract;
-use TinyApp\Model\Middleware\ApplicationMiddlewareInterface;
+use TinyApp\Model\Middleware\MiddlewareAbstract;
+use TinyApp\Model\Middleware\MiddlewareInterface;
 
-class SecurityMiddleware extends ApplicationMiddlewareAbstract
+class SecurityMiddleware extends MiddlewareAbstract
 {
     private const LOGIN_ROUTE = '/login';
 
     private $securityList;
     private $sessionService;
 
-    public function __construct(ApplicationMiddlewareInterface $next, array $securityList, SessionService $sessionService)
+    public function __construct(MiddlewareInterface $next, array $securityList, SessionService $sessionService)
     {
         parent::__construct($next);
         $this->securityList = $securityList;

@@ -5,7 +5,8 @@
             "@securityMiddleware@",
             "%defaultContentType%",
             "%assetsVersion%",
-            "@filesService@"
+            "@filesService@",
+            "@sessionService@"
         ]
     },
     "securityMiddleware": {
@@ -33,14 +34,6 @@
 
 
 
-    "itemsController": {
-        "class": "TinyApp\\Controller\\ItemsController",
-        "inject": [
-            "@itemsService@",
-            "@validatorFactory@",
-            "@sessionService@"
-        ]
-    },
     "filesController": {
         "class": "TinyApp\\Controller\\FilesController",
         "inject": [
@@ -48,9 +41,6 @@
             "@validatorFactory@",
             "@sessionService@"
         ]
-    },
-    "restrictedController": {
-        "class": "TinyApp\\Controller\\RestrictedController"
     },
     "authenticationController": {
         "class": "TinyApp\\Controller\\AuthenticationController",
@@ -68,36 +58,14 @@
             "@filesService@"
         ]
     },
-    "apiController": {
-            "class": "TinyApp\\Controller\\ApiController",
-        "inject": [
-            "@itemsService@",
-            "@validatorFactory@"
-        ]
+    "forexController": {
+        "class": "TinyApp\\Controller\\ForexController"
     },
 
 
 
-    "validatorFactory": {
-        "class": "TinyApp\\Model\\Validator\\ValidatorFactory",
-        "inject": [
-            "@sessionService@"
-        ]
-    },
     "sessionService": {
         "class": "TinyApp\\Model\\Service\\SessionService"
-    },
-    "itemsService": {
-        "class": "TinyApp\\Model\\Service\\ItemsService",
-        "inject": [
-            "@itemsRepository@"
-        ]
-    },
-    "priceService": {
-        "class": "TinyApp\\Model\\Service\\PriceService",
-        "inject": [
-            "@priceRepository@"
-        ]
     },
     "filesService": {
         "class": "TinyApp\\Model\\Service\\FilesService",
@@ -105,10 +73,22 @@
             "@filesRepository@"
         ]
     },
+    "validatorFactory": {
+        "class": "TinyApp\\Model\\Validator\\ValidatorFactory",
+        "inject": [
+            "@sessionService@"
+        ]
+    },
     "clientFactory": {
         "class": "HttpClient\\ClientFactory",
         "inject": [
             "%clientConfiguration%"
+        ]
+    },
+    "priceService": {
+        "class": "TinyApp\\Model\\Service\\PriceService",
+        "inject": [
+            "@priceRepository@"
         ]
     },
 
@@ -124,8 +104,8 @@
             "%databasePassword%"
         ]
     },
-    "itemsRepository": {
-        "class": "TinyApp\\Model\\Repository\\ItemsRepository",
+    "filesRepository" : {
+        "class": "TinyApp\\Model\\Repository\\FilesRepository",
         "inject": [
             "@writeConnection@"
         ]
@@ -136,22 +116,9 @@
             "@writeConnection@"
         ]
     },
-    "filesRepository" : {
-        "class": "TinyApp\\Model\\Repository\\FilesRepository",
-        "inject": [
-            "@writeConnection@"
-        ]
-    },
 
 
 
-    "itemsCommand": {
-        "class": "TinyApp\\Model\\Command\\ItemsCommand",
-        "inject": [
-            "@itemsRepository@",
-            "%itemsFixtures%"
-        ]
-    },
     "populateRandomCommand": {
         "class": "TinyApp\\Model\\Command\\PopulateRandomCommand",
         "inject": [
