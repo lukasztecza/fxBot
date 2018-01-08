@@ -4,7 +4,7 @@ namespace TinyApp\Model\Command;
 use TinyApp\Model\Command\CommandResult;
 use TinyApp\Model\Service\PriceService;
 
-class PopulateRealCommand implements CommandInterface
+class PopulatePricesCommand implements CommandInterface
 {
     private const EXTERNAL_DATETIME_FORMAT = 'Y-m-d\TH:i:s.u000\Z';
     private const INTERNAL_DATETIME_FORMAT = 'Y-m-d H:i:s';
@@ -47,7 +47,6 @@ class PopulateRealCommand implements CommandInterface
 
     public function execute() : CommandResult
     {
-        $instrument = 'EUR_USD';
         $expectedSuccesses = count(self::INSTRUMENTS);
         $successes = 0;
         foreach (self::INSTRUMENTS as $instrument) {
