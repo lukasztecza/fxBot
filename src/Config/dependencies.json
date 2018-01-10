@@ -87,16 +87,24 @@
             "%clientConfiguration%"
         ]
     },
+    "forexService": {
+        "class": "TinyApp\\Model\\Service\\ForexService",
+        "inject": [
+            "@priceService@",
+            "@indicatorService@",
+            "@clientFactory@"
+        ]
+    },
     "priceService": {
         "class": "TinyApp\\Model\\Service\\PriceService",
         "inject": [
             "@priceRepository@"
         ]
     },
-    "marketService": {
-        "class": "TinyApp\\Model\\Service\\MarketService",
+    "indicatorService": {
+        "class": "TinyApp\\Model\\Service\\IndicatorService",
         "inject": [
-            "@marketRepository@"
+            "@indicatorRepository@"
         ]
     },
 
@@ -125,8 +133,8 @@
             "@writeConnection@"
         ]
     },
-    "marketRepository": {
-        "class": "TinyApp\\Model\\Repository\\MarketRepository",
+    "indicatorRepository": {
+        "class": "TinyApp\\Model\\Repository\\IndicatorRepository",
         "inject": [
             "@writeConnection@"
         ]
@@ -144,15 +152,13 @@
     "populatePricesCommand": {
         "class": "TinyApp\\Model\\Command\\PopulatePricesCommand",
         "inject": [
-            "@priceService@",
-            "@clientFactory"
+            "@forexService@"
         ]
     },
-    "populateMarketCommand": {
-        "class": "TinyApp\\Model\\Command\\PopulateMarketCommand",
+    "populateIndicatorsCommand": {
+        "class": "TinyApp\\Model\\Command\\PopulateIndicatorsCommand",
         "inject": [
-            "@marketService@",
-            "@clientFactory"
+            "@forexService@"
         ]
     }
 }
