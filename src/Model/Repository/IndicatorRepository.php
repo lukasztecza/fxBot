@@ -1,14 +1,14 @@
 <?php
 namespace TinyApp\Model\Repository;
 
-class MarketRepository extends RepositoryAbstract
+class IndicatorRepository extends RepositoryAbstract
 {
     public function savePrices(array $prices) : array
     {
         $this->getWrite()->begin();
         try {
             $this->getWrite()->prepare(
-                'INSERT INTO `price` (`pack`, `instrument`, `datetime`, `open`, `high`, `low`, `average`, `close`, `extrema`)
+                'INSERT INTO `indicator` (`pack`, `instrument`, `datetime`, `open`, `high`, `low`, `average`, `close`, `extrema`)
                 VALUES (:pack, :instrument, :datetime, :open, :high, :low, :average, :close, :extrema)'
             );
             $affectedIds = [];

@@ -1,23 +1,22 @@
 <?php
 namespace TinyApp\Model\Service;
 
-use TinyApp\Model\Repository\MarketRepository;
+use TinyApp\Model\Repository\IndicatorRepository;
 
-class MarketService
+class IndicatorService
 {
-    private $marketRepository;
+    private $indicatorRepository;
 
-    public function __construct(MarketRepository $marketRepository) {
-        $this->marketRepository = $marketRepository;
+    public function __construct(IndicatorRepository $indicatorRepository) {
+        $this->indicatorRepository = $indicatorRepository;
     }
 
-    public function savePrices(array $prices) : array
+    public function saveIndicators(array $indicators) : array
     {
         try {
-            $this->appendLocalExtremas($prices);
-            return $this->marketRepository->savePrices($prices);
+            return $this->indicatorRepository->saveIndicators($indicators);
         } catch(\Throwable $e) {
-            trigger_error('Failed to save prices with message ' . $e->getMessage() . ' with paylaod ' . var_export($prices, true), E_USER_NOTICE);
+            trigger_error('Failed to save indicators with message ' . $e->getMessage() . ' with paylaod ' . var_export($prices, true), E_USER_NOTICE);
 
             return [];
         }
