@@ -121,7 +121,7 @@ CREATE TABLE IF NOT EXISTS `files` (
     KEY (`name`),
     KEY (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-CREATE TABLE IF NOT EXISTS `market` (
+CREATE TABLE IF NOT EXISTS `indicator` (
     `id` INT(11) NOT NULL AUTO_INCREMENT,
     `datetime` DATETIME NOT NULL,
     `content` TEXT COLLATE utf8_general_ci NOT NULL,
