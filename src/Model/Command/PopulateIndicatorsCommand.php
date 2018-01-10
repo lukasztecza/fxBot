@@ -4,7 +4,7 @@ namespace TinyApp\Model\Command;
 use TinyApp\Model\Service\ForexService;
 use TinyApp\Model\Command\CommandResult;
 
-class PopulatePricesCommand implements CommandInterface
+class PopulateIndicatorsCommand implements CommandInterface
 {
     private $forexService;
 
@@ -15,10 +15,10 @@ class PopulatePricesCommand implements CommandInterface
 
     public function execute() : CommandResult
     {
-        if ($this->forexService->populatePrices()) {
-            return new CommandResult(true, 'successfully populated all prices');
+        if ($this->forexService->populateIndicators()) {
+            return new CommandResult(true, 'successfully populated all indicators');
         } else {
-            return new CommandResult(false, 'failed to populate all prices');
+            return new CommandResult(false, 'failed to populated all indicators');
         }
     }
 }
