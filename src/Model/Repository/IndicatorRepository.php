@@ -41,11 +41,11 @@ class IndicatorRepository extends RepositoryAbstract
         return $affectedIds;
     }
 
-    public function getLatestIndicatorByInstrumentAndPack(string $instrument, string $pack) : array
+    public function getLatestIndicatorByPack(string $pack) : array
     {
         $records = $this->getRead()->fetch(
-            'SELECT * FROM `indicator` WHERE `instrument` = :instrument AND `pack` = :pack ORDER BY `datetime` DESC LIMIT 1',
-            ['instrument' => $instrument, 'pack' => $pack]
+            'SELECT * FROM `indicator` WHERE `pack` = :pack ORDER BY `datetime` DESC LIMIT 1',
+            ['pack' => $pack]
         );
 
         return !empty($records) ? array_pop($records) : [];

@@ -87,8 +87,8 @@
             "%clientConfiguration%"
         ]
     },
-    "forexService": {
-        "class": "TinyApp\\Model\\Service\\ForexService",
+    "oandaFetchingService": {
+        "class": "TinyApp\\Model\\Service\\OandaFetchingService",
         "inject": [
             "@priceService@",
             "@indicatorService@",
@@ -152,13 +152,13 @@
     "populatePricesCommand": {
         "class": "TinyApp\\Model\\Command\\PopulatePricesCommand",
         "inject": [
-            "@forexService@"
+            "@oandaFetchingService@"
         ]
     },
     "populateIndicatorsCommand": {
         "class": "TinyApp\\Model\\Command\\PopulateIndicatorsCommand",
         "inject": [
-            "@forexService@"
+            "@oandaFetchingService@"
         ]
     }
 }
