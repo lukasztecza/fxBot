@@ -14,7 +14,6 @@ class PriceService
     public function savePrices(array $prices) : array
     {
         try {
-            $this->appendLocalExtremas($prices);
             return $this->priceRepository->savePrices($prices);
         } catch(\Throwable $e) {
             trigger_error('Failed to save prices with message ' . $e->getMessage() . ' with paylaod ' . var_export($prices, true), E_USER_NOTICE);
@@ -63,17 +62,6 @@ class PriceService
             if ($scoreMin === 2 * $range + 1) {
                 $values[$key]['extrema'] = 'min';
             }
-        }
-    }
-
-    public function deletePriceById(int $id) : bool
-    {
-        try {
-            return $this->priceRepository->deletePriceById($id);
-        } catch(\Throwable $e) {
-            trigger_error('Failed to delete price with message ' . $e->getMessage() . ' with id ' . var_export($id, true), E_USER_NOTICE);
-
-            return false;
         }
     }
 }

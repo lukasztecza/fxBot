@@ -3,56 +3,51 @@ namespace TinyApp\Model\Repository;
 
 class IndicatorRepository extends RepositoryAbstract
 {
-    public function savePrices(array $prices) : array
+    public function saveIndicators(array $indicators) : array
     {
         $this->getWrite()->begin();
         try {
             $this->getWrite()->prepare(
-                'INSERT INTO `indicator` (`pack`, `instrument`, `datetime`, `open`, `high`, `low`, `average`, `close`, `extrema`)
-                VALUES (:pack, :instrument, :datetime, :open, :high, :low, :average, :close, :extrema)'
+                'INSERT INTO `indicator` (`pack`, `instrument`, `datetime`, `name`, `unit`, `forecast`, `market`, `actual`)
+                VALUES (:pack, :instrument, :datetime, :name, :unit, :forecast1, :market1, :actual1)
+                ON DUPLICATE KEY UPDATE `forecast` = :forecast2, `market` = :market2, `actual` = :actual2'
             );
             $affectedIds = [];
-            foreach ($prices as $price) {
+            foreach ($indicators as $indicator) {
                 $affectedIds[] = $this->getWrite()->execute(null, [
-                    'pack' => $price['pack'],
-                    'instrument' => $price['instrument'],
-                    'datetime' => $price['datetime'],
-                    'open' => $price['open'],
-                    'high' => $price['high'],
-                    'low' => $price['low'],
-                    'average' => $price['average'],
-                    'close' => $price['close'],
-                    'extrema' => $price['extrema']
+                    'pack' => $indicator['pack'],
+                    'instrument' => $indicator['instrument'],
+                    'datetime' => $indicator['datetime'],
+                    'name' => $indicator['name'],
+                    'unit' => $indicator['unit'],
+                    'forecast1' => $indicator['forecast'],
+                    'market1' => $indicator['market'],
+                    'actual1' => $indicator['actual'],
+                    'forecast2' => $indicator['forecast'],
+                    'market2' => $indicator['market'],
+                    'actual2' => $indicator['actual']
                 ]);
             }
+            $this->getWrite()->commit();
         } catch(\Throwable $e) {
             $this->getWrite()->rollBack();
             trigger_error(
-                'Rolling back after failed attempt to save prices with message ' . $e->getMessage() . ' with payload ' . var_export($prices, true)
+                'Rolling back after failed attempt to save indicators with message ' . $e->getMessage() .
+                ' with payload ' . var_export($indicators, true)
             );
             throw $e;
         }
-        $this->getWrite()->commit();
 
         return $affectedIds;
     }
 
-    public function getLatestPriceByInstrumentAndPack(string $instrument, string $pack) : array
+    public function getLatestIndicatorByInstrumentAndPack(string $instrument, string $pack) : array
     {
         $records = $this->getRead()->fetch(
-            'SELECT * FROM `price` WHERE `instrument` = :instrument AND `pack` = :pack ORDER BY `id` DESC LIMIT 1',
+            'SELECT * FROM `indicator` WHERE `instrument` = :instrument AND `pack` = :pack ORDER BY `datetime` DESC LIMIT 1',
             ['instrument' => $instrument, 'pack' => $pack]
         );
 
         return !empty($records) ? array_pop($records) : [];
-    }
-
-    public function deletePriceById(int $id) : bool
-    {
-        $this->getWrite()->execute(
-            'DELETE FROM `price` WHERE `id` = :id', ['id' => $id]
-        );
-
-        return true;
     }
 }

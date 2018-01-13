@@ -9,15 +9,16 @@ class ForexService
 {
     private const EXTERNAL_DATETIME_FORMAT = 'Y-m-d\TH:i:s.u000\Z';
     private const INTERNAL_DATETIME_FORMAT = 'Y-m-d H:i:s';
-    private const BEGINING_DATETIME = '2017-12-01';
+    private const UNIX_TIMESTAMP_FORMAT = 'U';
+    private const BEGINING_DATETIME = '2018-01-12 15:00:00';
     private const INTERVAL = 'P5D';
     private const REAL_PACK = 'real';
 
     private const INSTRUMENTS = [
-        'AUD_USD',
+//        'AUD_USD',
         'AUD_CAD',
-/*        'AUD_JPY',
-        'AUD_CHF',
+        'AUD_JPY',
+/*        'AUD_CHF',
         'CAD_CHF',
         'CAD_JPY',
         'CHF_JPY',
@@ -65,11 +66,10 @@ class ForexService
         $latestPrice = $this->priceService->getLatestPriceByInstrumentAndPack($instrument, self::REAL_PACK);
         if (!empty($latestPrice['datetime'])) {
             $startDate = new \DateTime($latestPrice['datetime'], new \DateTimeZone('UTC'));
-            $this->priceService->deletePriceById($latestPrice['id']);
         } else {
             $startDate = new \DateTime(self::BEGINING_DATETIME, new \DateTimeZone('UTC'));
         }
-        return true;
+
         $endDate = clone $startDate;
         $startDate = $startDate->format(self::EXTERNAL_DATETIME_FORMAT);
         $endDate->add(new \DateInterval(self::INTERVAL));
@@ -78,7 +78,7 @@ class ForexService
         } else {
             $endDate = $endDate->format(self::EXTERNAL_DATETIME_FORMAT);
         }
-//@TODO something wrong with latest prices deletes properly but still inserts wrong maybe on duplicate key should simply update primary key instrument datetime
+
         $realValues = $this->oandaClient->getPrices(
             $instrument,
             $startDate,
@@ -90,6 +90,7 @@ class ForexService
 
             return false;
         }
+
         $prices = $this->buildPricesValuesToStore($realValues['body']['candles'], $realValues['body']['instrument']);
         if (empty($this->priceService->savePrices($prices))) {
             return false;
@@ -102,16 +103,25 @@ class ForexService
     {
         $values = [];
         foreach ($realValues as $key => $value) {
+            if (
+                empty($value['time']) ||
+                empty($value['mid']['o']) ||
+                empty($value['mid']['h']) ||
+                empty($value['mid']['l']) ||
+                empty($value['mid']['c'])
+            ) {
+                trigger_error('Got wrong structure for price ' . var_export($value, true) . ' ignoring this value', E_USER_NOTICE);
+                continue;
+            }
+
             $values[] = [
                 'pack' => self::REAL_PACK,
                 'instrument' => $instrument,
                 'datetime' => (\DateTime::createFromFormat(self::EXTERNAL_DATETIME_FORMAT, $value['time']))->format(self::INTERNAL_DATETIME_FORMAT),
-                'open' => (int)($value['mid']['o'] * 100000),
-                'high' => (int)($value['mid']['h'] * 100000),
-                'low' => (int)($value['mid']['l'] * 100000),
-                'average' => (int)((($value['mid']['h'] + $value['mid']['l']) / 2)  * 100000),
-                'close' => (int)($value['mid']['c'] * 100000),
-                'extrema' => null
+                'open' => $value['mid']['o'],
+                'high' => $value['mid']['h'],
+                'low' => $value['mid']['l'],
+                'close' => $value['mid']['c']
             ];
         }
 
@@ -133,56 +143,53 @@ class ForexService
 
     private function storeIndicators($instrument) : bool
     {
-
-    var_dump($instrument);exit;
-        $latestPrice = $this->priceService->getLatestIndicatorsByInstrumentAndPack($instrument, self::REAL_PACK);
+        $latestIndicator = $this->indicatorService->getLatestIndicatorByInstrumentAndPack($instrument, self::REAL_PACK);
 
         if (!empty($latestPrice['datetime'])) {
             $startDate = date_format(date_create_from_format(self::INTERNAL_DATETIME_FORMAT, $latestPrice['datetime']), self::EXTERNAL_DATETIME_FORMAT);
             $endDate = date(self::EXTERNAL_DATETIME_FORMAT, strtotime($latestPrice['datetime'] . self::INTERVAL));
 
-            // latest record mey be not complete so remove it and fetch new one for it's datetime
-            $this->priceService->deletePriceById($latestPrice['id']);
         } else {
             $startDate = date(self::EXTERNAL_DATETIME_FORMAT, strtotime(self::BEGINING_DATETIME));
             $endDate = date(self::EXTERNAL_DATETIME_FORMAT, strtotime(self::BEGINING_DATETIME . self::INTERVAL));
         }
+//@TODO figure out proper periods based on dates
+$period = 604800;
 
-        $query = ['from' => $startDate, 'instrument' => $instrument, 'period' => 86400];
-        $realValues = $this->client->get(['labs' => 'v1', 'calendar' => null], $query);
-
-        if (empty($realValues['body']['candles']) || empty($realValues['body']['instrument'])) {
-            trigger_error('Got wrong response ' . var_export($realValues ,true), E_USER_NOTICE);
-
-            return false;
-        }
-
-        $prices = $this->buildValuesToStore($realValues['body']['candles'], $realValues['body']['instrument']);
-        $result = $this->priceService->savePrices($prices);
+        $query = ['from' => $startDate, 'instrument' => $instrument, 'period' => $period];
+        $realValues = $this->oandaClient->get(['labs' => 'v1', 'calendar' => null], $query);
+        $indicators = $this->buildValuesToStore($realValues['body']);
+        $result = $this->indicatorService->saveIndicators($indicators);
 
         return true;
     }
 
-    private function buildValuesToStore(array $realValues, string $instrument) : array
+    private function buildValuesToStore(array $realValues) : array
     {
         $values = [];
         foreach ($realValues as $key => $value) {
+            if (
+                empty($value['currency']) ||
+                empty($value['timestamp']) ||
+                empty($value['title']) ||
+                empty($value['actual'])
+            ) {
+                trigger_error('Got wrong structure for indicator ' . var_export($value, true) . ' ignoring this value', E_USER_NOTICE);
+                continue;
+            }
+
             $values[] = [
                 'pack' => self::REAL_PACK,
-                'instrument' => $instrument,
-                'datetime' => date_format(date_create_from_format(self::EXTERNAL_DATETIME_FORMAT, $value['time']), self::INTERNAL_DATETIME_FORMAT),
-                'open' => (int)($value['mid']['o'] * 100000),
-                'high' => (int)($value['mid']['h'] * 100000),
-                'low' => (int)($value['mid']['l'] * 100000),
-                'average' => (int)((($value['mid']['h'] + $value['mid']['l']) / 2)  * 100000),
-                'close' => (int)($value['mid']['c'] * 100000),
-                'extrema' => null
+                'instrument' => $value['currency'],
+                'datetime' => (\DateTime::createFromFormat(self::UNIX_TIMESTAMP_FORMAT, $value['timestamp']))->format(self::INTERNAL_DATETIME_FORMAT),
+                'name' => $value['title'],
+                'unit' => $value['unit'] ?? null,
+                'forecast' => $value['forecast'] ?? null,
+                'market' => $value['market'] ?? null,
+                'actual' => $value['actual']
             ];
         }
 
         return $values;
     }
-
-
-
 }
