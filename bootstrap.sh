@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS `indicator` (
     `forecast` DECIMAL(10,5) DEFAULT NULL,
     `market` DECIMAL(10,5) DEFAULT NULL,
     `actual` DECIMAL(10,5) NOT NULL,
-    PRIMARY KEY (`pack`, `instrument`, `datetime`)
+    PRIMARY KEY (`pack`, `instrument`, `datetime`, `name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 CREATE TABLE IF NOT EXISTS `price` (
     `pack` VARCHAR(37) COLLATE utf8_general_ci NOT NULL,

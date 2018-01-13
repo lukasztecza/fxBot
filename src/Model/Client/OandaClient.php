@@ -39,4 +39,10 @@ class OandaClient extends ClientAbstract
 
         return $this->get(['v3' => 'instruments', $instrument => 'candles'], $query);
     }
+
+    public function getIndicators(string $period) : array
+    {
+        $query = ['period' => $period];
+        return $this->get(['labs' => 'v1', 'calendar' => null], $query);
+    }
 }

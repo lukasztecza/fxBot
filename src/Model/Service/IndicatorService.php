@@ -22,10 +22,10 @@ class IndicatorService
         }
     }
 
-    public function getLatestIndicatorByInstrumentAndPack(string $instrument, string $pack) : array
+    public function getLatestIndicatorByPack(string $pack) : array
     {
         try {
-            return $this->indicatorRepository->getLatestIndicatorByInstrumentAndPack($instrument, $pack);
+            return $this->indicatorRepository->getLatestIndicatorByPack($pack);
         } catch(\Throwable $e) {
             trigger_error('Failed to get latest indicator with message ' . $e->getMessage());
 
