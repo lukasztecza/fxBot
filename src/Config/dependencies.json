@@ -107,6 +107,9 @@
             "@indicatorRepository@"
         ]
     },
+    "tradeService": {
+        "class": "TinyApp\\Model\\Service\\TradeService"
+    },
 
 
 
@@ -159,6 +162,12 @@
         "class": "TinyApp\\Model\\Command\\PopulateIndicatorsCommand",
         "inject": [
             "@oandaFetchingService@"
+        ]
+    },
+    "tradeCommand": {
+        "class": "TinyApp\\Model\\Command\\TradeCommand",
+        "inject": [
+            "@tradeService@"
         ]
     }
 }
