@@ -8,7 +8,6 @@ use HttpClient\ClientFactory;
 
 class OandaFetchingService implements FetchingServiceInterface
 {
-    private const EXTERNAL_DATETIME_FORMAT = 'Y-m-d\TH:i:s.u000\Z';
     private const INTERNAL_DATETIME_FORMAT = 'Y-m-d H:i:s';
     private const BEGINING_DATETIME = '2017-10-01 00:00:00';
     private const SHORT_INTERVAL = 'P14D';
@@ -27,35 +26,18 @@ class OandaFetchingService implements FetchingServiceInterface
 
     private const REAL_PACK = 'real';
 
-    private const PRICE_INSTRUMENTS = [
-        'AUD_USD',
-        'AUD_CAD',
-        'AUD_JPY',
-        'AUD_CHF',
-        'CAD_CHF',
-        'CAD_JPY',
-        'CHF_JPY',
-        'EUR_GBP',
-        'EUR_USD',
-        'EUR_JPY',
-        'EUR_CHF',
-        'EUR_AUD',
-        'EUR_CAD',
-        'GBP_JPY',
-        'GBP_USD',
-        'GBP_CAD',
-        'GBP_CHF',
-        'GBP_AUD',
-        'USD_JPY',
-        'USD_CAD',
-        'USD_CHF'
-    ];
-
+    private $priceInstruments;
     private $priceService;
     private $indicatorService;
     private $oandaClient;
 
-    public function __construct(PriceService $priceService, IndicatorService $indicatorService, ClientFactory $clientFactory) {
+    public function __construct(
+        array $priceInstruments,
+        PriceService $priceService,
+        IndicatorService $indicatorService,
+        ClientFactory $clientFactory
+    ) {
+        $this->priceInstruments = $priceInstruments;
         $this->priceService = $priceService;
         $this->indicatorService = $indicatorService;
         $this->oandaClient = $clientFactory->getClient('oandaClient');
@@ -63,9 +45,9 @@ class OandaFetchingService implements FetchingServiceInterface
 
     public function populatePrices() : bool
     {
-        $expectedSuccesses = count(self::PRICE_INSTRUMENTS);
+        $expectedSuccesses = count($this->priceInstruments);
         $successes = 0;
-        foreach (self::PRICE_INSTRUMENTS as $instrument) {
+        foreach ($this->priceInstruments as $instrument) {
             if ($this->storePrices($instrument)) {
                 $successes++;
             }
@@ -84,16 +66,25 @@ class OandaFetchingService implements FetchingServiceInterface
         $latestPrice = $this->priceService->getLatestPriceByInstrumentAndPack($instrument, self::REAL_PACK);
         $latestDateTime = $latestPrice['datetime'] ?? null;
         $dateTimes = $this->getDateTimesByLatest($latestDateTime, self::SHORT_INTERVAL);
-        $this->formatDateTimes($dateTimes, self::EXTERNAL_DATETIME_FORMAT);
-        $realValues = $this->oandaClient->getPrices($instrument, $dateTimes['start'], $dateTimes['end']);
-
-        if (empty($realValues['body']['candles']) || empty($realValues['body']['instrument'])) {
-            trigger_error('Got wrong response ' . var_export($realValues ,true), E_USER_NOTICE);
+        $this->formatDateTimes($dateTimes, $this->oandaClient->getOandaDateTimeFormat());
+        try {
+            $response = $this->oandaClient->getPrices($instrument, $dateTimes['start'], $dateTimes['end']);
+        } catch (\Throwable $e) {
+            trigger_error(
+                'Got an exception response trying to get prices with message ' . $e->getMessage() . ' for instrument ' .
+                var_export($instrument ,true) . ' and dates ' . var_export($dateTimes, true), E_USER_NOTICE
+            );
 
             return false;
         }
 
-        $prices = $this->buildPricesValuesToStore($realValues['body']['candles'], $realValues['body']['instrument']);
+        if (empty($response['body']['candles']) || empty($response['body']['instrument'])) {
+            trigger_error('Got wrong response ' . var_export($response ,true), E_USER_NOTICE);
+
+            return false;
+        }
+
+        $prices = $this->buildPricesValuesToStore($response['body']['candles'], $response['body']['instrument']);
         if (empty($this->priceService->savePrices($prices))) {
             return false;
         }
@@ -108,8 +99,18 @@ class OandaFetchingService implements FetchingServiceInterface
         $dateTimes = $this->getDateTimesByLatest($latestDateTime, self::LONG_INTERVAL);
         $period = $this->getPeriodByDateTimes($dateTimes['start'], $dateTimes['end']);
 
-        $realValues = $this->oandaClient->getIndicators($period);
-        $indicators = $this->buildIndicatorsValuesToStore($realValues['body']);
+        try {
+            $response = $this->oandaClient->getIndicators($period);
+        } catch (\Throwable $e) {
+            trigger_error(
+                'Got an exception response trying to get indicators with message ' . $e->getMessage() . ' for instrument ' .
+                var_export($instrument ,true) . ' and dates ' . var_export($dateTimes, true), E_USER_NOTICE
+            );
+
+            return false;
+        }
+
+        $indicators = $this->buildIndicatorsValuesToStore($response['body']);
         $result = $this->indicatorService->saveIndicators($indicators);
 
         return true;
@@ -133,7 +134,9 @@ class OandaFetchingService implements FetchingServiceInterface
             $values[] = [
                 'pack' => self::REAL_PACK,
                 'instrument' => $instrument,
-                'datetime' => (\DateTime::createFromFormat(self::EXTERNAL_DATETIME_FORMAT, $value['time']))->format(self::INTERNAL_DATETIME_FORMAT),
+                'datetime' => (
+                    \DateTime::createFromFormat($this->oandaClient->getOandaDateTimeFormat(), $value['time'])
+                )->format(self::INTERNAL_DATETIME_FORMAT),
                 'open' => $value['mid']['o'],
                 'high' => $value['mid']['h'],
                 'low' => $value['mid']['l'],
@@ -196,7 +199,7 @@ class OandaFetchingService implements FetchingServiceInterface
     private function formatDateTimes(array &$dateTimes, string $format) : void
     {
         foreach ($dateTimes as $key => $dateTime) {
-            $dateTimes[$key] = $dateTime ? $dateTime->format(self::EXTERNAL_DATETIME_FORMAT) : null;
+            $dateTimes[$key] = $dateTime ? $dateTime->format($this->oandaClient->getOandaDateTimeFormat()) : null;
         }
     }
 
