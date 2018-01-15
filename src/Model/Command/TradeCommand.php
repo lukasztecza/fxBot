@@ -15,10 +15,7 @@ class TradeCommand implements CommandInterface
 
     public function execute() : CommandResult
     {
-        if ($this->tradeService->trade()) {
-            return new CommandResult(true, 'successfully executed trades');
-        } else {
-            return new CommandResult(false, 'failed to execute trades');
-        }
+        $tradeResult = $this->tradeService->trade();
+        return new CommandResult($tradeResult['status'], $tradeResult['message']);
     }
 }

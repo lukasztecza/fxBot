@@ -90,6 +90,7 @@
     "oandaFetchingService": {
         "class": "TinyApp\\Model\\Service\\OandaFetchingService",
         "inject": [
+            "%priceInstruments%",
             "@priceService@",
             "@indicatorService@",
             "@clientFactory@"
@@ -108,7 +109,16 @@
         ]
     },
     "tradeService": {
-        "class": "TinyApp\\Model\\Service\\TradeService"
+        "class": "TinyApp\\Model\\Service\\TradeService",
+        "inject": [
+            "%priceInstruments%",
+            "@clientFactory@",
+            "%oandaAccount%",
+            "@strategyFactory@"
+        ]
+    },
+    "strategyFactory": {
+        "class": "TinyApp\\Model\\Strategy\\StrategyFactory"
     },
 
 
