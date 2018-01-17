@@ -54,9 +54,9 @@ class OandaClient extends ClientAbstract
         return $this->get(['labs' => 'v1', 'calendar' => null], $query);
     }
 
-    public function getOpenPositions(string $oandaAccount) : array
+    public function getAccountSummary(string $oandaAccount) : array
     {
-        return $this->get(['v3' => 'accounts', $oandaAccount => 'openPositions']);
+        return $this->get(['v3' => 'accounts', $oandaAccount => 'summary']);
     }
 
     public function getCurrentPrice($instrument) : array
@@ -66,8 +66,8 @@ class OandaClient extends ClientAbstract
        return $this->get(['v3' => 'instruments', $instrument => 'candles'], $query);
     }
 
-    public function executeTrade(Order $order) : array
+    public function executeTrade(string $oandaAccount, Order $order) : array
     {
-        var_dump($order->getFormatted());exit;
+        return $this->post(['v3' => 'accounts', $oandaAccount => 'orders'], [], [], $order->getFormatted());
     }
 }

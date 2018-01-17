@@ -29,23 +29,29 @@ class TradeService
 
     public function trade() : array
     {
-/*        try {
-            $response = $this->oandaClient->getOpenPositions($this->oandaAccount);
+        try {
+            $response = $this->oandaClient->getAccountSummary($this->oandaAccount);
             if ($response['info']['http_code'] !== 200) {
                 return ['status' => false, 'message' => 'Did not get 200 response trying to get open positions'];
             }
-            if (!empty($response['positions'])) {
+            if (!empty($response['body']['openPositionCount'])) {
                 return ['status' => true, 'message' => 'Maximum allowed open positions reached, did not execute any trade'];
+            }
+            if (empty($response['body']['account']['balance'])) {
+                return ['status' => true, 'message' => 'Could not get account balance, did not execute any trade'];
             }
         } catch (\Throwable $e) {
             trigger_error('Failed to get open positions with message ' . $e->getMessage(), E_USER_NOTICE);
+
+            return ['status' => false, 'message' => 'Got exception trying to get open positions'];
         }
-*/
+
+        $balance = $response['body']['account']['balance'];
         $prices = [];
         try {
             foreach ($this->priceInstruments as $instrument) {
                 $response = $this->oandaClient->getCurrentPrice($instrument);
-                if (empty($response['body']['candles'][0]['mid']['c'])) {
+                if (empty($response['body']['candles'][0]['bid']['c']) || empty($response['body']['candles'][0]['ask']['c'])) {
                     trigger_error('Failed to get current price for ' . $instrument . ' did not execute any trade', E_USER_NOTICE);
 
                     return ['status' => true, 'message' => 'Could not get current prices, did not execute any trade'];
@@ -58,23 +64,26 @@ class TradeService
             }
         } catch (\Throwable $e) {
             trigger_error('Failed to get current prices with message ' . $e->getMessage(), E_USER_NOTICE);
+
+            return ['status' => false, 'message' => 'Got exception trying to get current prices, did not execute any trade'];
         }
 
-
         $strategy = $this->strategyFactory->getStrategy(SelectedStrategy::class);
+        $order = $strategy->getOrder($prices, $balance);
 
-        $order = $strategy->getOrderForPrices($prices);
-
-
-        $this->oandaClient->executeTrade($order);
-echo 'DONE';exit;
-//@TODO save executed trade
         try {
-            return $this->priceRepository->savePrices($prices);
+            $result = $this->oandaClient->executeTrade($this->oandaAccount, $order);
         } catch(\Throwable $e) {
-            trigger_error('Failed to save prices with message ' . $e->getMessage() . ' with paylaod ' . var_export($prices, true), E_USER_NOTICE);
+            trigger_error('Failed to execute trade with message ' . $e->getMessage() . ' with order ' . var_export($order, true), E_USER_NOTICE);
 
-            return [];
+            return ['status' => false, 'message' => 'Got exception trying to execute trade  prices, did not execute any trade'];
+        }
+
+        // @TODO store executed trades and pack
+        try {
+//            return $this->tradeRepository->saveTrade($trade);
+        } catch(\Throwable $e) {
+
         }
     }
 }

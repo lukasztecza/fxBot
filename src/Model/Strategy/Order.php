@@ -19,8 +19,8 @@ class Order
     public function __construct(
         string $instrument,
         int $units,
-        float $takeProfit,
-        float $stopLoss,
+        string $takeProfit,
+        string $stopLoss,
         string $type = null,
         string $timeInForce = null,
         string $positionFill = null
@@ -54,12 +54,12 @@ class Order
         return $this->units;
     }
 
-    public function getTakeProfit() : float
+    public function getTakeProfit() : string
     {
         return $this->takeProfit;
     }
 
-    public function getStopLoss() : float
+    public function getStopLoss() : string
     {
         return $this->stopLoss;
     }
