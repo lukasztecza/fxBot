@@ -1,21 +1,21 @@
 <?php
 namespace TinyApp\Model\Command;
 
-use TinyApp\Model\Service\ForexService;
+use TinyApp\Model\Service\FetchingServiceInterface;
 use TinyApp\Model\Command\CommandResult;
 
 class PopulateIndicatorsCommand implements CommandInterface
 {
-    private $forexService;
+    private $fetchingService;
 
-    public function __construct(ForexService $forexService)
+    public function __construct(FetchingServiceInterface $fetchingService)
     {
-        $this->forexService = $forexService;
+        $this->fetchingService = $fetchingService;
     }
 
     public function execute() : CommandResult
     {
-        if ($this->forexService->populateIndicators()) {
+        if ($this->fetchingService->populateIndicators()) {
             return new CommandResult(true, 'successfully populated all indicators');
         } else {
             return new CommandResult(false, 'failed to populated all indicators');

@@ -87,9 +87,10 @@
             "%clientConfiguration%"
         ]
     },
-    "forexService": {
-        "class": "TinyApp\\Model\\Service\\ForexService",
+    "oandaFetchingService": {
+        "class": "TinyApp\\Model\\Service\\OandaFetchingService",
         "inject": [
+            "%priceInstruments%",
             "@priceService@",
             "@indicatorService@",
             "@clientFactory@"
@@ -106,6 +107,18 @@
         "inject": [
             "@indicatorRepository@"
         ]
+    },
+    "tradeService": {
+        "class": "TinyApp\\Model\\Service\\TradeService",
+        "inject": [
+            "%priceInstruments%",
+            "@clientFactory@",
+            "%oandaAccount%",
+            "@strategyFactory@"
+        ]
+    },
+    "strategyFactory": {
+        "class": "TinyApp\\Model\\Strategy\\StrategyFactory"
     },
 
 
@@ -152,13 +165,19 @@
     "populatePricesCommand": {
         "class": "TinyApp\\Model\\Command\\PopulatePricesCommand",
         "inject": [
-            "@forexService@"
+            "@oandaFetchingService@"
         ]
     },
     "populateIndicatorsCommand": {
         "class": "TinyApp\\Model\\Command\\PopulateIndicatorsCommand",
         "inject": [
-            "@forexService@"
+            "@oandaFetchingService@"
+        ]
+    },
+    "tradeCommand": {
+        "class": "TinyApp\\Model\\Command\\TradeCommand",
+        "inject": [
+            "@tradeService@"
         ]
     }
 }

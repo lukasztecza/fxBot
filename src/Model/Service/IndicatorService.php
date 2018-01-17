@@ -16,18 +16,18 @@ class IndicatorService
         try {
             return $this->indicatorRepository->saveIndicators($indicators);
         } catch(\Throwable $e) {
-            trigger_error('Failed to save indicators with message ' . $e->getMessage() . ' with paylaod ' . var_export($prices, true), E_USER_NOTICE);
+            trigger_error('Failed to save indicators with message ' . $e->getMessage() . ' with paylaod ' . var_export($indicators, true), E_USER_NOTICE);
 
             return [];
         }
     }
 
-    public function getLatestPriceByInstrumentAndPack(string $instrument, string $pack) : array
+    public function getLatestIndicatorByPack(string $pack) : array
     {
         try {
-            return $this->marketRepository->getLatestPriceByInstrumentAndPack($instrument, $pack);
+            return $this->indicatorRepository->getLatestIndicatorByPack($pack);
         } catch(\Throwable $e) {
-            trigger_error('Failed to get latest price with message ' . $e->getMessage());
+            trigger_error('Failed to get latest indicator with message ' . $e->getMessage());
 
             return [];
         }
@@ -62,17 +62,6 @@ class IndicatorService
             if ($scoreMin === 2 * $range + 1) {
                 $values[$key]['extrema'] = 'min';
             }
-        }
-    }
-
-    public function deletePriceById(int $id) : bool
-    {
-        try {
-            return $this->marketRepository->deletePriceById($id);
-        } catch(\Throwable $e) {
-            trigger_error('Failed to delete price with message ' . $e->getMessage() . ' with id ' . var_export($id, true), E_USER_NOTICE);
-
-            return false;
         }
     }
 }

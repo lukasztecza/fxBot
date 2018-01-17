@@ -122,26 +122,25 @@ CREATE TABLE IF NOT EXISTS `files` (
     KEY (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 CREATE TABLE IF NOT EXISTS `indicator` (
-    `id` INT(11) NOT NULL AUTO_INCREMENT,
+    `pack` VARCHAR(37) COLLATE utf8_general_ci NOT NULL,
+    `instrument` CHAR(3) COLLATE utf8_general_ci NOT NULL,
     `datetime` DATETIME NOT NULL,
-    `content` TEXT COLLATE utf8_general_ci NOT NULL,
-    PRIMARY KEY (`id`)
+    `name` VARCHAR(32) COLLATE utf8_general_ci NOT NULL,
+    `unit` VARCHAR(16) DEFAULT NULL,
+    `forecast` DECIMAL(10,5) DEFAULT NULL,
+    `market` DECIMAL(10,5) DEFAULT NULL,
+    `actual` DECIMAL(10,5) NOT NULL,
+    PRIMARY KEY (`pack`, `instrument`, `datetime`, `name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 CREATE TABLE IF NOT EXISTS `price` (
-    `id` INT(11) NOT NULL AUTO_INCREMENT,
-    `pack` varchar(37) COLLATE utf8_general_ci NOT NULL,
-    `instrument` char(7) COLLATE utf8_general_ci NOT NULL,
+    `pack` VARCHAR(37) COLLATE utf8_general_ci NOT NULL,
+    `instrument` CHAR(7) COLLATE utf8_general_ci NOT NULL,
     `datetime` DATETIME NOT NULL,
-    `open` INT(11) NOT NULL,
-    `high` INT(11) NOT NULL,
-    `low` INT(11) NOT NULL,
-    `average` INT(11) NOT NULL,
-    `close` INT(11) NOT NULL,
-    `extrema` char(3) COLLATE utf8_general_ci DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    KEY (`pack`),
-    KEY (`instrument`),
-    KEY (`datetime`)
+    `open` DECIMAL(10,5) NOT NULL,
+    `high` DECIMAL(10,5) NOT NULL,
+    `low` DECIMAL(10,5) NOT NULL,
+    `close` DECIMAL(10,5) NOT NULL,
+    PRIMARY KEY (`pack`, `instrument`, `datetime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 EOL
 
