@@ -8,8 +8,9 @@ class PriceRepository extends RepositoryAbstract
         $this->getWrite()->begin();
         try {
             $this->getWrite()->prepare(
-                'INSERT INTO `price` (`pack`, `instrument`, `datetime`, `open`, `high`, `low`, `average`, `close`, `extrema`)
-                VALUES (:pack, :instrument, :datetime, :open, :high, :low, :average, :close, :extrema)'
+                'INSERT INTO `price` (`pack`, `instrument`, `datetime`, `open`, `high`, `low`, `close`)
+                VALUES (:pack, :instrument, :datetime, :open1, :high1, :low1, :close1)
+                ON DUPLICATE KEY UPDATE `open` = :open2, `high` = :high2, `low` = :low2, `close` = :close2' 
             );
             $affectedIds = [];
             foreach ($prices as $price) {
@@ -17,14 +18,17 @@ class PriceRepository extends RepositoryAbstract
                     'pack' => $price['pack'],
                     'instrument' => $price['instrument'],
                     'datetime' => $price['datetime'],
-                    'open' => $price['open'],
-                    'high' => $price['high'],
-                    'low' => $price['low'],
-                    'average' => $price['average'],
-                    'close' => $price['close'],
-                    'extrema' => $price['extrema']
+                    'open1' => $price['open'],
+                    'high1' => $price['high'],
+                    'low1' => $price['low'],
+                    'close1' => $price['close'],
+                    'open2' => $price['open'],
+                    'high2' => $price['high'],
+                    'low2' => $price['low'],
+                    'close2' => $price['close']
                 ]);
             }
+            $this->getWrite()->commit();
         } catch(\Throwable $e) {
             $this->getWrite()->rollBack();
             trigger_error(
@@ -32,7 +36,6 @@ class PriceRepository extends RepositoryAbstract
             );
             throw $e;
         }
-        $this->getWrite()->commit();
 
         return $affectedIds;
     }
@@ -40,19 +43,10 @@ class PriceRepository extends RepositoryAbstract
     public function getLatestPriceByInstrumentAndPack(string $instrument, string $pack) : array
     {
         $records = $this->getRead()->fetch(
-            'SELECT * FROM `price` WHERE `instrument` = :instrument AND `pack` = :pack ORDER BY `id` DESC LIMIT 1',
+            'SELECT * FROM `price` WHERE `instrument` = :instrument AND `pack` = :pack ORDER BY `datetime` DESC LIMIT 1',
             ['instrument' => $instrument, 'pack' => $pack]
         );
 
         return !empty($records) ? array_pop($records) : [];
-    }
-
-    public function deletePriceById(int $id) : bool
-    {
-        $this->getWrite()->execute(
-            'DELETE FROM `price` WHERE `id` = :id', ['id' => $id]
-        );
-
-        return true;
     }
 }
