@@ -44,11 +44,22 @@ class RandomStrategy implements StrategyInterface
                 $selectedInstrument = $instrument;
             }
         }
-
+//@TODO ensure it works
+//$selectedInstrument = 'EUR_USD';
         // get home rate
         $quoteCurrency = explode('_', $selectedInstrument)[1];
-        $homeInstrument = $quoteCurrency . '_' . self::HOME_CURRENCY;
-        $homeRate = ($prices[$homeInstrument]['bid'] + $prices[$homeInstrument]['ask']) / 2;
+        if (isset($prices[$quoteCurrency . '_' . self::HOME_CURRENCY])) {
+            $homeInstrument = $quoteCurrency . '_' . self::HOME_CURRENCY;
+            $homeRate = ($prices[$homeInstrument]['bid'] + $prices[$homeInstrument]['ask']) / 2;
+        } elseif(isset($prices[self::HOME_CURRENCY . '_' . $quoteCurrency])) {
+            $homeInstrument = self::HOME_CURRENCY . '_' . $quoteCurrency;
+            $homeRate = 2 / ($prices[$homeInstrument]['bid'] + $prices[$homeInstrument]['ask']);
+        }
+
+        if (empty($homeInstrument)) {
+            throw new \Exception('Could not find home instrument for selected instrument ' . var_export($selectedInstrument, true));
+        }
+
 
         // get stop loss in pips
         $balanceRisk = $balance * self::SINGLE_TRANSACTION_RISK;
