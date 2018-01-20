@@ -142,6 +142,16 @@ CREATE TABLE IF NOT EXISTS `price` (
     `close` DECIMAL(10,5) NOT NULL,
     PRIMARY KEY (`pack`, `instrument`, `datetime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+CREATE TABLE IF NOT EXISTS `trade` (
+    `id` INT(11) NOT NULL AUTO_INCREMENT,
+    `instrument` CHAR(7) COLLATE utf8_general_ci NOT NULL,
+    `units` INT(11) NOT NULL,
+    `price` DECIMAL(10,5) NOT NULL,
+    `take_profit` DECIMAL(10,5) NOT NULL,
+    `stop_loss` DECIMAL(10,5) NOT NULL,
+    `datetime` DATETIME NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 EOL
 
 # Restart apache
