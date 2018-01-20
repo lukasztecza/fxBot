@@ -33,7 +33,7 @@ class TradeService
         if (empty($accountDetails)) {
             return ['status' => false, 'message' => 'Could not get account details'];
         }
-        $balance = $accountDetails['balance'] ?? null;
+        $balance = $accountDetails['balance'];
 
         $prices = $this->getCurrentPrices();
         if (empty($prices)) {
@@ -74,7 +74,7 @@ var_dump($order);exit;
                 case $response['info']['http_code'] !== 200:
                     trigger_error('Failed to get valid response ' . var_export($response, true), E_USER_NOTICE);
                     return [];
-                case !isset($response['body']['account']['openPositionCount']) || !isset($response['body']['account']['balance']):
+                case !isset($response['body']['account']['openPositionCount']) || empty($response['body']['account']['balance']):
                     trigger_error('Failed to get expected account details in response ' . var_export($response, true), E_USER_NOTICE);
                     return [];
                 case $response['body']['account']['openPositionCount'] >= self::MAX_ALLOWED_OPEN_POSITIONS:

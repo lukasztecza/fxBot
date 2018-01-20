@@ -118,7 +118,11 @@
         ]
     },
     "strategyFactory": {
-        "class": "TinyApp\\Model\\Strategy\\StrategyFactory"
+        "class": "TinyApp\\Model\\Strategy\\StrategyFactory",
+        "inject": [
+            "@priceService@",
+            "@indicatorService@"
+        ]
     },
 
 
