@@ -114,7 +114,8 @@
             "%priceInstruments%",
             "@clientFactory@",
             "%oandaAccount%",
-            "@strategyFactory@"
+            "@strategyFactory@",
+            "@tradeRepository"
         ]
     },
     "strategyFactory": {
@@ -152,6 +153,12 @@
     },
     "indicatorRepository": {
         "class": "TinyApp\\Model\\Repository\\IndicatorRepository",
+        "inject": [
+            "@writeConnection@"
+        ]
+    },
+    "tradeRepository": {
+        "class": "TinyApp\\Model\\Repository\\TradeRepository",
         "inject": [
             "@writeConnection@"
         ]

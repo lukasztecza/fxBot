@@ -3,6 +3,7 @@ namespace TinyApp\Model\Service;
 
 use HttpClient\ClientFactory;
 use TinyApp\Model\Strategy\StrategyFactory;
+use TinyApp\Model\Repository\TradeRepository;
 
 use TinyApp\Model\Strategy\RandomStrategy as SelectedStrategy;
 
@@ -14,22 +15,25 @@ class TradeService
     private $oandaClient;
     private $oandaAccount;
     private $strategyFactory;
+    private $tradeRepository;
 
     public function __construct(
         array $priceInstruments,
         ClientFactory $clientFactory,
         string $oandaAccount,
-        StrategyFactory $strategyFactory
+        StrategyFactory $strategyFactory,
+        TradeRepository $tradeRepository
     ) {
         $this->priceInstruments = $priceInstruments;
         $this->oandaClient = $clientFactory->getClient('oandaClient');
         $this->oandaAccount = $oandaAccount;
         $this->strategyFactory = $strategyFactory;
+        $this->tradeRepository = $tradeRepository;
     }
 
     public function trade() : array
     {
-        $accountDetails = $this->getAccountDetails(); //get balance
+        $accountDetails = $this->getAccountDetails();
         if (empty($accountDetails)) {
             return ['status' => false, 'message' => 'Could not get account details'];
         }
@@ -48,7 +52,7 @@ class TradeService
 
             return ['status' => false, 'message' => 'Could not create order'];
         }
-var_dump($order);exit;
+
         try {
             $result = $this->oandaClient->executeTrade($this->oandaAccount, $order);
         } catch(\Throwable $e) {
@@ -57,12 +61,22 @@ var_dump($order);exit;
             return ['status' => false, 'message' => 'Got exception trying to execute trade  prices'];
         }
 
-        // @TODO store executed trades and pack
         try {
-//            return $this->tradeRepository->saveTrade($trade);
+            $this->tradeRepository->saveTrade([
+                'instrument' => $order->getInstrument(),
+                'units' => $order->getUnits(),
+                'price' => $order->getUnits() > 0 ? $prices[$order->getInstrument()]['ask'] : $prices[$order->getInstrument()]['bid'],
+                'takeProfit' => $order->getTakeProfit(),
+                'stopLoss' => $order->getStopLoss(),
+                'datetime' => (new \DateTime(null, new \DateTimeZone('UTC')))->format('Y-m-d H:i:s')
+            ]);
         } catch(\Throwable $e) {
+            trigger_error('Failed to save trade for order ' . var_export($order, true) . ' with message ' . $e->getMessage(), E_USER_NOTICE);
 
+            return ['status' => false, 'message' => 'Got exception trying to save  execute trade  prices'];
         }
+
+        return ['status' => true, 'message' => 'Trade executed and stored successfully'];
     }
 
     private function getAccountDetails() : array
