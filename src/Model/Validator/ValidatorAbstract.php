@@ -39,7 +39,7 @@ abstract class ValidatorAbstract implements ValidatorInterface
                     break;
             }
 
-            if ($request->getHost() !== $httpOrigin) {
+            if (strpos($request->getHost(), $httpOrigin) !== 0) {
                 $this->error = 'Origin is not valid';
                 return false;
             }
