@@ -169,7 +169,7 @@ class FilesRepository extends RepositoryAbstract
         $this->getWrite()->prepare('DELETE FROM `files` WHERE `id` = :id');
         foreach ($files as $file) {
             $this->getWrite()->execute(null, ['id' => $file['id']]);
-            unlink($file['path']);
+            unlink($this->getUploadPathByType($file['type']) . '/' . $file['name']);
         }
         $this->getWrite()->clean();
 
