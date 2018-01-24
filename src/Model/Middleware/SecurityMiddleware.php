@@ -38,13 +38,12 @@ class SecurityMiddleware extends MiddlewareAbstract
                     strpos($request->getRoute(), substr($rule['route'], 0, strlen($rule['route']) - 2)) === 0
                 )
             ) {
-                $included = true;
-
-                if (empty($roles)) {
-                    break;
-                }
                 if (isset($rule['methods']) && !in_array($request->getMethod(), $rule['methods'])) {
                     continue;
+                }
+                $included = true;
+                if (empty($roles)) {
+                    break;
                 }
 
                 foreach ($roles as $role) {
