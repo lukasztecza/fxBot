@@ -8,12 +8,21 @@
             "route": "/private/upload/{directory}/{file}",
             "methods": ["GET"],
             "allow": ["ROLE_USER"]
+        },
+        {
+            "route": "/files/add",
+            "allow": ["ROLE_USER"]
+        },
+        {
+            "route": "/files/list/{type}/{page}",
+            "methods": ["POST"],
+            "allow": ["ROLE_USER"]
         }
     ],
 
     "cacheList": [
         {
-            "route": "/files",
+            "route": "/",
             "time": "10"
         }
     ],
