@@ -118,6 +118,15 @@
             "@tradeRepository"
         ]
     },
+    "simulationService": {
+        "class": "TinyApp\\Model\\Service\\SimulationService",
+        "inject": [
+            "%priceInstruments%",
+            "@priceService@",
+            "@strategyFactory@",
+            "@tradeRepository"
+        ]
+    },
     "strategyFactory": {
         "class": "TinyApp\\Model\\Strategy\\StrategyFactory",
         "inject": [
@@ -189,6 +198,12 @@
         "class": "TinyApp\\Model\\Command\\TradeCommand",
         "inject": [
             "@tradeService@"
+        ]
+    },
+    "simulationCommand": {
+        "class": "TinyApp\\Model\\Command\\SimulationCommand",
+        "inject": [
+            "@simulationService@"
         ]
     }
 }
