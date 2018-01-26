@@ -9,8 +9,12 @@ use TinyApp\Model\Strategy\RandomStrategy;
 
 class SimulationService
 {
-    private const MAX_ALLOWED_OPEN_POSITIONS = 1;
     private const INITIAL_TEST_BALANCE = 100;
+    private const MAX_ALLOWED_OPEN_POSITIONS = 1;
+
+    private const STRATEGIES = [
+        'TinyApp\Model\Strategy\RandomStrategy'
+    ];
 
     private $priceInstruments;
     private $priceService;
@@ -31,21 +35,26 @@ class SimulationService
 
     public function run() : array
     {
-//        $accountDetails = $this->getAccountDetails();
-//        if (empty($accountDetails)) {
-//            return ['status' => false, 'message' => 'Could not get account details'];
-//        }
-        $initialBalance = self::INITIAL_TEST_BALANCE;//$accountDetails['balance'];
-// var_dump($this->priceInstruments);exit;       //@TODO get balance from trade results
+        $balance = self::INITIAL_TEST_BALANCE;
         $initialPrices = $this->priceService->getInitialPrices($this->priceInstruments);
-var_dump($initialPrices);exit;
-        $prices = $this->getCurrentPrices();
-        //@TODO get price for date
+        $prices = $this->getCurrentPrices($initialPrices);
         if (empty($prices)) {
             return ['status' => false, 'message' => 'Could not get current prices'];
         }
 
-        $strategy = $this->strategyFactory->getStrategy(SelectedStrategy::class);
+        foreach (self::STRATEGIES as $strategyClass) {
+            $strategy = $this->strategyFactory->getStrategy($strategyClass);
+            try {
+                $order = $strategy->getOrder($prices, $balance);
+            } catch(\Throwable $e) {
+                trigger_error('Failed to build order with message ' . $e->getMessage(), E_USER_NOTICE);
+
+                return ['status' => false, 'message' => 'Could not create order'];
+            }
+
+
+            var_dump($order);exit;
+        }
         //@TODO pick all strategies
         try {
             $order = $strategy->getOrder($prices, $balance);
@@ -82,50 +91,18 @@ var_dump($initialPrices);exit;
         return ['status' => true, 'message' => 'Trade executed and stored successfully'];
     }
 
-    private function getAccountDetails() : array
-    {
-        try {
-            $response = $this->oandaClient->getAccountSummary($this->oandaAccount);
-
-            switch (true) {
-                case $response['info']['http_code'] !== 200:
-                    trigger_error('Failed to get valid response ' . var_export($response, true), E_USER_NOTICE);
-                    return [];
-                case !isset($response['body']['account']['openPositionCount']) || empty($response['body']['account']['balance']):
-                    trigger_error('Failed to get expected account details in response ' . var_export($response, true), E_USER_NOTICE);
-                    return [];
-                case $response['body']['account']['openPositionCount'] >= self::MAX_ALLOWED_OPEN_POSITIONS:
-                    trigger_error('Max allowed open positions reached', E_USER_NOTICE);
-                    return [];
-            }
-        } catch (\Throwable $e) {
-            trigger_error('Failed to get account summary with message ' . $e->getMessage(), E_USER_NOTICE);
-
-            return [];
-        }
-
-        return $response['body']['account'];
-    }
-
-    private function getCurrentPrices() : array
+    private function getCurrentPrices($inputPrices) : array
     {
         $prices = [];
         try {
-            foreach ($this->priceInstruments as $instrument) {
-                $response = $this->oandaClient->getCurrentPrice($instrument);
-                if (empty($response['body']['candles'][0]['bid']['c']) || empty($response['body']['candles'][0]['ask']['c'])) {
-                    trigger_error('Failed to get current price for ' . $instrument, E_USER_NOTICE);
-
-                    return [];
-                }
-
-                $prices[$instrument] = [
-                    'ask' => $response['body']['candles'][0]['ask']['c'],
-                    'bid' => $response['body']['candles'][0]['bid']['c']
+            foreach ($inputPrices as $inputPrice) {
+                $prices[$inputPrice['instrument']] = [
+                    'ask' => $inputPrice['high'],
+                    'bid' => $inputPrice['low']
                 ];
             }
         } catch (\Throwable $e) {
-            trigger_error('Failed to get current prices with message ' . $e->getMessage(), E_USER_NOTICE);
+            trigger_error('Failed to create prices with message ' . $e->getMessage(), E_USER_NOTICE);
 
             return [];
         }

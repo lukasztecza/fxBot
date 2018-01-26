@@ -58,5 +58,7 @@
                 }
             ]
         }
-    }
+    },
+
+    "selectedStrategy": "TinyApp\\Model\\Strategy\\RandomStrategy"
 }
