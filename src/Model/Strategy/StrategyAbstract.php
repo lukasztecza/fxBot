@@ -47,14 +47,28 @@ abstract class StrategyAbstract implements StrategyInterface
         string $tradePair,
         float $closeTradePairRate
     ) {
-        $quoteCurrency = explode('_', $tradePair)[1];
+        $currencies = explode('_', $tradePair);
+        $baseCurrency = $currencies[0];
+        $quoteCurrency = $currencies[1];
         $homePair = $homePairRate = null;
-        if (isset($currentPrices[$quoteCurrency . '_' . self::HOME_CURRENCY])) {
-            $homePair = $quoteCurrency . '_' . self::HOME_CURRENCY;
-            $homePairRate = ($currentPrices[$homePair]['bid'] + $currentPrices[$homePair]['ask']) / 2;
-        } elseif(isset($currentPrices[self::HOME_CURRENCY . '_' . $quoteCurrency])) {
-            $homePair = self::HOME_CURRENCY . '_' . $quoteCurrency;
-            $homePairRate = 2 / ($currentPrices[$homePair]['bid'] + $currentPrices[$homePair]['ask']);
+
+        switch (true) {
+            case $baseCurrency === self::HOME_CURRENCY:
+                $homePair = $tradePair;
+                $homePairRate = 2 / ($currentPrices[$homePair]['bid'] + $currentPrices[$homePair]['ask']);
+                break;
+            case $quoteCurrency === self::HOME_CURRENCY:
+                $homePair = $tradePair;
+                $homePairRate = ($currentPrices[$homePair]['bid'] + $currentPrices[$homePair]['ask']) / 2;
+                break;
+            case isset($currentPrices[$quoteCurrency . '_' . self::HOME_CURRENCY]):
+                $homePair = $quoteCurrency . '_' . self::HOME_CURRENCY;
+                $homePairRate = ($currentPrices[$homePair]['bid'] + $currentPrices[$homePair]['ask']) / 2;
+                break;
+            case isset($currentPrices[self::HOME_CURRENCY . '_' . $quoteCurrency]):
+                $homePair = self::HOME_CURRENCY . '_' . $quoteCurrency;
+                $homePairRate = 2 / ($currentPrices[$homePair]['bid'] + $currentPrices[$homePair]['ask']);
+                break;
         }
         if (empty($homePair)) {
             throw new \Exception('Could not find home pair for trade pair ' . var_export($tradePair, true));

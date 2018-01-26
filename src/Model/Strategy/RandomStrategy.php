@@ -21,7 +21,6 @@ class RandomStrategy extends StrategyAbstract
             }
         }
 
-//@TODO ensure it works when markets are live
         $rigidStopLoss = self::RIGID_STOP_LOSS_PIPS;
         if (strpos($selectedPair, 'JPY') !== false) {
             $rigidStopLoss *= 100;

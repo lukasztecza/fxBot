@@ -114,6 +114,7 @@
             "%priceInstruments%",
             "@clientFactory@",
             "%oandaAccount%",
+            "%selectedStrategy%",
             "@strategyFactory@",
             "@tradeRepository"
         ]
