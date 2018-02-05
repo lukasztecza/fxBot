@@ -21,12 +21,22 @@ class StrategyFactory
         if (!in_array(StrategyInterface::class, class_implements($class))) {
             throw new \Exception('Wrong class exception, ' . $class . ' has to implement ' . StrategyInterface::class);
         }
-        $namespaceLassClass = lcfirst(substr($class, strrpos($class, '\\') + 1));
+        $namespaceLessClass = lcfirst(substr($class, strrpos($class, '\\') + 1));
 
-        if (isset($this->strategies[$namespaceLassClass])) {
-            return $this->strategies[$namespaceLassClass];
+        if (isset($this->strategies[$namespaceLessClass])) {
+            return $this->strategies[$namespaceLessClass];
         }
 
-        return new $class($this->priceService, $this->indicatorService);
+        switch ($class) {
+            case 'TinyApp\Model\Strategy\MinSpreadRigidOneMultiOneTrendFindStrategy':
+                $strategy = new $class($this->priceService, $this->indicatorService);
+                break;
+            default:
+                $strategy = new $class();
+                break;
+        }
+
+        $this->strategies[$namespaceLessClass] = $strategy;
+        return $this->strategies[$namespaceLessClass];
     }
 }

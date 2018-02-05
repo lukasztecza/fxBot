@@ -10,6 +10,7 @@ class Order
 
     private $instrument;
     private $units;
+    private $price;
     private $takeProfit;
     private $stopLoss;
     private $type;
@@ -19,6 +20,7 @@ class Order
     public function __construct(
         string $instrument,
         int $units,
+        string $price,
         string $takeProfit,
         string $stopLoss,
         string $type = null,
@@ -27,6 +29,7 @@ class Order
     ) {
         $this->instrument = $instrument;
         $this->units = $units;
+        $this->price = $price;
         $this->takeProfit = $takeProfit;
         $this->stopLoss = $stopLoss;
         $this->type = $type ?? self::DEFAULT_TYPE;
@@ -39,19 +42,14 @@ class Order
         return $this->instrument;
     }
 
-    public function getType() : string
-    {
-        return $this->type;
-    }
-
-    public function getTimeInForce() : string
-    {
-        return $this->timeInfForce;
-    }
-
     public function getUnits() : int
     {
         return $this->units;
+    }
+
+    public function getPrice() : string
+    {
+        return $this->price;
     }
 
     public function getTakeProfit() : string
@@ -62,6 +60,16 @@ class Order
     public function getStopLoss() : string
     {
         return $this->stopLoss;
+    }
+
+    public function getType() : string
+    {
+        return $this->type;
+    }
+
+    public function getTimeInForce() : string
+    {
+        return $this->timeInForce;
     }
 
     public function getPositionFill() : string

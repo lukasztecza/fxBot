@@ -49,4 +49,21 @@ class PriceRepository extends RepositoryAbstract
 
         return !empty($records) ? array_pop($records) : [];
     }
+
+    public function getInitialPrices(array $priceInstruments, string $initialDateTime) : array
+    {
+        $this->getRead()->prepare(
+            'SELECT * FROM `price` WHERE `instrument` = :instrument AND `pack` = "real" AND `datetime` >= :datetime ORDER BY `datetime` ASC LIMIT 1'
+        );
+        $initialPrices = [];
+        foreach ($priceInstruments as $priceInstrument) {
+            $records = $this->getRead()->fetch(null, [
+                'instrument' => $priceInstrument,
+                'datetime' => $initialDateTime
+            ]);
+            $initialPrices[] = !empty($records) ? array_pop($records) : [];
+        }
+
+        return $initialPrices;
+    }
 }
