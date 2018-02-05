@@ -10,10 +10,16 @@ use TinyApp\Model\Strategy\RandomStrategy;
 class SimulationService
 {
     private const INITIAL_TEST_BALANCE = 100;
-    private const MAX_ALLOWED_OPEN_POSITIONS = 1;
+    private const SINGLE_TRANSACTION_RISK = 0.01;
+
+    private const MAX_ITERATIONS_PER_STRATEGY = 10000;
+    private const SIMULATION_START = '2017-10-01 00:00:00';
+    private const SIMULATION_END = '2018-01-15 00:00:00';
 
     private const STRATEGIES = [
-        'TinyApp\Model\Strategy\RandomStrategy'
+        'TinyApp\Model\Strategy\MinSpreadRigidOneMultiOneRandomStrategy',
+        'TinyApp\Model\Strategy\MinSpreadRigidTwoMultiFiveRandomStrategy',
+        'TinyApp\Model\Strategy\MinSpreadRigidOneMultiOneTrendFindStrategy',
     ];
 
     private $priceInstruments;
@@ -35,60 +41,72 @@ class SimulationService
 
     public function run() : array
     {
-        $balance = self::INITIAL_TEST_BALANCE;
-        $initialPrices = $this->priceService->getInitialPrices($this->priceInstruments);
-        $prices = $this->getCurrentPrices($initialPrices);
-        if (empty($prices)) {
-            return ['status' => false, 'message' => 'Could not get current prices'];
-        }
-
+        $results = [];
         foreach (self::STRATEGIES as $strategyClass) {
+            echo '=====================================================' . PHP_EOL;
+            echo 'Simulation for ' . $strategyClass . PHP_EOL;
+            echo '=====================================================' . PHP_EOL;
             $strategy = $this->strategyFactory->getStrategy($strategyClass);
-            try {
-                $order = $strategy->getOrder($prices, $balance);
-            } catch(\Throwable $e) {
-                trigger_error('Failed to build order with message ' . $e->getMessage(), E_USER_NOTICE);
+            $balance = self::INITIAL_TEST_BALANCE;
+            $currentDate = self::SIMULATION_START;
+            $counter = 0;
+            $activeOrder = null;
+            //@TODO add how many trades executed and min max for strategy
 
-                return ['status' => false, 'message' => 'Could not create order'];
+            while ($counter < self::MAX_ITERATIONS_PER_STRATEGY && $currentDate < self::SIMULATION_END) {
+                $counter++;
+                $prices = $this->priceService->getInitialPrices($this->priceInstruments, $currentDate);
+                $prices = $this->getCurrentPrices($prices);
+                if (empty($prices)) {
+                    return [
+                        'status' => false,
+                        'message' => 'Could not get current prices for ' . var_export($strategyClass, true)
+                    ];
+                }
+                $currentDate = (new \DateTime($currentDate, new \DateTimeZone('UTC')));
+                $currentDate = $currentDate->add(new \DateInterval('PT15M'))->format('Y-m-d H:i:s');
+
+                if ($activeOrder) {
+                    $prices[$activeOrder->getInstrument()]['ask'];
+                }
+ 
+                if (is_null($activeOrder)) {
+                    try {
+                        $activeOrder = $strategy->getOrder($prices, $balance, $currentDate);
+                    } catch(\Throwable $e) {
+                        echo 'Could not create order skipping' . PHP_EOL;
+                        continue;
+                    }
+                } elseif (
+                    ($activeOrder->getUnits() > 0 && $activeOrder->getTakeProfit() < $prices[$activeOrder->getInstrument()]['bid']) ||
+                    ($activeOrder->getUnits() < 0 && $activeOrder->getTakeProfit() > $prices[$activeOrder->getInstrument()]['ask'])
+                ) {
+                    $balance = $balance + ($balance * self::SINGLE_TRANSACTION_RISK * (
+                        abs($activeOrder->getPrice() - $activeOrder->getTakeProfit()) / abs($activeOrder->getPrice() - $activeOrder->getStopLoss())
+                    ));
+                    echo 'PROFIT ' . $this->formatBalance($balance) . PHP_EOL;
+                    $activeOrder = null;
+                } elseif (
+                    ($activeOrder->getUnits() > 0 && $activeOrder->getStopLoss() > $prices[$activeOrder->getInstrument()]['bid']) ||
+                    ($activeOrder->getUnits() < 0 && $activeOrder->getStopLoss() < $prices[$activeOrder->getInstrument()]['ask'])
+                ) {
+                    $balance = $balance - ($balance * self::SINGLE_TRANSACTION_RISK);
+                    echo 'LOSS   ' . $this->formatBalance($balance) . PHP_EOL;
+                    $activeOrder = null;
+                }
             }
-
-
-            var_dump($order);exit;
-        }
-        //@TODO pick all strategies
-        try {
-            $order = $strategy->getOrder($prices, $balance);
-        } catch(\Throwable $e) {
-            trigger_error('Failed to build order with message ' . $e->getMessage(), E_USER_NOTICE);
-
-            return ['status' => false, 'message' => 'Could not create order'];
+            $results[$strategyClass] = $balance;
         }
 
-        try {
-            $result = $this->oandaClient->executeTrade($this->oandaAccount, $order);
-        } catch(\Throwable $e) {
-            trigger_error('Failed to execute trade with message ' . $e->getMessage() . ' with order ' . var_export($order, true), E_USER_NOTICE);
-
-            return ['status' => false, 'message' => 'Got exception trying to execute trade  prices'];
+        echo '=====================================================' . PHP_EOL;
+        echo 'Simulation results between ' . self::SIMULATION_START . ' and ' . $currentDate . PHP_EOL;
+        echo '=====================================================' . PHP_EOL;
+        foreach ($results as $strategyClass => $finalBalance) {
+            echo $strategyClass . ' finished with ' . $this->formatBalance($finalBalance) . PHP_EOL;
         }
+        echo '=====================================================' . PHP_EOL;
 
-        try {
-        //@TODO add current balance when saving trade
-            $this->tradeRepository->saveTrade([
-                'instrument' => $order->getInstrument(),
-                'units' => $order->getUnits(),
-                'price' => $order->getUnits() > 0 ? $prices[$order->getInstrument()]['ask'] : $prices[$order->getInstrument()]['bid'],
-                'takeProfit' => $order->getTakeProfit(),
-                'stopLoss' => $order->getStopLoss(),
-                'datetime' => (new \DateTime(null, new \DateTimeZone('UTC')))->format('Y-m-d H:i:s')
-            ]);
-        } catch(\Throwable $e) {
-            trigger_error('Failed to save trade for order ' . var_export($order, true) . ' with message ' . $e->getMessage(), E_USER_NOTICE);
-
-            return ['status' => false, 'message' => 'Got exception trying to save  execute trade  prices'];
-        }
-
-        return ['status' => true, 'message' => 'Trade executed and stored successfully'];
+        return ['status' => true, 'message' => 'simulation finished'];
     }
 
     private function getCurrentPrices($inputPrices) : array
@@ -108,5 +126,10 @@ class SimulationService
         }
 
         return $prices;
+    }
+
+    private function formatBalance(float $balance) : string
+    {
+        return substr($balance, 0, strpos($balance, '.') + 3) . (strpos($balance, '.') === false ? '.00' : '');
     }
 }
