@@ -114,6 +114,16 @@
             "%priceInstruments%",
             "@clientFactory@",
             "%oandaAccount%",
+            "%selectedStrategy%",
+            "@strategyFactory@",
+            "@tradeRepository"
+        ]
+    },
+    "simulationService": {
+        "class": "TinyApp\\Model\\Service\\SimulationService",
+        "inject": [
+            "%priceInstruments%",
+            "@priceService@",
             "@strategyFactory@",
             "@tradeRepository"
         ]
@@ -189,6 +199,12 @@
         "class": "TinyApp\\Model\\Command\\TradeCommand",
         "inject": [
             "@tradeService@"
+        ]
+    },
+    "simulationCommand": {
+        "class": "TinyApp\\Model\\Command\\SimulationCommand",
+        "inject": [
+            "@simulationService@"
         ]
     }
 }

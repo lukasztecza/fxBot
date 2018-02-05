@@ -122,7 +122,7 @@ CREATE TABLE IF NOT EXISTS `files` (
     KEY (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 CREATE TABLE IF NOT EXISTS `indicator` (
-    `pack` VARCHAR(37) COLLATE utf8_general_ci NOT NULL,
+    `pack` VARCHAR(14) COLLATE utf8_general_ci NOT NULL,
     `instrument` CHAR(3) COLLATE utf8_general_ci NOT NULL,
     `datetime` DATETIME NOT NULL,
     `name` VARCHAR(32) COLLATE utf8_general_ci NOT NULL,
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS `indicator` (
     PRIMARY KEY (`pack`, `instrument`, `datetime`, `name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 CREATE TABLE IF NOT EXISTS `price` (
-    `pack` VARCHAR(37) COLLATE utf8_general_ci NOT NULL,
+    `pack` VARCHAR(14) COLLATE utf8_general_ci NOT NULL,
     `instrument` CHAR(7) COLLATE utf8_general_ci NOT NULL,
     `datetime` DATETIME NOT NULL,
     `open` DECIMAL(10,5) NOT NULL,
@@ -144,11 +144,13 @@ CREATE TABLE IF NOT EXISTS `price` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 CREATE TABLE IF NOT EXISTS `trade` (
     `id` INT(11) NOT NULL AUTO_INCREMENT,
+    `pack` VARCHAR(14) COLLATE utf8_general_ci NOT NULL,
     `instrument` CHAR(7) COLLATE utf8_general_ci NOT NULL,
     `units` INT(11) NOT NULL,
     `price` DECIMAL(10,5) NOT NULL,
     `take_profit` DECIMAL(10,5) NOT NULL,
     `stop_loss` DECIMAL(10,5) NOT NULL,
+    `balance` DECIMAL(10,5) NOT NULL,
     `datetime` DATETIME NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;

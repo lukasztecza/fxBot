@@ -5,8 +5,6 @@ use HttpClient\ClientFactory;
 use TinyApp\Model\Strategy\StrategyFactory;
 use TinyApp\Model\Repository\TradeRepository;
 
-use TinyApp\Model\Strategy\RandomStrategy as SelectedStrategy;
-
 class TradeService
 {
     private const MAX_ALLOWED_OPEN_POSITIONS = 1;
@@ -14,6 +12,7 @@ class TradeService
     private $priceInstruments;
     private $oandaClient;
     private $oandaAccount;
+    private $selectedStrategy;
     private $strategyFactory;
     private $tradeRepository;
 
@@ -21,12 +20,14 @@ class TradeService
         array $priceInstruments,
         ClientFactory $clientFactory,
         string $oandaAccount,
+        string $selectedStrategy,
         StrategyFactory $strategyFactory,
         TradeRepository $tradeRepository
     ) {
         $this->priceInstruments = $priceInstruments;
         $this->oandaClient = $clientFactory->getClient('oandaClient');
         $this->oandaAccount = $oandaAccount;
+        $this->selectedStrategy = $selectedStrategy;
         $this->strategyFactory = $strategyFactory;
         $this->tradeRepository = $tradeRepository;
     }
@@ -44,7 +45,7 @@ class TradeService
             return ['status' => false, 'message' => 'Could not get current prices'];
         }
 
-        $strategy = $this->strategyFactory->getStrategy(SelectedStrategy::class);
+        $strategy = $this->strategyFactory->getStrategy($this->selectedStrategy);
         try {
             $order = $strategy->getOrder($prices, $balance);
         } catch(\Throwable $e) {
@@ -63,11 +64,13 @@ class TradeService
 
         try {
             $this->tradeRepository->saveTrade([
+                'pack' => $this->oandaAccount,
                 'instrument' => $order->getInstrument(),
                 'units' => $order->getUnits(),
-                'price' => $order->getUnits() > 0 ? $prices[$order->getInstrument()]['ask'] : $prices[$order->getInstrument()]['bid'],
+                'price' => $order->getPrice(),
                 'takeProfit' => $order->getTakeProfit(),
                 'stopLoss' => $order->getStopLoss(),
+                'balance' => $balance,
                 'datetime' => (new \DateTime(null, new \DateTimeZone('UTC')))->format('Y-m-d H:i:s')
             ]);
         } catch(\Throwable $e) {
