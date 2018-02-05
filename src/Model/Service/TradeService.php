@@ -64,11 +64,13 @@ class TradeService
 
         try {
             $this->tradeRepository->saveTrade([
+                'pack' => $this->oandaAccount,
                 'instrument' => $order->getInstrument(),
                 'units' => $order->getUnits(),
-                'price' => $order->getUnits() > 0 ? $prices[$order->getInstrument()]['ask'] : $prices[$order->getInstrument()]['bid'],
+                'price' => $order->getPrice(),
                 'takeProfit' => $order->getTakeProfit(),
                 'stopLoss' => $order->getStopLoss(),
+                'balance' => $balance,
                 'datetime' => (new \DateTime(null, new \DateTimeZone('UTC')))->format('Y-m-d H:i:s')
             ]);
         } catch(\Throwable $e) {

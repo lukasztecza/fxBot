@@ -53,7 +53,7 @@ class PriceRepository extends RepositoryAbstract
     public function getInitialPrices(array $priceInstruments, string $initialDateTime) : array
     {
         $this->getRead()->prepare(
-            'SELECT * FROM `price` WHERE `instrument` = :instrument AND `pack` = "real" AND `datetime` > :datetime ORDER BY `datetime` ASC LIMIT 1'
+            'SELECT * FROM `price` WHERE `instrument` = :instrument AND `pack` = "real" AND `datetime` >= :datetime ORDER BY `datetime` ASC LIMIT 1'
         );
         $initialPrices = [];
         foreach ($priceInstruments as $priceInstrument) {

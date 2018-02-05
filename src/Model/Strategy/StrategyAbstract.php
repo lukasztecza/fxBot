@@ -11,15 +11,6 @@ abstract class StrategyAbstract implements StrategyInterface
     private const HOME_CURRENCY = 'CAD';
     private const SINGLE_TRANSACTION_RISK = 0.01;
 
-    protected $priceService;
-    protected $indicatorService;
-
-    public function __construct(PriceService $priceService, IndicatorService $indicatorService)
-    {
-        $this->priceService = $priceService;
-        $this->indicatorService = $indicatorService;
-    }
-
     /*
     This calculation follows the following formula:
 
@@ -39,57 +30,57 @@ abstract class StrategyAbstract implements StrategyInterface
     Profit = 0.99225 CAD
 
     To calculate units use:
-    units = (max risk in home currency) / ((closing rate of currency pair - opening rate of currency pair) * quote/home rate)
+    units = (max risk in home currency) / ((closing rate of currency instrument - opening rate of currency instrument) * quote/home rate)
     */
     public function calculateUnits(
         float $balance,
         array $currentPrices,
-        string $tradePair,
-        float $closeTradePairRate
+        string $tradeInstrument,
+        float $closeTradeInstrumentRate
     ) {
-        $currencies = explode('_', $tradePair);
+        $currencies = explode('_', $tradeInstrument);
         $baseCurrency = $currencies[0];
         $quoteCurrency = $currencies[1];
-        $homePair = $homePairRate = null;
+        $homeInstrument = $homeInstrumentRate = null;
 
         switch (true) {
             case $baseCurrency === self::HOME_CURRENCY:
-                $homePair = $tradePair;
-                $homePairRate = 2 / ($currentPrices[$homePair]['bid'] + $currentPrices[$homePair]['ask']);
+                $homeInstrument = $tradeInstrument;
+                $homeInstrumentRate = 2 / ($currentPrices[$homeInstrument]['bid'] + $currentPrices[$homeInstrument]['ask']);
                 break;
             case $quoteCurrency === self::HOME_CURRENCY:
-                $homePair = $tradePair;
-                $homePairRate = ($currentPrices[$homePair]['bid'] + $currentPrices[$homePair]['ask']) / 2;
+                $homeInstrument = $tradeInstrument;
+                $homeInstrumentRate = ($currentPrices[$homeInstrument]['bid'] + $currentPrices[$homeInstrument]['ask']) / 2;
                 break;
             case isset($currentPrices[$quoteCurrency . '_' . self::HOME_CURRENCY]):
-                $homePair = $quoteCurrency . '_' . self::HOME_CURRENCY;
-                $homePairRate = ($currentPrices[$homePair]['bid'] + $currentPrices[$homePair]['ask']) / 2;
+                $homeInstrument = $quoteCurrency . '_' . self::HOME_CURRENCY;
+                $homeInstrumentRate = ($currentPrices[$homeInstrument]['bid'] + $currentPrices[$homeInstrument]['ask']) / 2;
                 break;
             case isset($currentPrices[self::HOME_CURRENCY . '_' . $quoteCurrency]):
-                $homePair = self::HOME_CURRENCY . '_' . $quoteCurrency;
-                $homePairRate = 2 / ($currentPrices[$homePair]['bid'] + $currentPrices[$homePair]['ask']);
+                $homeInstrument = self::HOME_CURRENCY . '_' . $quoteCurrency;
+                $homeInstrumentRate = 2 / ($currentPrices[$homeInstrument]['bid'] + $currentPrices[$homeInstrument]['ask']);
                 break;
         }
-        if (empty($homePair)) {
-            throw new \Exception('Could not find home pair for trade pair ' . var_export($tradePair, true));
+        if (empty($homeInstrument)) {
+            throw new \Exception('Could not find home instrument for trade instrument ' . var_export($tradeInstrument, true));
         }
 
         $balanceRisk = $balance * self::SINGLE_TRANSACTION_RISK;
 
-        $openTradePairRate = null;
-        if ($closeTradePairRate > $currentPrices[$tradePair]['ask']) {
-            $openTradePairRate = $currentPrices[$tradePair]['bid'];
-        } elseif($closeTradePairRate < $currentPrices[$tradePair]['bid']) {
-            $openTradePairRate = $currentPrices[$tradePair]['ask'];
+        $openTradeInstrumentRate = null;
+        if ($closeTradeInstrumentRate > $currentPrices[$tradeInstrument]['ask']) {
+            $openTradeInstrumentRate = $currentPrices[$tradeInstrument]['bid'];
+        } elseif($closeTradeInstrumentRate < $currentPrices[$tradeInstrument]['bid']) {
+            $openTradeInstrumentRate = $currentPrices[$tradeInstrument]['ask'];
         }
-        if (empty($openTradePairRate)) {
+        if (empty($openTradeInstrumentRate)) {
             throw new \Exception(
-                'Wrong close price of the trade pair ' . var_export($closeTradePairRate, true) .
-                ' for current prices ' . var_export($currentPrices[$tradePair], true)
+                'Wrong close price of the trade instrument ' . var_export($closeTradeInstrumentRate, true) .
+                ' for current prices ' . var_export($currentPrices[$tradeInstrument], true)
             );
         }
 
-        return (int)($balanceRisk / (abs($closeTradePairRate - $openTradePairRate) * $homePairRate));
+        return (int)($balanceRisk / (abs($closeTradeInstrumentRate - $openTradeInstrumentRate) * $homeInstrumentRate));
     }
 
     abstract function getOrder(array $prices, float $balance) : Order;
