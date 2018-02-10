@@ -8,14 +8,13 @@ class PriceRepository extends RepositoryAbstract
         $this->getWrite()->begin();
         try {
             $this->getWrite()->prepare(
-                'INSERT INTO `price` (`pack`, `instrument`, `datetime`, `open`, `high`, `low`, `close`)
-                VALUES (:pack, :instrument, :datetime, :open1, :high1, :low1, :close1)
+                'INSERT INTO `price` (`instrument`, `datetime`, `open`, `high`, `low`, `close`)
+                VALUES (:instrument, :datetime, :open1, :high1, :low1, :close1)
                 ON DUPLICATE KEY UPDATE `open` = :open2, `high` = :high2, `low` = :low2, `close` = :close2' 
             );
             $affectedIds = [];
             foreach ($prices as $price) {
                 $affectedIds[] = $this->getWrite()->execute(null, [
-                    'pack' => $price['pack'],
                     'instrument' => $price['instrument'],
                     'datetime' => $price['datetime'],
                     'open1' => $price['open'],
@@ -40,11 +39,11 @@ class PriceRepository extends RepositoryAbstract
         return $affectedIds;
     }
 
-    public function getLatestPriceByInstrumentAndPack(string $instrument, string $pack) : array
+    public function getLatestPriceByInstrument(string $instrument) : array
     {
         $records = $this->getRead()->fetch(
-            'SELECT * FROM `price` WHERE `instrument` = :instrument AND `pack` = :pack ORDER BY `datetime` DESC LIMIT 1',
-            ['instrument' => $instrument, 'pack' => $pack]
+            'SELECT * FROM `price` WHERE `instrument` = :instrument ORDER BY `datetime` DESC LIMIT 1',
+            ['instrument' => $instrument]
         );
 
         return !empty($records) ? array_pop($records) : [];
@@ -53,7 +52,7 @@ class PriceRepository extends RepositoryAbstract
     public function getInitialPrices(array $priceInstruments, string $initialDateTime) : array
     {
         $this->getRead()->prepare(
-            'SELECT * FROM `price` WHERE `instrument` = :instrument AND `pack` = "real" AND `datetime` >= :datetime ORDER BY `datetime` ASC LIMIT 1'
+            'SELECT * FROM `price` WHERE `instrument` = :instrument AND `datetime` >= :datetime ORDER BY `datetime` ASC LIMIT 1'
         );
         $initialPrices = [];
         foreach ($priceInstruments as $priceInstrument) {

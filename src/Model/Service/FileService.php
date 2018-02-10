@@ -1,23 +1,23 @@
 <?php
 namespace TinyApp\Model\Service;
 
-use TinyApp\Model\Repository\FilesRepository;
+use TinyApp\Model\Repository\FileRepository;
 
-class FilesService
+class FileService
 {
     private const PER_PAGE = 5;
 
-    private $filesRepository;
+    private $fileRepository;
 
-    public function __construct(FilesRepository $filesRepository)
+    public function __construct(FileRepository $fileRepository)
     {
-        $this->filesRepository = $filesRepository;
+        $this->fileRepository = $fileRepository;
     }
 
     public function uploadFiles(array $files, bool $public) : array
     {
         try {
-            return $this->filesRepository->uploadFiles($files, $public);
+            return $this->fileRepository->uploadFiles($files, $public);
         } catch(\Throwable $e) {
             trigger_error(
                 'Failed to upload files with message ' . $e->getMessage() . ' with paylaod ' . var_export([$files, $public], true), E_USER_NOTICE
@@ -29,28 +29,28 @@ class FilesService
 
     public function getTypes() : array
     {
-        return $this->filesRepository->getTypes();
+        return $this->fileRepository->getTypes();
     }
 
     public function isTypeImage(int $type) : bool
     {
-        return $this->filesRepository->isTypeImage($type);
+        return $this->fileRepository->isTypeImage($type);
     }
 
     public function isTypePrivate(int $type) : bool
     {
-        return $this->filesRepository->isTypePrivate($type);
+        return $this->fileRepository->isTypePrivate($type);
     }
 
     public function isImageContentType(string $contentType) : bool
     {
-        return $this->filesRepository->isImageMime($contentType);
+        return $this->fileRepository->isImageMime($contentType);
     }
 
     public function getUploadPathByType(int $type) : string
     {
         try {
-            return $this->filesRepository->getUploadPathByType($type);
+            return $this->fileRepository->getUploadPathByType($type);
         } catch(\Throwable $e) {
             trigger_error('Failed to get upload path by type ' . var_export($type, true) . ' with message ' . $e->getMessage(), E_USER_NOTICE);
 
@@ -61,7 +61,7 @@ class FilesService
     public function getContentTypeByExtension(string $extension) : string
     {
         try {
-            return $this->filesRepository->getSupportedMimeByExtension($extension);
+            return $this->fileRepository->getSupportedMimeByExtension($extension);
         } catch(\Throwable $e) {
             trigger_error(
                 'Failed to get content type by extension ' . var_export($extension, true) . ' with message ' . $e->getMessage(), E_USER_NOTICE
@@ -74,7 +74,7 @@ class FilesService
     public function getByType(int $type, int $page) : array
     {
         try {
-            return $this->filesRepository->getByType($type, $page, self::PER_PAGE);
+            return $this->fileRepository->getByType($type, $page, self::PER_PAGE);
         } catch(\Throwable $e) {
             trigger_error(
                 'Failed to get files for type ' . var_export($type, true) .
@@ -89,7 +89,7 @@ class FilesService
     public function getByName(string $name) : array
     {
         try {
-            return $this->filesRepository->getByName($name);
+            return $this->fileRepository->getByName($name);
         } catch(\Throwable $e) {
             trigger_error('Failed to get file for name ' . var_export($name, true) . ' with message ' . $e->getMessage(), E_USER_NOTICE);
 
@@ -100,7 +100,7 @@ class FilesService
     public function deleteFiles(array $ids) : bool
     {
         try {
-            return $this->filesRepository->deleteFiles($ids);
+            return $this->fileRepository->deleteFiles($ids);
         } catch(\Throwable $e) {
             trigger_error('Failed to delete all files for ids ' . var_export($ids, true) . ' with message ' . $e->getMessage(), E_USER_NOTICE);
 

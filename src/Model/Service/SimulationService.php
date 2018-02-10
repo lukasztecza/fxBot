@@ -56,6 +56,7 @@ class SimulationService
             while ($counter < self::MAX_ITERATIONS_PER_STRATEGY && $currentDate < self::SIMULATION_END) {
                 $counter++;
                 $prices = $this->priceService->getInitialPrices($this->priceInstruments, $currentDate);
+//@TODO we do not have bid ask fix it
                 $prices = $this->getCurrentPrices($prices);
                 if (empty($prices)) {
                     return [
