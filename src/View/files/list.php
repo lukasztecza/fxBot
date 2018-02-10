@@ -5,7 +5,7 @@
 <?php endif; ?>
 <ul>
     <?php foreach($types as $type => $name): ?>
-        <li><a href="<?php echo '/files/list/' . $type . '/1'; ?>"><?php echo $name; ?></a></li>
+        <li><a href="<?php echo '/file/list/' . $type . '/1'; ?>"><?php echo $name; ?></a></li>
     <?php endforeach; ?>
 </ul>
 <?php include(__DIR__ . '/../common/foot.php'); ?>

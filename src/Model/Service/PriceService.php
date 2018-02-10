@@ -24,10 +24,10 @@ class PriceService
         }
     }
 
-    public function getLatestPriceByInstrumentAndPack(string $instrument, string $pack) : array
+    public function getLatestPriceByInstrument(string $instrument) : array
     {
         try {
-            return $this->priceRepository->getLatestPriceByInstrumentAndPack($instrument, $pack);
+            return $this->priceRepository->getLatestPriceByInstrument($instrument);
         } catch(\Throwable $e) {
             trigger_error('Failed to get latest price with message ' . $e->getMessage());
 

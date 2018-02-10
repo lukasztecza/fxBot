@@ -5,7 +5,7 @@ use TinyApp\Model\System\Request;
 use TinyApp\Model\System\Response;
 use TinyApp\Model\Middleware\MiddlewareAbstract;
 use TinyApp\Model\Middleware\MiddlewareInterface;
-use TinyApp\Model\Service\FilesService;
+use TinyApp\Model\Service\FileService;
 use TinyApp\Model\Service\SessionService;
 
 class OutputMiddleware extends MiddlewareAbstract
@@ -18,20 +18,20 @@ class OutputMiddleware extends MiddlewareAbstract
 
     private $defaultContentType;
     private $assetsVersion;
-    private $filesService;
+    private $fileService;
     private $sessionService;
 
     public function __construct(
         MiddlewareInterface $next,
         string $defaultContentType,
         string $assetsVersion,
-        FilesService $filesService,
+        FileService $fileService,
         SessionService $sessionService
     ) {
         parent::__construct($next);
         $this->defaultContentType = $defaultContentType;
         $this->assetsVersion = $assetsVersion;
-        $this->filesService = $filesService;
+        $this->fileService = $fileService;
         $this->sessionService = $sessionService;
     }
 
@@ -58,7 +58,7 @@ class OutputMiddleware extends MiddlewareAbstract
             case $contentType === self::CONTENT_TYPE_JSON:
                 $this->buildJsonResponse($response->getVariables(), $headers);
                 break;
-            case $this->filesService->isImageContentType($contentType):
+            case $this->fileService->isImageContentType($contentType):
                 $this->buildImageResponse($response->getFile(), $response->getVariables(), $headers);
                 break;
             case $contentType === self::CONTENT_TYPE_STREAM:
@@ -123,7 +123,7 @@ class OutputMiddleware extends MiddlewareAbstract
 
     private function buildImageResponse(string $file, array $variables, array $headers) : void
     {
-        $path = isset($variables['type']) ? $this->filesService->getUploadPathByType($variables['type']) : null;
+        $path = isset($variables['type']) ? $this->fileService->getUploadPathByType($variables['type']) : null;
         if (empty($path) || !file_exists($path . '/' . $file)) {
             throw new \Exception(
                 'Image does not exists or can not be accessed ' . var_export($path . '/' . $file, true) .
@@ -137,7 +137,7 @@ class OutputMiddleware extends MiddlewareAbstract
 
     private function buildDownloadResponse(string $file, array $variables, array $headers) : void
     {
-        $path = isset($variables['type']) ? $this->filesService->getUploadPathByType($variables['type']) : null;
+        $path = isset($variables['type']) ? $this->fileService->getUploadPathByType($variables['type']) : null;
         if (empty($path) || !file_exists($path . '/' . $file)) {
             throw new \Exception(
                 'File does not exists or can not be accessed ' . var_export($path . '/' . $file, true) .

@@ -64,7 +64,7 @@ class TradeService
 
         try {
             $this->tradeRepository->saveTrade([
-                'pack' => $this->oandaAccount,
+                'account' => $this->oandaAccount,
                 'instrument' => $order->getInstrument(),
                 'units' => $order->getUnits(),
                 'price' => $order->getPrice(),

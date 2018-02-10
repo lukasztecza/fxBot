@@ -9,9 +9,9 @@ use HttpClient\ClientFactory;
 class OandaFetchingService implements FetchingServiceInterface
 {
     private const INTERNAL_DATETIME_FORMAT = 'Y-m-d H:i:s';
-    private const BEGINING_DATETIME = '2017-10-01 00:00:00';
+    private const BEGINING_DATETIME = '2017-01-01 00:00:00';
     private const SHORT_INTERVAL = 'P14D';
-    private const LONG_INTERVAL = 'P3M';
+    private const LONG_INTERVAL = 'P1Y';
     private const UNIX_TIMESTAMP_FORMAT = 'U';
 
     private const VALID_PERIODS = [
@@ -21,10 +21,9 @@ class OandaFetchingService implements FetchingServiceInterface
         '1w' => 604800,
         '1m' => 2592000,
         '3m' => 7776000,
-        '6m' => 15552000
+        '6m' => 15552000,
+        '1y' => 31536000
     ];
-
-    private const REAL_PACK = 'real';
 
     private $priceInstruments;
     private $priceService;
@@ -63,7 +62,7 @@ class OandaFetchingService implements FetchingServiceInterface
 
     private function storePrices(string $instrument) : bool
     {
-        $latestPrice = $this->priceService->getLatestPriceByInstrumentAndPack($instrument, self::REAL_PACK);
+        $latestPrice = $this->priceService->getLatestPriceByInstrument($instrument);
         $latestDateTime = $latestPrice['datetime'] ?? null;
         $dateTimes = $this->getDateTimesByLatest($latestDateTime, self::SHORT_INTERVAL);
         $this->formatDateTimes($dateTimes, $this->oandaClient->getOandaDateTimeFormat());
@@ -92,9 +91,39 @@ class OandaFetchingService implements FetchingServiceInterface
         return true;
     }
 
+    private function buildPricesValuesToStore(array $realValues, string $instrument) : array
+    {
+        $values = [];
+        foreach ($realValues as $key => $value) {
+            if (
+                !isset($value['time']) ||
+                !isset($value['mid']['o']) ||
+                !isset($value['mid']['h']) ||
+                !isset($value['mid']['l']) ||
+                !isset($value['mid']['c'])
+            ) {
+                trigger_error('Got wrong structure for price ' . var_export($value, true) . ' ignoring this value', E_USER_NOTICE);
+                continue;
+            }
+
+            $values[] = [
+                'instrument' => $instrument,
+                'datetime' => (
+                    \DateTime::createFromFormat($this->oandaClient->getOandaDateTimeFormat(), $value['time'])
+                )->format(self::INTERNAL_DATETIME_FORMAT),
+                'open' => $value['mid']['o'],
+                'high' => $value['mid']['h'],
+                'low' => $value['mid']['l'],
+                'close' => $value['mid']['c']
+            ];
+        }
+
+        return $values;
+    }
+
     private function storeIndicators() : bool
     {
-        $latestIndicator = $this->indicatorService->getLatestIndicatorByPack(self::REAL_PACK);
+        $latestIndicator = $this->indicatorService->getLatestIndicator();
         $latestDateTime = $latestIndicator['datetime'] ?? null;
         $dateTimes = $this->getDateTimesByLatest($latestDateTime, self::LONG_INTERVAL);
         $period = $this->getPeriodByDateTimes($dateTimes['start'], $dateTimes['end']);
@@ -111,40 +140,11 @@ class OandaFetchingService implements FetchingServiceInterface
         }
 
         $indicators = $this->buildIndicatorsValuesToStore($response['body']);
-        $result = $this->indicatorService->saveIndicators($indicators);
-
-        return true;
-    }
-
-    private function buildPricesValuesToStore(array $realValues, string $instrument) : array
-    {
-        $values = [];
-        foreach ($realValues as $key => $value) {
-            if (
-                empty($value['time']) ||
-                empty($value['mid']['o']) ||
-                empty($value['mid']['h']) ||
-                empty($value['mid']['l']) ||
-                empty($value['mid']['c'])
-            ) {
-                trigger_error('Got wrong structure for price ' . var_export($value, true) . ' ignoring this value', E_USER_NOTICE);
-                continue;
-            }
-
-            $values[] = [
-                'pack' => self::REAL_PACK,
-                'instrument' => $instrument,
-                'datetime' => (
-                    \DateTime::createFromFormat($this->oandaClient->getOandaDateTimeFormat(), $value['time'])
-                )->format(self::INTERNAL_DATETIME_FORMAT),
-                'open' => $value['mid']['o'],
-                'high' => $value['mid']['h'],
-                'low' => $value['mid']['l'],
-                'close' => $value['mid']['c']
-            ];
+        if (empty($this->indicatorService->saveIndicators($indicators))) {
+            return false;
         }
 
-        return $values;
+        return true;
     }
 
     private function buildIndicatorsValuesToStore(array $realValues) : array
@@ -152,19 +152,20 @@ class OandaFetchingService implements FetchingServiceInterface
         $values = [];
         foreach ($realValues as $key => $value) {
             if (
-                empty($value['currency']) ||
-                empty($value['timestamp']) ||
-                empty($value['title']) ||
-                empty($value['actual'])
+                !isset($value['currency']) ||
+                !isset($value['timestamp']) ||
+                !isset($value['title']) ||
+                !isset($value['actual'])
             ) {
                 trigger_error('Got wrong structure for indicator ' . var_export($value, true) . ' ignoring this value', E_USER_NOTICE);
                 continue;
             }
 
             $values[] = [
-                'pack' => self::REAL_PACK,
                 'instrument' => $value['currency'],
-                'datetime' => (\DateTime::createFromFormat(self::UNIX_TIMESTAMP_FORMAT, $value['timestamp']))->format(self::INTERNAL_DATETIME_FORMAT),
+                'datetime' => (
+                    \DateTime::createFromFormat(self::UNIX_TIMESTAMP_FORMAT, $value['timestamp'])
+                )->format(self::INTERNAL_DATETIME_FORMAT),
                 'name' => $value['title'],
                 'unit' => $value['unit'] ?? null,
                 'forecast' => $value['forecast'] ?? null,

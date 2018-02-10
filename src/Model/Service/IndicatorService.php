@@ -16,16 +16,18 @@ class IndicatorService
         try {
             return $this->indicatorRepository->saveIndicators($indicators);
         } catch(\Throwable $e) {
-            trigger_error('Failed to save indicators with message ' . $e->getMessage() . ' with paylaod ' . var_export($indicators, true), E_USER_NOTICE);
+            trigger_error(
+                'Failed to save indicators with message ' . $e->getMessage() . ' with paylaod ' . var_export($indicators, true), E_USER_NOTICE
+            );
 
             return [];
         }
     }
 
-    public function getLatestIndicatorByPack(string $pack) : array
+    public function getLatestIndicator() : array
     {
         try {
-            return $this->indicatorRepository->getLatestIndicatorByPack($pack);
+            return $this->indicatorRepository->getLatestIndicator();
         } catch(\Throwable $e) {
             trigger_error('Failed to get latest indicator with message ' . $e->getMessage());
 
