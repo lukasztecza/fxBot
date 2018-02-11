@@ -13,11 +13,17 @@ class SimulationService
     private const SINGLE_TRANSACTION_RISK = 0.01;
 
     private const MAX_ITERATIONS_PER_STRATEGY = 10000;
-    private const SIMULATION_START = '2017-10-01 00:00:00';
+    private const SIMULATION_START = '2017-10-02 00:00:00';
     private const SIMULATION_END = '2018-01-15 00:00:00';
+
+    private const DEFAULT_SPREAD = 0.0003;
 
     private const STRATEGIES = [
         'TinyApp\Model\Strategy\MinSpreadRigidOneMultiOneRandomStrategy',
+        'TinyApp\Model\Strategy\MinSpreadRigidOneMultiThreeRandomStrategy',
+        'TinyApp\Model\Strategy\MinSpreadRigidOneMultiFiveRandomStrategy',
+        'TinyApp\Model\Strategy\MinSpreadRigidTwoMultiOneRandomStrategy',
+        'TinyApp\Model\Strategy\MinSpreadRigidTwoMultiThreeRandomStrategy',
         'TinyApp\Model\Strategy\MinSpreadRigidTwoMultiFiveRandomStrategy',
         'TinyApp\Model\Strategy\MinSpreadRigidOneMultiOneTrendFindStrategy',
     ];
@@ -50,13 +56,20 @@ class SimulationService
             $balance = self::INITIAL_TEST_BALANCE;
             $currentDate = self::SIMULATION_START;
             $counter = 0;
+            $executedTrades = 0;
+            $minBalance = 100000;
+            $maxBalance = 0;
+            $profits = 0;
+            $losses = 0;
             $activeOrder = null;
             //@TODO add how many trades executed and min max for strategy
 
             while ($counter < self::MAX_ITERATIONS_PER_STRATEGY && $currentDate < self::SIMULATION_END) {
                 $counter++;
+                $currentDate = (new \DateTime($currentDate, new \DateTimeZone('UTC')));
+                $currentDate = $currentDate->add(new \DateInterval('PT15M'))->format('Y-m-d H:i:s');
+
                 $prices = $this->priceService->getInitialPrices($this->priceInstruments, $currentDate);
-//@TODO we do not have bid ask fix it
                 $prices = $this->getCurrentPrices($prices);
                 if (empty($prices)) {
                     return [
@@ -64,16 +77,11 @@ class SimulationService
                         'message' => 'Could not get current prices for ' . var_export($strategyClass, true)
                     ];
                 }
-                $currentDate = (new \DateTime($currentDate, new \DateTimeZone('UTC')));
-                $currentDate = $currentDate->add(new \DateInterval('PT15M'))->format('Y-m-d H:i:s');
 
-                if ($activeOrder) {
-                    $prices[$activeOrder->getInstrument()]['ask'];
-                }
- 
                 if (is_null($activeOrder)) {
                     try {
                         $activeOrder = $strategy->getOrder($prices, $balance, $currentDate);
+                        $executedTrades++;
                     } catch(\Throwable $e) {
                         echo 'Could not create order skipping' . PHP_EOL;
                         continue;
@@ -86,6 +94,7 @@ class SimulationService
                         abs($activeOrder->getPrice() - $activeOrder->getTakeProfit()) / abs($activeOrder->getPrice() - $activeOrder->getStopLoss())
                     ));
                     echo 'PROFIT ' . $this->formatBalance($balance) . PHP_EOL;
+                    $profits++;
                     $activeOrder = null;
                 } elseif (
                     ($activeOrder->getUnits() > 0 && $activeOrder->getStopLoss() > $prices[$activeOrder->getInstrument()]['bid']) ||
@@ -93,17 +102,40 @@ class SimulationService
                 ) {
                     $balance = $balance - ($balance * self::SINGLE_TRANSACTION_RISK);
                     echo 'LOSS   ' . $this->formatBalance($balance) . PHP_EOL;
+                    $losses++;
                     $activeOrder = null;
                 }
+
+                if ($minBalance > $balance) {
+                    $minBalance = $balance;
+                }
+                if ($maxBalance < $balance) {
+                    $maxBalance = $balance;
+                }
             }
-            $results[$strategyClass] = $balance;
+
+            $results[$strategyClass] = [
+                'finalBalance' => $balance,
+                'minBalance' => $minBalance,
+                'maxBalance' => $maxBalance,
+                'executedTrades' => $executedTrades,
+                'profits' => $profits,
+                'losses' => $losses
+            ];
         }
 
         echo '=====================================================' . PHP_EOL;
         echo 'Simulation results between ' . self::SIMULATION_START . ' and ' . $currentDate . PHP_EOL;
         echo '=====================================================' . PHP_EOL;
-        foreach ($results as $strategyClass => $finalBalance) {
-            echo $strategyClass . ' finished with ' . $this->formatBalance($finalBalance) . PHP_EOL;
+        foreach ($results as $strategyClass => $stats) {
+            echo $strategyClass . ' finished with ' . $this->formatBalance($stats['finalBalance']) . PHP_EOL;
+            echo '    with minimum balance of ' . $this->formatBalance($stats['minBalance']) . PHP_EOL;
+            echo '    with maximum balance of ' . $this->formatBalance($stats['maxBalance']) . PHP_EOL;
+            echo '    with total trades of ' . $stats['executedTrades'] . PHP_EOL;
+            echo '    with trades ended with profit ' . $stats['profits'] . PHP_EOL;
+            echo '    with trades ended with loss ' . $stats['losses'] . PHP_EOL;
+            echo '    which gives average profit per trade ' .
+                round(($stats['finalBalance'] - self::INITIAL_TEST_BALANCE) / $stats['executedTrades'], 4) . PHP_EOL;
         }
         echo '=====================================================' . PHP_EOL;
 
@@ -115,9 +147,15 @@ class SimulationService
         $prices = [];
         try {
             foreach ($inputPrices as $inputPrice) {
+                $closePrice = $inputPrice['close'];
+                $spread = self::DEFAULT_SPREAD;
+                if (strpos($inputPrice['instrument'], 'JPY') !== false) {
+                    $spread *= 100;
+                }
+
                 $prices[$inputPrice['instrument']] = [
-                    'ask' => $inputPrice['high'],
-                    'bid' => $inputPrice['low']
+                    'ask' => $inputPrice['close'] + ($spread / 2),
+                    'bid' => $inputPrice['close'] - ($spread / 2)
                 ];
             }
         } catch (\Throwable $e) {

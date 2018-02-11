@@ -9,18 +9,18 @@ use TinyApp\Model\Service\IndicatorService;
 class MinSpreadRigidOneMultiOneTrendFindStrategy extends MinSpreadRigidOneMultiOneStrategyAbstract
 {
     protected $priceService;
-    protected $indicatorService;
 
-    public function __construct(PriceService $priceService, IndicatorService $indicatorService)
+    public function __construct(PriceService $priceService)
     {
         $this->priceService = $priceService;
-        $this->indicatorService = $indicatorService;
     }
 
     protected function getDirection(string $currentDate = null) : int
     {
         var_dump($currentDate);exit;
         //@TODO fetch week of prices and try to find recent extremas
+
+
 
         return 1;
     }

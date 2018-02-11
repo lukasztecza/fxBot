@@ -29,7 +29,7 @@ class StrategyFactory
 
         switch ($class) {
             case 'TinyApp\Model\Strategy\MinSpreadRigidOneMultiOneTrendFindStrategy':
-                $strategy = new $class($this->priceService, $this->indicatorService);
+                $strategy = new $class($this->priceService);
                 break;
             default:
                 $strategy = new $class();
