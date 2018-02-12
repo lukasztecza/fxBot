@@ -54,6 +54,10 @@ class TradeService
             return ['status' => false, 'message' => 'Could not create order'];
         }
 
+        if (empty($order)) {
+            return ['status' => false, 'message' => 'Could not build order'];
+        }
+
         try {
             $result = $this->oandaClient->executeTrade($this->oandaAccount, $order);
         } catch(\Throwable $e) {
