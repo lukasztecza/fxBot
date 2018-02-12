@@ -83,5 +83,5 @@ abstract class StrategyAbstract implements StrategyInterface
         return (int)($balanceRisk / (abs($closeTradeInstrumentRate - $openTradeInstrumentRate) * $homeInstrumentRate));
     }
 
-    abstract function getOrder(array $prices, float $balance) : Order;
+    abstract function getOrder(array $prices, float $balance) : ?Order;
 }

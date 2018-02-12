@@ -16,7 +16,7 @@ class StrategyFactory
         $this->indicatorService = $indicatorService;
     }
 
-    public function getStrategy(string $class) : StrategyInterface
+    public function getStrategy(string $class, array $params = []) : StrategyInterface
     {
         if (!in_array(StrategyInterface::class, class_implements($class))) {
             throw new \Exception('Wrong class exception, ' . $class . ' has to implement ' . StrategyInterface::class);
@@ -28,15 +28,19 @@ class StrategyFactory
         }
 
         switch ($class) {
-            case 'TinyApp\Model\Strategy\MinSpreadRigidOneMultiOneTrendFindStrategy':
-                $strategy = new $class($this->priceService);
+            case 'TinyApp\Model\Strategy\MinSpreadRigidTrendingStrategyPattern':
+                $strategy = new $class($this->priceService, ...$params);
                 break;
+            case 'TinyApp\Model\Strategy\MinSpreadRigidStrategyPattern':
+                $strategy = new $class(...$params);
+                break;
+            //default strategies are not patterns so there is no need to create new object every time it is called
             default:
                 $strategy = new $class();
+                $this->strategies[$namespaceLessClass] = $strategy;
                 break;
         }
 
-        $this->strategies[$namespaceLessClass] = $strategy;
-        return $this->strategies[$namespaceLessClass];
+        return $strategy;
     }
 }
