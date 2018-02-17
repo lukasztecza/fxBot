@@ -66,9 +66,10 @@ class SimulationService
             while ($counter < self::MAX_ITERATIONS_PER_STRATEGY && $currentDate < self::SIMULATION_END) {
                 $counter++;
                 if ($balance < self::INITIAL_TEST_BALANCE / 2) {
-                    continue;
-                } elseif ($balance < self::INITIAL_TEST_BALANCE * 10) {
-                    continue;
+                    $balance = 0;
+                    break 1;
+                } elseif ($balance > self::INITIAL_TEST_BALANCE * 10) {
+                    break 1;
                 }
 
                 $currentDate = (new \DateTime($currentDate, new \DateTimeZone('UTC')));
@@ -141,20 +142,12 @@ class SimulationService
 
     private function getStrategiesForTest() : array
     {
-        return [
-            [
-                'className' => 'TinyApp\Model\Strategy\MinSpreadRigidTrendingStrategyPattern',
-                //'className' => 'TinyApp\Model\Strategy\MinSpreadRigidStrategyPattern',
-                'params' => [0.001, 1]
-            ]
-        ];
-
         $strategies = [];
         for ($i = 0.001; $i <= 0.004; $i += 0.001) {
             for ($j = 0.1; $j <= 5;) {
                 $strategies[] = [
-                    'className' => 'TinyApp\Model\Strategy\MinSpreadRigidStrategyPattern',
                     //'className' => 'TinyApp\Model\Strategy\MinSpreadRigidStrategyPattern',
+                    'className' => 'TinyApp\Model\Strategy\MinSpreadRigidTrendingStrategyPattern',
                     'params' => [$i, $j]
                 ];
                 if ($j <= 0.8) {
@@ -285,7 +278,7 @@ class SimulationService
         echo 'Best ratio per trade is  ' . $this->formatBalance($maxRatioPerTrade['value']) . ' for ' . $maxRatioPerTrade['strategy'] . PHP_EOL;
     }
 
-    private function getRatioPerTrade($result) : string
+    private function getRatioPerTrade(array $result) : string
     {
         return round(($result['finalBalance'] - self::INITIAL_TEST_BALANCE) / $result['executedTrades'], 4);
     }
