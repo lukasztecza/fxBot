@@ -5,5 +5,5 @@ use TinyApp\Model\Strategy\Order;
 
 interface StrategyInterface
 {
-    public function getOrder(array $price, float $balance) : Order;
+    public function getOrder(array $price, float $balance) : ?Order;
 }

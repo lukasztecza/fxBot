@@ -24,10 +24,10 @@ class PriceService
         }
     }
 
-    public function getLatestPriceByInstrumentAndPack(string $instrument, string $pack) : array
+    public function getLatestPriceByInstrument(string $instrument) : array
     {
         try {
-            return $this->priceRepository->getLatestPriceByInstrumentAndPack($instrument, $pack);
+            return $this->priceRepository->getLatestPriceByInstrument($instrument);
         } catch(\Throwable $e) {
             trigger_error('Failed to get latest price with message ' . $e->getMessage());
 
@@ -50,35 +50,16 @@ class PriceService
         }
     }
 
-    private function appendLocalExtremas(array &$values) : void
+    public function getLastPricesByPeriod(string $instrument, string $period, string $currentDateTime = null) : array
     {
-        $range = 10;
+        try {
+            $endDateTime = $currentDateTime ? new \DateTime($currentDateTime,new \DateTimeZone('UTC')) : new \DateTime(null, \DateTimeZone('UTC'));
+            $endDateTime = $endDateTime->sub(new \DateInterval($period));
+            return $this->priceRepository->getPricesForDates($instrument, $endDateTime->format('Y-m-d H:i:s'), $currentDateTime);
+        } catch(\Throwable $e) {
+            trigger_error('Failed to get latest price with message ' . $e->getMessage());
 
-        foreach ($values as $key => $value) {
-            $scoreMax = 0;
-            $scoreMin = 0;
-            for ($i = -$range; $i <= $range; $i++) {
-                // not enough adjoining data
-                if (!isset($values[$key + $i])) {
-                    continue 2;
-                }
-                // local max
-                if ($values[$key + $i]['high'] <= $value['high']) {
-                    $scoreMax++;
-                }
-                // local min
-                if ($values[$key + $i]['low'] >= $value['low']) {
-                    $scoreMin++;
-                }
-            }
-
-            // mark edge values
-            if ($scoreMax === 2 * $range + 1) {
-                $values[$key]['extrema'] = 'max';
-            }
-            if ($scoreMin === 2 * $range + 1) {
-                $values[$key]['extrema'] = 'min';
-            }
+            return [];
         }
     }
 }

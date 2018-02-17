@@ -8,14 +8,13 @@ class IndicatorRepository extends RepositoryAbstract
         $this->getWrite()->begin();
         try {
             $this->getWrite()->prepare(
-                'INSERT INTO `indicator` (`pack`, `instrument`, `datetime`, `name`, `unit`, `forecast`, `market`, `actual`)
-                VALUES (:pack, :instrument, :datetime, :name, :unit, :forecast1, :market1, :actual1)
+                'INSERT INTO `indicator` (`instrument`, `datetime`, `name`, `unit`, `forecast`, `market`, `actual`)
+                VALUES (:instrument, :datetime, :name, :unit, :forecast1, :market1, :actual1)
                 ON DUPLICATE KEY UPDATE `forecast` = :forecast2, `market` = :market2, `actual` = :actual2'
             );
             $affectedIds = [];
             foreach ($indicators as $indicator) {
                 $affectedIds[] = $this->getWrite()->execute(null, [
-                    'pack' => $indicator['pack'],
                     'instrument' => $indicator['instrument'],
                     'datetime' => $indicator['datetime'],
                     'name' => $indicator['name'],
@@ -41,11 +40,10 @@ class IndicatorRepository extends RepositoryAbstract
         return $affectedIds;
     }
 
-    public function getLatestIndicatorByPack(string $pack) : array
+    public function getLatestIndicator() : array
     {
         $records = $this->getRead()->fetch(
-            'SELECT * FROM `indicator` WHERE `pack` = :pack ORDER BY `datetime` DESC LIMIT 1',
-            ['pack' => $pack]
+            'SELECT * FROM `indicator` ORDER BY `datetime` DESC LIMIT 1'
         );
 
         return !empty($records) ? array_pop($records) : [];

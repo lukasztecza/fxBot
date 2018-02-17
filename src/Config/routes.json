@@ -16,22 +16,22 @@
         "action": "logout"
     },
     {
-        "path": "/files/add",
+        "path": "/file/add",
         "methods": ["GET", "POST"],
-        "controller": "filesController",
+        "controller": "fileController",
         "action": "upload"
     },
     {
-        "path": "/files",
+        "path": "/file",
         "methods": ["GET", "POST"],
-        "controller": "filesController",
+        "controller": "fileController",
         "action": "list"
     },
     {
-        "path": "/files/list/{type}/{page}",
+        "path": "/file/list/{type}/{page}",
         "methods": ["GET", "POST"],
         "requirements": {"type": "\\d+", "page": "\\d+"},
-        "controller": "filesController",
+        "controller": "fileController",
         "action": "listPaginated"
     },
     {

@@ -2,7 +2,7 @@
 namespace TinyApp\Controller;
 
 use TinyApp\Controller\ControllerInterface;
-use TinyApp\Model\Service\FilesService;
+use TinyApp\Model\Service\FileService;
 use TinyApp\Model\Service\SessionService;
 use TinyApp\Model\System\Request;
 use TinyApp\Model\System\Response;
@@ -10,24 +10,24 @@ use TinyApp\Model\System\Response;
 class PrivateContentController implements ControllerInterface
 {
     private $sessionService;
-    private $filesService;
+    private $fileService;
 
-    public function __construct(SessionService $sessionService, FilesService $filesService)
+    public function __construct(SessionService $sessionService, FileService $fileService)
     {
         $this->sessionService = $sessionService;
-        $this->filesService = $filesService;
+        $this->fileService = $fileService;
     }
 
     public function serve(Request $request) : Response
     {
         $attributes = $request->getAttributes(['directory', 'file']);
 
-        $file = $this->filesService->getByName($attributes['file']);
+        $file = $this->fileService->getByName($attributes['file']);
         if (empty($file[0]['name']) || empty($file[0]['type'])) {
             return $this->getNotFoundResponse($request);
         }
 
-        $contentType = $this->filesService->getContentTypeByExtension(pathinfo($file[0]['name'], PATHINFO_EXTENSION));
+        $contentType = $this->fileService->getContentTypeByExtension(pathinfo($file[0]['name'], PATHINFO_EXTENSION));
         if (empty($contentType)) {
             return $this->getNotFoundResponse($request);
         }
@@ -37,7 +37,7 @@ class PrivateContentController implements ControllerInterface
                 $file[0]['name'],
                 ['type' => $file[0]['type']],
                 [],
-                ['Content-Type' => ($this->filesService->isImageContentType($contentType) ? $contentType : 'application/octet-stream')]
+                ['Content-Type' => ($this->fileService->isImageContentType($contentType) ? $contentType : 'application/octet-stream')]
             );
         }
     }
