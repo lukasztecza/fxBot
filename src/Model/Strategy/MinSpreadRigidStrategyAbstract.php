@@ -48,7 +48,7 @@ abstract class MinSpreadRigidStrategyAbstract extends StrategyAbstract
         }
 
         $units = $this->calculateUnits($balance, $prices, $selectedInstrument, $stopLoss);
-        $units = $direction ? $units : -$units;
+        $units *= $direction;
 
         return new Order($selectedInstrument, $units, $tradePrice, $takeProfit, $stopLoss);
     }
