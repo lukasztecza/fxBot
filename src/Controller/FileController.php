@@ -4,35 +4,35 @@ namespace TinyApp\Controller;
 use TinyApp\Controller\ControllerInterface;
 use TinyApp\Model\System\Request;
 use TinyApp\Model\System\Response;
-use TinyApp\Model\Service\FilesService;
+use TinyApp\Model\Service\FileService;
 use TinyApp\Model\Service\SessionService;
 use TinyApp\Model\Validator\ValidatorFactory;
 use TinyApp\Model\Validator\FilesUploadValidator;
 use TinyApp\Model\Validator\FilesDeleteValidator;
 
-class FilesController implements ControllerInterface
+class FileController implements ControllerInterface
 {
-    private $filesService;
+    private $fileService;
     private $sessionService;
 
-    public function __construct(FilesService $filesService, ValidatorFactory $validatorFactory, SessionService $sessionService)
+    public function __construct(FileService $fileService, ValidatorFactory $validatorFactory, SessionService $sessionService)
     {
-        $this->filesService = $filesService;
+        $this->fileService = $fileService;
         $this->validatorFactory = $validatorFactory;
         $this->sessionService = $sessionService;
     }
 
     public function upload(Request $request) : Response
     {
-        // Upload file and redirect to files list
+        // Upload files and redirect to files list
         $validator = $this->validatorFactory->create(FilesUploadValidator::class);
         if ($request->getMethod() === 'POST') {
             if ($validator->check($request)) {
                 $files = $request->getFiles(['someFile']);
-                $result = $this->filesService->uploadFiles($files, (bool)$request->getPayload(['public'])['public']);
+                $result = $this->fileService->uploadFiles($files, (bool)$request->getPayload(['public'])['public']);
                 if (!empty($result)) {
                     $this->sessionService->set(['flash' => ['type' => 'success', 'text' => 'Files are added']]);
-                    return new Response(null, [], [], ['Location' => '/files']);
+                    return new Response(null, [], [], ['Location' => '/file']);
                 }
                 $error = 'Failed to upload files';
             }
@@ -49,7 +49,7 @@ class FilesController implements ControllerInterface
     {
         return new Response(
             'files/list.php',
-            ['types' => $this->filesService->getTypes(), 'flash' => $this->sessionService->get(['flash'], true)['flash']],
+            ['types' => $this->fileService->getTypes(), 'flash' => $this->sessionService->get(['flash'], true)['flash']],
             ['types' => 'html', 'flash' => 'html']
         );
     }
@@ -65,22 +65,22 @@ class FilesController implements ControllerInterface
             if ($validator->check($request)) {
                 $ids = $request->getPayload(['ids'])['ids'];
                 if (!empty($ids)) {
-                    if ($this->filesService->deleteFiles($ids)) {
+                    if ($this->fileService->deleteFiles($ids)) {
                         $this->sessionService->set(['flash' => ['type' => 'success', 'text' => 'Files are deleted']]);
                     } else {
                         $this->sessionService->set(['flash' => ['type' => 'error', 'text' => 'Files are not deleted']]);
                     }
 
-                    return new Response(null, [], [], ['Location' => '/files/list/' . (int)$type . '/' . (int)$page]);
+                    return new Response(null, [], [], ['Location' => '/file/list/' . (int)$type . '/' . (int)$page]);
                 }
             }
         }
 
         // Get files
-        $filesPack = $this->filesService->getByType($type, $page);
+        $filesPack = $this->fileService->getByType($type, $page);
         if (empty($filesPack['files'])) {
             $this->sessionService->set(['flash' => ['type' => 'error', 'text' => 'There is no files under selected category']]);
-            return new Response(null, [], [], ['Location' => '/files']);
+            return new Response(null, [], [], ['Location' => '/file']);
         }
 
         // Set escape rules
@@ -90,13 +90,13 @@ class FilesController implements ControllerInterface
         }
 
         return new Response(
-            $this->filesService->isTypeImage($type) ? 'files/listImages.php' : 'files/listFiles.php',
+            $this->fileService->isTypeImage($type) ? 'files/listImages.php' : 'files/listFiles.php',
             [
                 'files' => $filesPack['files'],
                 'type' => $type,
                 'page' => $filesPack['page'],
                 'pages' => $filesPack['pages'],
-                'private' => $this->filesService->isTypePrivate($type),
+                'private' => $this->fileService->isTypePrivate($type),
                 'flash' => $this->sessionService->get(['flash'], true)['flash'],
                 'error' => isset($error) ? $error : $validator->getError(),
                 'csrfToken' => $validator->getCsrfToken()

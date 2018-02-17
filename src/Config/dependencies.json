@@ -5,7 +5,7 @@
             "@securityMiddleware@",
             "%defaultContentType%",
             "%assetsVersion%",
-            "@filesService@",
+            "@fileService@",
             "@sessionService@"
         ]
     },
@@ -35,10 +35,10 @@
 
 
 
-    "filesController": {
-        "class": "TinyApp\\Controller\\FilesController",
+    "fileController": {
+        "class": "TinyApp\\Controller\\FileController",
         "inject": [
-            "@filesService@",
+            "@fileService@",
             "@validatorFactory@",
             "@sessionService@"
         ]
@@ -56,7 +56,7 @@
         "class": "TinyApp\\Controller\\PrivateContentController",
         "inject": [
             "@sessionService@",
-            "@filesService@"
+            "@fileService@"
         ]
     },
     "forexController": {
@@ -69,10 +69,10 @@
     "sessionService": {
         "class": "TinyApp\\Model\\Service\\SessionService"
     },
-    "filesService": {
-        "class": "TinyApp\\Model\\Service\\FilesService",
+    "fileService": {
+        "class": "TinyApp\\Model\\Service\\FileService",
         "inject": [
-            "@filesRepository@"
+            "@fileRepository@"
         ]
     },
     "validatorFactory": {
@@ -149,8 +149,8 @@
             "%databasePassword%"
         ]
     },
-    "filesRepository" : {
-        "class": "TinyApp\\Model\\Repository\\FilesRepository",
+    "fileRepository" : {
+        "class": "TinyApp\\Model\\Repository\\FileRepository",
         "inject": [
             "@writeConnection@"
         ]

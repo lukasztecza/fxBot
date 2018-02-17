@@ -10,11 +10,11 @@
             "allow": ["ROLE_USER"]
         },
         {
-            "route": "/files/add",
+            "route": "/file/add",
             "allow": ["ROLE_USER"]
         },
         {
-            "route": "/files/list/{type}/{page}",
+            "route": "/file/list/{type}/{page}",
             "methods": ["POST"],
             "allow": ["ROLE_USER"]
         }

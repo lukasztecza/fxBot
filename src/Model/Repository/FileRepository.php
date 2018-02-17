@@ -1,7 +1,7 @@
 <?php
 namespace TinyApp\Model\Repository;
 
-class FilesRepository extends RepositoryAbstract
+class FileRepository extends RepositoryAbstract
 {
     private const IMAGE_PUBLIC = 1;
     private const FILE_PUBLIC = 2;

@@ -4,7 +4,7 @@
 <?php if(isset($flash)): ?>
     <p class="<?php echo $flash['type']; ?>"><?php echo $flash['text']; ?></p>
 <?php endif; ?>
-<?php $prefix = '/files/list/' . $type . '/'; include(__DIR__ . '/../common/paginator.php'); ?>
+<?php $prefix = '/file/list/' . $type . '/'; include(__DIR__ . '/../common/paginator.php'); ?>
 <form method="post">
 <p>Images:</p>
 <ul>
