@@ -2,8 +2,6 @@
 namespace TinyApp\Model\Strategy;
 
 use TinyApp\Model\Strategy\StrategyInterface;
-use TinyApp\Model\Service\PriceService;
-use TinyApp\Model\Service\IndicatorService;
 use TinyApp\Model\Strategy\Order;
 
 abstract class StrategyAbstract implements StrategyInterface
