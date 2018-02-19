@@ -17,9 +17,16 @@ class SimulationService
     private const SIMULATION_END = '2017-12-31 00:00:00';
 //    private const SIMULATION_END = '2017-01-10 00:00:00';
 
-//@TODO something broken -> look why simulation gets wrong results
-
     private const DEFAULT_SPREAD = 0.0005;
+
+    /*
+     * Table results for strategies having more than 2 parameters will
+     * show values for the first value of parameters not included below
+     */
+    private const TABLE_RESULT_PARAMS = [
+        'vertical' => 2,
+        'horizontal' => 0
+    ];
 
     private $priceInstruments;
     private $priceService;
@@ -58,7 +65,7 @@ class SimulationService
             $currentDate = self::SIMULATION_START;
             $counter = 0;
             $executedTrades = 0;
-            $minBalance = 1000000;
+            $minBalance = self::INITIAL_TEST_BALANCE;
             $maxBalance = 0;
             $profits = 0;
             $losses = 0;
@@ -143,19 +150,20 @@ class SimulationService
     private function getStrategiesForTest() : array
     {
         $strategies = [];
-        for ($i = 0.001; $i <= 0.004; $i += 0.001) {
-            for ($j = 0.1; $j <= 5;) {
+        for ($i = 0.002; $i <= 0.005; $i += 0.001) {
+            for ($j = 3; $j <= 3; $j++) {
+                /*
                 $strategies[] = [
-                    //'className' => 'TinyApp\Model\Strategy\MinSpreadRigidStrategyPattern',
                     'className' => 'TinyApp\Model\Strategy\MinSpreadRigidTrendingStrategyPattern',
+                    //'className' => 'TinyApp\Model\Strategy\MinSpreadRigidStrategyPattern',
                     'params' => [$i, $j]
                 ];
-                if ($j <= 0.8) {
-                    $j += 0.2;
-                } elseif ($j > 0.8 && $j < 1) {
-                    $j = 1;
-                } else {
-                    $j++;
+                */
+                foreach (/*['AUD_USD', 'USD_CAD']*/$this->priceInstruments as $instrument) {
+                    $strategies[] = [
+                        'className' => 'TinyApp\Model\Strategy\RigidTrendingStrategyPattern',
+                        'params' => [$i, $j, $instrument]
+                    ];
                 }
             }
         }
@@ -190,14 +198,18 @@ class SimulationService
 
     private function displayTableResults(array $results, string $currentDate) : void
     {
-        if (empty($results[0]['params'])) {
+        if (
+            empty($results[0]['params'][self::TABLE_RESULT_PARAMS['vertical']]) ||
+            empty($results[0]['params'][self::TABLE_RESULT_PARAMS['horizontal']])
+        ) {
+            echo 'Could not create table view for specified params';
             return;
         }
         $params1 = [];
         $params2 = [];
         foreach ($results as $result) {
-            $params1[(string)$result['params'][0]] = true;
-            $params2[(string)$result['params'][1]] = true;
+            $params1[(string)$result['params'][self::TABLE_RESULT_PARAMS['vertical']]] = true;
+            $params2[(string)$result['params'][self::TABLE_RESULT_PARAMS['horizontal']]] = true;
         }
 
         echo '=========================================================================================================' . PHP_EOL;
@@ -225,7 +237,10 @@ class SimulationService
             echo str_pad('|' . $param1, 10);
             foreach ($params2 as $param2 => $val2) {
                 foreach ($results as $result) {
-                    if ((string)$result['params'][0] == $param1 && (string)$result['params'][1] == $param2) {
+                    if (
+                        (string)$result['params'][self::TABLE_RESULT_PARAMS['vertical']] == $param1 &&
+                        (string)$result['params'][self::TABLE_RESULT_PARAMS['horizontal']] == $param2
+                    ) {
                         echo str_pad('|' . $this->formatBalance($result[$field]), 10);
                         break 1;
                     }
@@ -240,10 +255,10 @@ class SimulationService
         echo '=========================================================================================================' . PHP_EOL;
         echo 'Simulation results between ' . self::SIMULATION_START . ' and ' . $currentDate . PHP_EOL;
         echo '=========================================================================================================' . PHP_EOL;
-        $maxFinalBalance = ['value' => 0, 'strategy' => null];
-        $maxTotalBalance = ['value' => 0, 'strategy' => null];
-        $minTotalBalance = ['value' => 1000000, 'strategy' => null];
-        $maxRatioPerTrade = ['value' => -100, 'strategy' => null];
+        $maxFinalBalance = ['value' => 0.00, 'strategy' => null];
+        $maxTotalBalance = ['value' => 0.00, 'strategy' => null];
+        $minTotalBalance = ['value' => self::INITIAL_TEST_BALANCE, 'strategy' => null];
+        $maxRatioPerTrade = ['value' => -self::INITIAL_TEST_BALANCE, 'strategy' => null];
         foreach ($results as $result) {
             $paramsText = !empty($result['params']) ? ' with ' . implode(' and ', $result['params']) : '';
             echo $result['strategy'] . $paramsText . ' finished with balance of ' . $this->formatBalance($result['finalBalance']) . PHP_EOL;
@@ -254,8 +269,8 @@ class SimulationService
             echo '    with trades ended with loss ' . $result['losses'] . PHP_EOL;
             $ratioPerTrade = $this->getRatioPerTrade($result);
             echo '    which gives average profit per trade ' . $ratioPerTrade . PHP_EOL;
-            if ($maxFinalBalance['value'] < $result['maxBalance']) {
-                $maxFinalBalance['value'] = $result['maxBalance'];
+            if ($maxFinalBalance['value'] < $result['finalBalance']) {
+                $maxFinalBalance['value'] = $result['finalBalance'];
                 $maxFinalBalance['strategy'] = $result['strategy'] . $paramsText;
             }
             if ($maxTotalBalance['value'] < $result['maxBalance']) {
