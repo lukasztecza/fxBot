@@ -3,6 +3,7 @@ namespace TinyApp\Model\Strategy;
 
 use TinyApp\Model\Service\PriceService;
 use TinyApp\Model\Service\IndicatorService;
+use TinyApp\Model\Strategy\StrategyInterface;
 
 class StrategyFactory
 {
@@ -29,9 +30,11 @@ class StrategyFactory
 
         switch ($class) {
             case 'TinyApp\Model\Strategy\MinSpreadRigidTrendingStrategyPattern':
+            case 'TinyApp\Model\Strategy\RigidTrendingStrategyPattern':
                 $strategy = new $class($this->priceService, ...$params);
                 break;
             case 'TinyApp\Model\Strategy\MinSpreadRigidStrategyPattern':
+            case 'TinyApp\Model\Strategy\RigidStrategyPattern':
                 $strategy = new $class(...$params);
                 break;
             //default strategies are not patterns so there is no need to create new object every time it is called
