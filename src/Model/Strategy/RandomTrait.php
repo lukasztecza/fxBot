@@ -1,9 +1,7 @@
 <?php
 namespace TinyApp\Model\Strategy;
 
-use TinyApp\Model\Strategy\MinSpreadRigidStrategyAbstract;
-
-class MinSpreadRigidStrategyPattern extends MinSpreadRigidStrategyAbstract
+trait RandomTrait
 {
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
     {
