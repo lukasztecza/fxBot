@@ -6,7 +6,7 @@ use TinyApp\Model\Service\PriceService;
 
 class PopulateRandomCommand implements CommandInterface
 {
-    private const DEFAULT_INSTRUMENT = 'EUR_USD';
+    private const DEFAULT_INSTRUMENT = 'USD_CAD';
 
     private $priceService;
 
@@ -26,8 +26,8 @@ class PopulateRandomCommand implements CommandInterface
     private function getRandomPrices() : array
     {
         $pack = 'test_' . md5(time() . rand(1,1000000));
-        $price = 100000; // work on ints instead of floats
-        $itertions = 5000;
+        $price = 1000; // work on ints instead of floats
+        $itertions = 500;
         $priceChangeFactor = 200; // 20 pips
         $priceFluctuation = 50; // 5 pips
         $dateString = '2017-01-01 00:00:00';
@@ -40,15 +40,12 @@ class PopulateRandomCommand implements CommandInterface
             $high = $open < $close ? $close + rand(0, $priceFluctuation) : $open + rand(0, $priceFluctuation);
             $low = $open < $close ? $open - rand(0, $priceFluctuation) : $close - rand(0, $priceFluctuation);
             $prices[] = [
-                'pack' => $pack,
                 'instrument' => self::DEFAULT_INSTRUMENT,
                 'datetime' => $dateString,
                 'open' => $open,
                 'high' => $high,
                 'low' => $low,
-                'average' => round(($high + $low) / 2),
                 'close' => $close,
-                'extrema' => null
             ];
             $price = $close;
         }
