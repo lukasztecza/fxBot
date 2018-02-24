@@ -13,7 +13,7 @@ class SimulationService
     private const SINGLE_TRANSACTION_RISK = 0.01;
 
     private const MAX_ITERATIONS_PER_STRATEGY = 40000;
-    private const SIMULATION_START = '2017-01-01 00:00:00';
+    private const SIMULATION_START = '2017-01-10 00:00:00';
 //    private const SIMULATION_END = '2017-12-31 00:00:00';
     private const SIMULATION_END = '2017-01-30 00:00:00';
 
