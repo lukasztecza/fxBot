@@ -13,9 +13,9 @@ class SimulationService
     private const SINGLE_TRANSACTION_RISK = 0.01;
 
     private const MAX_ITERATIONS_PER_STRATEGY = 40000;
-    private const SIMULATION_START = '2017-01-01 00:00:00';
+    private const SIMULATION_START = '2017-01-10 00:00:00';
     private const SIMULATION_END = '2017-12-31 00:00:00';
-//    private const SIMULATION_END = '2017-01-10 00:00:00';
+//    private const SIMULATION_END = '2017-01-30 00:00:00';
 
     private const DEFAULT_SPREAD = 0.0005;
 
@@ -98,7 +98,7 @@ class SimulationService
                             $executedTrades++;
                         }
                     } catch(\Throwable $e) {
-                        echo 'Could not create order skipping' . PHP_EOL;
+                        echo 'Could not create order due to ' . $e->getMessage() . ' skipping' . PHP_EOL;
                         continue;
                     }
                 } elseif (
@@ -150,7 +150,7 @@ class SimulationService
     private function getStrategiesForTest() : array
     {
         $strategies = [];
-        for ($i = 0.002; $i <= 0.005; $i += 0.001) {
+        for ($i = 0.002; $i <= 0.004; $i += 0.001) {
             for ($j = 3; $j <= 3; $j++) {
                 /*
                 $strategies[] = [
@@ -159,9 +159,9 @@ class SimulationService
                     'params' => [$i, $j]
                 ];
                 */
-                foreach (/*['AUD_USD', 'USD_CAD']*/$this->priceInstruments as $instrument) {
+                foreach ($this->priceInstruments as $instrument) {
                     $strategies[] = [
-                        'className' => 'TinyApp\Model\Strategy\RigidTrendingStrategyPattern',
+                        'className' => 'TinyApp\Model\Strategy\RigidDeviationStrategyPattern',
                         'params' => [$i, $j, $instrument]
                     ];
                 }
@@ -176,6 +176,11 @@ class SimulationService
         $prices = [];
         try {
             foreach ($inputPrices as $inputPrice) {
+
+                if (!isset($inputPrice['instrument']) || !isset($inputPrice['close'])) {
+                    return [];
+                }
+
                 $closePrice = $inputPrice['close'];
                 $spread = self::DEFAULT_SPREAD;
                 if (strpos($inputPrice['instrument'], 'JPY') !== false) {
