@@ -5,68 +5,43 @@ trait DeviationTrait
 {
     protected function getDeviation(array $lastPrices) : int
     {
-        echo 'blah';return 1;
-        $this->appendLocalExtremas($lastPrices);
-        $lastHighs = [];
-        $lastLows = [];
-        foreach ($lastPrices as $price) {
-            if (count($lastHighs) > 1 && count($lastLows) > 1) {
-                break;
-            }
+        $fastAveragePeriod = 5;
+        $slowAveragePeriod = 20;
 
-            if (isset($price['extrema'])) {
-                if ($price['extrema'] === 'max') {
-                    $lastHighs[] = $price['high'];
-                } elseif ($price['extrema'] === 'min') {
-                    $lastLows[] = $price['low'];
-                }
-            }
-        }
-
-        if (count($lastHighs) > 1 && count($lastLows) > 1) {
-            $lowsDiff = $lastLows[0] - $lastLows[1];
-            $highesDiff = $lastHighs[0] - $lastHighs[1];
-
-            if ($lastLows[0] > $lastLows[1] && $lastHighs[0] < $lastHighs[1]) {
-                return $lowsDiff > abs($highesDiff) ? 1 : -1;
-            } elseif ($lastLows[0] > $lastLows[1]) {
-                return 1;
-            } elseif ($lastHighs[0] < $lastHighs[1]) {
-                return -1;
-            }
-        }
-
-        return 0;
-    }
-
-    private function appendLocalExtremas(array &$values) : void
-    {
-        $range = 10;
-        foreach ($values as $key => $value) {
-            $scoreMax = 0;
-            $scoreMin = 0;
-            for ($i = -$range; $i <= $range; $i++) {
-                // not enough adjoining data
-                if (!isset($values[$key + $i])) {
+        $averages = [
+            'current' => ($lastPrices[0]['high'] + $lastPrices[0]['low']) / 2,
+            'fast' => null,
+            'slow' => null
+        ];
+        $sum = 0;
+        $counter = 0;
+        foreach ($lastPrices as $key => $price) {
+            $sum += ($price['high'] + $price['low']) / 2;
+            $counter++;
+            switch (true) {
+                case $fastAveragePeriod - $counter > 0:
                     continue 2;
-                }
-                // local max
-                if ($values[$key + $i]['high'] <= $value['high']) {
-                    $scoreMax++;
-                }
-                // local min
-                if ($values[$key + $i]['low'] >= $value['low']) {
-                    $scoreMin++;
-                }
+                case $fastAveragePeriod - $counter === 0:
+                    $averages['fast'] = $sum / $counter;
+                    break 1;
+                case $slowAveragePeriod - $counter > 0:
+                    continue 2;
+                case $slowAveragePeriod - $counter === 0:
+                    $averages['slow'] = $sum / $counter;
+                    break 2;
             }
+        }
 
-            // mark edge values
-            if ($scoreMax === 2 * $range + 1) {
-                $values[$key]['extrema'] = 'max';
-            }
-            if ($scoreMin === 2 * $range + 1) {
-                $values[$key]['extrema'] = 'min';
-            }
+        /* todo
+         * if last block average price is between fast and slow averages that means local price is about to move in opposite direction to the previos local trend should be combined with long trend strategy
+         */
+        switch (true) {
+            case $averages['current'] < $averages['fast'] && $averages['current'] > $averages['slow']:
+                return -1;
+            case $averages['current'] > $averages['fast'] && $averages['current'] < $averages['slow']:
+                return 1;
+            default:
+                return 0;
         }
     }
 }
