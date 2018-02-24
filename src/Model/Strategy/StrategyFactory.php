@@ -31,10 +31,11 @@ class StrategyFactory
         switch ($class) {
             case 'TinyApp\Model\Strategy\MinSpreadRigidTrendingStrategyPattern':
             case 'TinyApp\Model\Strategy\RigidTrendingStrategyPattern':
+            case 'TinyApp\Model\Strategy\RigidDeviationStrategyPattern':
                 $strategy = new $class($this->priceService, ...$params);
                 break;
-            case 'TinyApp\Model\Strategy\MinSpreadRigidStrategyPattern':
-            case 'TinyApp\Model\Strategy\RigidStrategyPattern':
+            case 'TinyApp\Model\Strategy\MinSpreadRigidRandomStrategyPattern':
+            case 'TinyApp\Model\Strategy\RigidRandomStrategyPattern':
                 $strategy = new $class(...$params);
                 break;
             //default strategies are not patterns so there is no need to create new object every time it is called
