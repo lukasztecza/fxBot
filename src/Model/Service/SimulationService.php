@@ -10,14 +10,14 @@ use TinyApp\Model\Strategy\RandomStrategy;
 class SimulationService
 {
     private const INITIAL_TEST_BALANCE = 100;
-    private const SINGLE_TRANSACTION_RISK = 0.01;
+    private const SINGLE_TRANSACTION_RISK = 0.03;
 
     private const MAX_ITERATIONS_PER_STRATEGY = 40000;
     private const SIMULATION_START = '2017-01-10 00:00:00';
     private const SIMULATION_END = '2017-12-31 00:00:00';
 //    private const SIMULATION_END = '2017-01-30 00:00:00';
 
-    private const DEFAULT_SPREAD = 0.0005;
+    private const MAX_SPREAD = 0.0003;
 
     /*
      * Table results for strategies having more than 2 parameters will
@@ -39,7 +39,7 @@ class SimulationService
         StrategyFactory $strategyFactory,
         TradeRepository $tradeRepository
     ) {
-        $this->priceInstruments = $priceInstruments;
+        $this->priceInstruments = ['USD_CAD', 'EUR_USD', 'EUR_CAD'];//$priceInstruments;
         $this->priceService = $priceService;
         $this->strategyFactory = $strategyFactory;
         $this->tradeRepository = $tradeRepository;
@@ -150,8 +150,8 @@ class SimulationService
     private function getStrategiesForTest() : array
     {
         $strategies = [];
-        for ($i = 0.002; $i <= 0.004; $i += 0.001) {
-            for ($j = 3; $j <= 3; $j++) {
+        for ($i = 0.003; $i <= 0.003; $i += 0.001) {
+            for ($j = 4; $j <= 4; $j++) {
                 /*
                 $strategies[] = [
                     'className' => 'TinyApp\Model\Strategy\MinSpreadRigidTrendingStrategyPattern',
@@ -161,7 +161,8 @@ class SimulationService
                 */
                 foreach ($this->priceInstruments as $instrument) {
                     $strategies[] = [
-                        'className' => 'TinyApp\Model\Strategy\RigidDeviationStrategyPattern',
+                        //'className' => 'TinyApp\Model\Strategy\RigidTrendingDeviationStrategyPattern',
+                        'className' => 'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern',
                         'params' => [$i, $j, $instrument]
                     ];
                 }
@@ -182,7 +183,7 @@ class SimulationService
                 }
 
                 $closePrice = $inputPrice['close'];
-                $spread = self::DEFAULT_SPREAD;
+                $spread = self::MAX_SPREAD;
                 if (strpos($inputPrice['instrument'], 'JPY') !== false) {
                     $spread *= 100;
                 }

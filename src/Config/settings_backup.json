@@ -31,13 +31,24 @@
         "AUD_USD",
         "AUD_CAD",
         "AUD_JPY",
+        "AUD_CHF",
+        "CAD_CHF",
         "CAD_JPY",
+        "CHF_JPY",
+        "EUR_GBP",
         "EUR_USD",
         "EUR_JPY",
+        "EUR_CHF",
         "EUR_AUD",
         "EUR_CAD",
+        "GBP_JPY",
+        "GBP_USD",
+        "GBP_CAD",
+        "GBP_CHF",
+        "GBP_AUD",
         "USD_JPY",
-        "USD_CAD"
+        "USD_CAD",
+        "USD_CHF"
     ],
 
     "clientConfiguration": {
