@@ -29,7 +29,11 @@ class StrategyFactory
         }
 
         switch ($class) {
+            case 'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern':
+                $strategy = new $class($this->priceService, $this->indicatorService, ...$params);
+                break;
             case 'TinyApp\Model\Strategy\MinSpreadRigidTrendingStrategyPattern':
+            case 'TinyApp\Model\Strategy\RigidTrendingDeviationStrategyPattern':
             case 'TinyApp\Model\Strategy\RigidTrendingStrategyPattern':
             case 'TinyApp\Model\Strategy\RigidDeviationStrategyPattern':
                 $strategy = new $class($this->priceService, ...$params);

@@ -7,7 +7,7 @@ use TinyApp\Model\Strategy\Order;
 abstract class StrategyAbstract implements StrategyInterface
 {
     private const HOME_CURRENCY = 'CAD';
-    private const SINGLE_TRANSACTION_RISK = 0.01;
+    private const SINGLE_TRANSACTION_RISK = 0.03;
 
     /*
     This calculation follows the following formula:

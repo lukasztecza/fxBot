@@ -23,15 +23,11 @@ trait TrendingTrait
         }
 
         if (count($lastHighs) > 1 && count($lastLows) > 1) {
-            $lowsDiff = $lastLows[0] - $lastLows[1];
-            $highesDiff = $lastHighs[0] - $lastHighs[1];
-
-            if ($lastLows[0] > $lastLows[1] && $lastHighs[0] < $lastHighs[1]) {
-                return $lowsDiff > abs($highesDiff) ? 1 : -1;
-            } elseif ($lastLows[0] > $lastLows[1]) {
-                return 1;
-            } elseif ($lastHighs[0] < $lastHighs[1]) {
-                return -1;
+            switch (true) {
+                case $lastLows[0] > $lastLows[1] && $lastHighs[0] > $lastHighs[1]:
+                    return 1;
+                case $lastLows[0] < $lastLows[1] && $lastHighs[0] < $lastHighs[1]:
+                    return -1;
             }
         }
 
@@ -40,7 +36,7 @@ trait TrendingTrait
 
     private function appendLocalExtremas(array &$values) : void
     {
-        $range = 10;
+        $range = 15;
         foreach ($values as $key => $value) {
             $scoreMax = 0;
             $scoreMin = 0;

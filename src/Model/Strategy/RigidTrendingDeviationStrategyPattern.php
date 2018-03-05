@@ -3,10 +3,12 @@ namespace TinyApp\Model\Strategy;
 
 use TinyApp\Model\Strategy\RigidStrategyAbstract;
 use TinyApp\Model\Service\PriceService;
+use TinyApp\Model\Strategy\TrendingTrait;
 use TinyApp\Model\Strategy\DeviationTrait;
 
-class RigidDeviationStrategyPattern extends RigidStrategyAbstract
+class RigidTrendingDeviationStrategyPattern extends RigidStrategyAbstract
 {
+    use TrendingTrait;
     use DeviationTrait;
 
     private $priceService;
@@ -21,6 +23,16 @@ class RigidDeviationStrategyPattern extends RigidStrategyAbstract
     {
         $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, 'P7D', $currentDateTime);
 
-        return $this->getDeviation($lastPrices);
+        $trend = $this->getTrend($lastPrices);
+        $deviation = $this->getDeviation($lastPrices);
+
+        switch (true) {
+            case $trend === 1 && $deviation === 1:
+                return 1;
+            case $trend === -1 && $deviation === -1:
+                return -1;
+            default:
+                return 0;
+        }
     }
 }
