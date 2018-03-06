@@ -4,8 +4,7 @@ namespace TinyApp\Model\Service;
 use TinyApp\Model\Service\PriceService;
 use TinyApp\Model\Strategy\StrategyFactory;
 use TinyApp\Model\Repository\TradeRepository;
-
-use TinyApp\Model\Strategy\RandomStrategy;
+use TinyApp\Model\Repository\SimulationRepository;
 
 class SimulationService
 {
@@ -14,8 +13,8 @@ class SimulationService
 
     private const MAX_ITERATIONS_PER_STRATEGY = 40000;
     private const SIMULATION_START = '2017-01-10 00:00:00';
-    private const SIMULATION_END = '2017-12-31 00:00:00';
-//    private const SIMULATION_END = '2017-01-30 00:00:00';
+//    private const SIMULATION_END = '2017-12-31 00:00:00';
+    private const SIMULATION_END = '2017-01-30 00:00:00';
 
     private const MAX_SPREAD = 0.0003;
 
@@ -32,17 +31,20 @@ class SimulationService
     private $priceService;
     private $strategyFactory;
     private $tradeRepository;
+    private $simulationRepository;
 
     public function __construct(
         array $priceInstruments,
         PriceService $priceService,
         StrategyFactory $strategyFactory,
-        TradeRepository $tradeRepository
+        TradeRepository $tradeRepository,
+        SimulationRepository $simulationRepository
     ) {
-        $this->priceInstruments = ['USD_CAD', 'EUR_USD', 'EUR_CAD'];//$priceInstruments;
+        $this->priceInstruments = ['USD_CAD'];//$priceInstruments;
         $this->priceService = $priceService;
         $this->strategyFactory = $strategyFactory;
         $this->tradeRepository = $tradeRepository;
+        $this->simulationRepository = $simulationRepository;
     }
 
     public function run() : array
@@ -139,10 +141,37 @@ class SimulationService
                 'profits' => $profits,
                 'losses' => $losses
             ];
+
+            try {
+                $this->simulationRepository->saveSimulation([
+                    'instrument' => $settings['params'][2],
+                    'parameters' => [
+                        'strategy' => substr($strategyClass, strrpos($strategyClass, '\\') + 1),
+                        'rigid_stop_loss' => $settings['params'][0],
+                        'take_profit_multiplier' => $settings['params'][1]
+                    ],
+                    'final_balance' => $balance,
+                    'min_balance' => $minBalance,
+                    'max_balance' => $maxBalance,
+                    'profits' => $profits,
+                    'losses' => $losses,
+                    'datetime' => (new \DateTime(null, new \DateTimeZone('UTC')))->format('Y-m-d H:i:s'),
+                ]);
+            } catch (\Throwable $e) {
+                trigger_error('Failed to save simulation result with message ' . $e->getMessage(), E_USER_NOTICE);
+
+                return [
+                    'status' => false,
+                    'message' => 'Could not save simulation result'
+                ];
+            }
         }
+
+//@TODO remove echoing tables etc use simulation result table and add periods to it
 
         $this->displayTextResults($results, $currentDate);
         $this->displayTableResults($results, $currentDate);
+
 
         return ['status' => true, 'message' => 'simulation finished'];
     }
@@ -161,8 +190,8 @@ class SimulationService
                 */
                 foreach ($this->priceInstruments as $instrument) {
                     $strategies[] = [
-                        //'className' => 'TinyApp\Model\Strategy\RigidTrendingDeviationStrategyPattern',
-                        'className' => 'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern',
+                        'className' => 'TinyApp\Model\Strategy\RigidTrendingDeviationStrategyPattern',
+                        //'className' => 'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern',
                         'params' => [$i, $j, $instrument]
                     ];
                 }

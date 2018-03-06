@@ -30,13 +30,9 @@
     "priceInstruments": [
         "AUD_USD",
         "AUD_CAD",
-        "AUD_JPY",
-        "CAD_JPY",
         "EUR_USD",
-        "EUR_JPY",
         "EUR_AUD",
         "EUR_CAD",
-        "USD_JPY",
         "USD_CAD"
     ],
 

@@ -105,7 +105,7 @@ class FileRepository extends RepositoryAbstract
         $files = $this->getRead()->fetch(
             'SELECT * FROM `files` WHERE `type` = :type LIMIT ' . ($page - 1) * $perPage . ', ' . $perPage, ['type' => $type]
         );
-        $pages = $this->getPages('SELECT COUNT(*) as count FROM `files`', [], $perPage);
+        $pages = $this->getPages('SELECT COUNT(*) AS count FROM `files`', [], $perPage);
 
         return ['files' => $files, 'page' => $page, 'pages' => $pages];
     }
@@ -145,6 +145,7 @@ class FileRepository extends RepositoryAbstract
             $this->getWrite()->rollBack();
             throw $e;
         }
+        $this->getWrite()->clean();
 
         return $uploadedFiles;
     }
