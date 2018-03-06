@@ -125,7 +125,8 @@
             "%priceInstruments%",
             "@priceService@",
             "@strategyFactory@",
-            "@tradeRepository"
+            "@tradeRepository",
+            "@simulationRepository"
         ]
     },
     "strategyFactory": {
@@ -169,6 +170,12 @@
     },
     "tradeRepository": {
         "class": "TinyApp\\Model\\Repository\\TradeRepository",
+        "inject": [
+            "@writeConnection@"
+        ]
+    },
+    "simulationRepository": {
+        "class": "TinyApp\\Model\\Repository\\SimulationRepository",
         "inject": [
             "@writeConnection@"
         ]
