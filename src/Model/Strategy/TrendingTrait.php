@@ -36,7 +36,7 @@ trait TrendingTrait
 
     private function appendLocalExtremas(array &$values) : void
     {
-        $range = 15;
+        $range = 16;
         foreach ($values as $key => $value) {
             $scoreMax = 0;
             $scoreMin = 0;

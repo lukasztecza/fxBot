@@ -5,8 +5,9 @@ trait DeviationTrait
 {
     protected function getDeviation(array $lastPrices) : int
     {
-        $fastAveragePeriod = 3;
-        $slowAveragePeriod = 9;
+    //@TODO move all trait constants to passed params
+        $fastAveragePeriod = 4;
+        $slowAveragePeriod = 8;
 
         $averages = [
             'current' => ($lastPrices[0]['high'] + $lastPrices[0]['low']) / 2,

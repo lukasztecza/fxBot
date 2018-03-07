@@ -38,7 +38,9 @@ CREATE TABLE IF NOT EXISTS `trade` (
     `stop_loss` DECIMAL(10,5) NOT NULL,
     `balance` DECIMAL(10,5) NOT NULL,
     `datetime` DATETIME NOT NULL,
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+    KEY (`instrument`),
+    KEY (`datetime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE IF NOT EXISTS `simulation` (
@@ -50,29 +52,34 @@ CREATE TABLE IF NOT EXISTS `simulation` (
     `profits` INT(11) NOT NULL,
     `losses` INT(11) NOT NULL,
     `datetime` DATETIME NOT NULL,
-    PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
-CREATE TABLE IF NOT EXISTS `simulation_parameter` (
-    `simulation_id` INT(11) NOT NULL,
-    `parameter_id` INT(11) NOT NULL,
-    `value` VARCHAR(64) COLLATE utf8_general_ci NOT NULL,
-    PRIMARY KEY (`simulation_id`, `parameter_id`)
+    PRIMARY KEY (`id`),
+    KEY (`instrument`),
+    KEY (`datetime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE IF NOT EXISTS `parameter` (
     `id` INT(11) NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(32) COLLATE utf8_general_ci NOT NULL,
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+    KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+CREATE TABLE IF NOT EXISTS `simulation_parameter` (
+    `simulation_id` INT(11) NOT NULL,
+    `parameter_id` INT(11) NOT NULL,
+    `value` VARCHAR(128) COLLATE utf8_general_ci NOT NULL,
+    FOREIGN KEY (`simulation_id`) REFERENCES `simulation`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`parameter_id`) REFERENCES `parameter`(`id`) ON DELETE CASCADE,
+    CONSTRAINT simulation_id_parameter_id UNIQUE (`simulation_id`, `parameter_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `parameter` (`id`, `name`) VALUES
     (1, 'instrument'),
-    (2, 'rigid_stop_loss'),
-    (3, 'take_profit_multiplier'),
-    (4, 'extremum_range'),
+    (2, 'rigidStopLoss'),
+    (3, 'takeProfitMultiplier'),
+    (4, 'extremumRange'),
     (5, 'strategy'),
-    (6, 'single_transaction_risk'),
-    (7, 'fast_average_period'),
-    (8, 'slow_average_period')
+    (6, 'singleTransactionRisk'),
+    (7, 'fastAveragePeriod'),
+    (8, 'slowAveragePeriod')
 ON DUPLICATE KEY UPDATE `id` = `id`;

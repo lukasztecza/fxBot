@@ -11,9 +11,9 @@ class SimulationRepository extends RepositoryAbstract
                 'INSERT INTO `simulation` (`instrument`, `final_balance`, `max_balance`, `min_balance`, `profits`, `losses`, `datetime`)
                 VALUES (:instrument, :final_balance, :max_balance, :min_balance, :profits, :losses, :datetime)', [
                     'instrument' => $simulation['instrument'],
-                    'final_balance' => $simulation['final_balance'],
-                    'max_balance' => $simulation['max_balance'],
-                    'min_balance' => $simulation['min_balance'],
+                    'final_balance' => $simulation['finalBalance'],
+                    'max_balance' => $simulation['maxBalance'],
+                    'min_balance' => $simulation['minBalance'],
                     'profits' => $simulation['profits'],
                     'losses' => $simulation['losses'],
                     'datetime' => $simulation['datetime']
