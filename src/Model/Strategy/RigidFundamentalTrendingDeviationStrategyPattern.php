@@ -17,16 +17,15 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
     private $indicatorService;
     private $priceService;
 
-    public function __construct(
-        PriceService $priceService,
-        IndicatorService $indicatorService,
-        float $rigidStopLoss,
-        float $takeProfitMultiplier,
-        string $instrument
-    ) {
+    public function __construct(PriceService $priceService, IndicatorService $indicatorService, array $params)
+    {
+        if (empty($params['rigidStopLoss']) || empty($params['takeProfitMultiplier']) || empty($params['instrument'])) {
+            throw new \Exception('Got wrong params ' . var_export($params, true));
+        }
+
         $this->priceService = $priceService;
         $this->indicatorService = $indicatorService;
-        parent::__construct($rigidStopLoss, $takeProfitMultiplier, $instrument);
+        parent::__construct($params['rigidStopLoss'], $params['takeProfitMultiplier'], $params['instrument']);
     }
 
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
