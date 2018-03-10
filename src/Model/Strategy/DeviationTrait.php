@@ -3,11 +3,8 @@ namespace TinyApp\Model\Strategy;
 
 trait DeviationTrait
 {
-    protected function getDeviation(array $lastPrices) : int
+    protected function getDeviation(array $lastPrices, int $fastAveragePeriod, int $slowAveragePeriod) : int
     {
-        $fastAveragePeriod = 5;
-        $slowAveragePeriod = 20;
-
         $averages = [
             'current' => ($lastPrices[0]['high'] + $lastPrices[0]['low']) / 2,
             'fast' => null,
@@ -32,9 +29,6 @@ trait DeviationTrait
             }
         }
 
-        /* todo
-         * if last block average price is between fast and slow averages that means local price is about to move in opposite direction to the previos local trend should be combined with long trend strategy
-         */
         switch (true) {
             case $averages['current'] < $averages['fast'] && $averages['current'] > $averages['slow']:
                 return -1;
