@@ -11,10 +11,14 @@ class MinSpreadRigidTrendingStrategyPattern extends MinSpreadRigidStrategyAbstra
 
     private $priceService;
 
-    public function __construct(PriceService $priceService, float $rigidStopLoss, float $takeProfitMultiplier)
+    public function __construct(PriceService $priceService, array $params)
     {
+        if (empty($params['rigidStopLoss']) || empty($params['takeProfitMultiplier'])) {
+            throw new \Exception('Got wrong params ' . var_export($params, true));
+        }
+
         $this->priceService = $priceService;
-        parent::__construct($rigidStopLoss, $takeProfitMultiplier);
+        parent::__construct($params['rigidStopLoss'], $params['takeProfitMultiplier']);
     }
 
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
