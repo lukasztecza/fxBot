@@ -13,8 +13,8 @@ class SimulationService
 
     private const MAX_ITERATIONS_PER_STRATEGY = 40000;
     private const SIMULATION_START = '2017-01-10 00:00:00';
-//    private const SIMULATION_END = '2017-12-31 00:00:00';
-    private const SIMULATION_END = '2017-03-01 00:00:00';
+    private const SIMULATION_END = '2017-12-31 00:00:00';
+//    private const SIMULATION_END = '2017-02-01 00:00:00';
 
     private const MAX_SPREAD = 0.0003;
 
@@ -26,11 +26,11 @@ class SimulationService
 
     private const STRATEGY_CLASS = 'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern';
     private const CHANGING_PARAMETERS = [
-//        'extremumRanges' => [100,200],   //16
-        'fastAveragePeriods' => [3,4],   //4
-        'slowAveragePeriods' => [500,600],   //8
-//        'rigidStopLoss' => [0.003, 0.004, 0.005],   //0.003
-//        'takeProfitMultiplier' => [3, 4, 5],  //4
+        'extremumRange' => [8, 16],
+        'fastAveragePeriod' => [4],
+        'slowAveragePeriod' => [8, 12],
+        'rigidStopLoss' => [0.003, 0.004],
+        'takeProfitMultiplier' => [3, 4, 5]
     ];
 
     public function __construct(
@@ -40,7 +40,7 @@ class SimulationService
         TradeRepository $tradeRepository,
         SimulationRepository $simulationRepository
     ) {
-        $this->priceInstruments = ['USD_CAD', 'AUD_USD'];//$priceInstruments;
+        $this->priceInstruments = $priceInstruments;
         $this->priceService = $priceService;
         $this->strategyFactory = $strategyFactory;
         $this->tradeRepository = $tradeRepository;
@@ -162,27 +162,26 @@ class SimulationService
         $strategies = [];
         $counter = 0;
         $changingParameters = self::CHANGING_PARAMETERS;
-        $allKeys = array_keys($changingParameters);
         end($changingParameters);
         $lastKey = key($changingParameters);
+
         foreach ($this->priceInstruments as $instrument) {
             $params = ['instrument' => $instrument];
-            reset($allKeys);
-            $this->nestIteration($counter, $strategies, $changingParameters, $allKeys, $lastKey, $params);
+            reset($changingParameters);
+            $this->nestIteration($counter, $strategies, $changingParameters, $lastKey, $params);
         }
-var_dump($strategies);exit;
 
         return $strategies;
     }
 
-    private function nestIteration(int $counter, array &$strategies, array $changingParameters, array &$allKeys, string $lastKey, array $params) : void
+    private function nestIteration(int $counter, array &$strategies, array &$changingParameters, string $lastKey, array $params) : void
     {
         $counter++;
         if ($counter > 100) {
             throw new \Exception('Too deep nesting or danger of infinite recurrence, reached counter ' . var_export($counter, true));
         }
 
-        $key = current($allKeys);
+        $key = key($changingParameters);
         foreach ($changingParameters[$key] as $value) {
             $params[$key] = $value;
 
@@ -192,11 +191,11 @@ var_dump($strategies);exit;
                     'params' => $params
                 ];
             } else {
-                next($allKeys);
-                $this->nestIteration($counter, $strategies, $changingParameters, $allKeys, $lastKey, $params);
+                next($changingParameters);
+                $this->nestIteration($counter, $strategies, $changingParameters, $lastKey, $params);
             }
         }
-        prev($allKeys);
+        prev($changingParameters);
     }
 
     private function getCurrentPrices($inputPrices) : array
@@ -204,7 +203,6 @@ var_dump($strategies);exit;
         $prices = [];
         try {
             foreach ($inputPrices as $inputPrice) {
-
                 if (!isset($inputPrice['instrument']) || !isset($inputPrice['close'])) {
                     return [];
                 }
