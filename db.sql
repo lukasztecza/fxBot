@@ -51,6 +51,8 @@ CREATE TABLE IF NOT EXISTS `simulation` (
     `min_balance` DECIMAL(10,5) NOT NULL,
     `profits` INT(11) NOT NULL,
     `losses` INT(11) NOT NULL,
+    `simulation_start` DATETIME NOT NULL,
+    `simulation_end` DATETIME NOT NULL,
     `datetime` DATETIME NOT NULL,
     PRIMARY KEY (`id`),
     KEY (`instrument`),

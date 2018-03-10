@@ -13,8 +13,8 @@ class SimulationService
 
     private const MAX_ITERATIONS_PER_STRATEGY = 40000;
     private const SIMULATION_START = '2017-01-10 00:00:00';
-    private const SIMULATION_END = '2017-12-31 00:00:00';
-//    private const SIMULATION_END = '2017-02-30 00:00:00';
+//    private const SIMULATION_END = '2017-12-31 00:00:00';
+    private const SIMULATION_END = '2017-03-01 00:00:00';
 
     private const MAX_SPREAD = 0.0003;
 
@@ -24,6 +24,15 @@ class SimulationService
     private $tradeRepository;
     private $simulationRepository;
 
+    private const STRATEGY_CLASS = 'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern';
+    private const CHANGING_PARAMETERS = [
+//        'extremumRanges' => [100,200],   //16
+        'fastAveragePeriods' => [3,4],   //4
+        'slowAveragePeriods' => [500,600],   //8
+//        'rigidStopLoss' => [0.003, 0.004, 0.005],   //0.003
+//        'takeProfitMultiplier' => [3, 4, 5],  //4
+    ];
+
     public function __construct(
         array $priceInstruments,
         PriceService $priceService,
@@ -31,7 +40,7 @@ class SimulationService
         TradeRepository $tradeRepository,
         SimulationRepository $simulationRepository
     ) {
-        $this->priceInstruments = $priceInstruments;
+        $this->priceInstruments = ['USD_CAD', 'AUD_USD'];//$priceInstruments;
         $this->priceService = $priceService;
         $this->strategyFactory = $strategyFactory;
         $this->tradeRepository = $tradeRepository;
@@ -120,19 +129,19 @@ class SimulationService
             }
 
             try {
+                $parameters = $settings['params'];
+                $parameters['strategy'] = substr($settings['className'], strrpos($settings['className'], '\\') + 1);
+                $parameters['singleTransactionRisk'] = self::SINGLE_TRANSACTION_RISK;
                 $this->simulationRepository->saveSimulation([
-                //@TODO add simulation start and end
                     'instrument' => $settings['params']['instrument'],
-                    'parameters' => [
-                        'strategy' => substr($settings['className'], strrpos($settings['className'], '\\') + 1),
-                        'rigidStopLoss' => $settings['params']['rigidStopLoss'],
-                        'takeProfitMultiplier' => $settings['params']['takeProfitMultiplier']
-                    ],
+                    'parameters' => $parameters,
                     'finalBalance' => $balance,
                     'minBalance' => $minBalance,
                     'maxBalance' => $maxBalance,
                     'profits' => $profits,
                     'losses' => $losses,
+                    'simulationStart' => self::SIMULATION_START,
+                    'simulationEnd' => self::SIMULATION_END,
                     'datetime' => (new \DateTime(null, new \DateTimeZone('UTC')))->format('Y-m-d H:i:s'),
                 ]);
             } catch (\Throwable $e) {
@@ -151,21 +160,43 @@ class SimulationService
     private function getStrategiesForTest() : array
     {
         $strategies = [];
-        for ($rigidStopLoss = 0.001; $rigidStopLoss <= 0.006; $rigidStopLoss += 0.001) {
-            for ($takeProfitMultiplier = 1; $takeProfitMultiplier <= 6; $takeProfitMultiplier++) {
-                foreach ($this->priceInstruments as $instrument) {
-                    $strategies[] = [
-                        'className' => 'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern',
-                        'params' => [
-                            'rigidStopLoss' => $rigidStopLoss,
-                            'takeProfitMultiplier' => $takeProfitMultiplier,
-                            'instrument' => $instrument
-                        ]
-                    ];
-                }
+        $counter = 0;
+        $changingParameters = self::CHANGING_PARAMETERS;
+        $allKeys = array_keys($changingParameters);
+        end($changingParameters);
+        $lastKey = key($changingParameters);
+        foreach ($this->priceInstruments as $instrument) {
+            $params = ['instrument' => $instrument];
+            reset($allKeys);
+            $this->nestIteration($counter, $strategies, $changingParameters, $allKeys, $lastKey, $params);
+        }
+var_dump($strategies);exit;
+
+        return $strategies;
+    }
+
+    private function nestIteration(int $counter, array &$strategies, array $changingParameters, array &$allKeys, string $lastKey, array $params) : void
+    {
+        $counter++;
+        if ($counter > 100) {
+            throw new \Exception('Too deep nesting or danger of infinite recurrence, reached counter ' . var_export($counter, true));
+        }
+
+        $key = current($allKeys);
+        foreach ($changingParameters[$key] as $value) {
+            $params[$key] = $value;
+
+            if ($key === $lastKey) {
+                $strategies[] = [
+                    'className' => self::STRATEGY_CLASS,
+                    'params' => $params
+                ];
+            } else {
+                next($allKeys);
+                $this->nestIteration($counter, $strategies, $changingParameters, $allKeys, $lastKey, $params);
             }
         }
-        return $strategies;
+        prev($allKeys);
     }
 
     private function getCurrentPrices($inputPrices) : array

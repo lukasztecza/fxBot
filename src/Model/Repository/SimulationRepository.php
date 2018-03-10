@@ -8,14 +8,18 @@ class SimulationRepository extends RepositoryAbstract
         try {
             $this->getWrite()->begin();
             $affectedId = $this->getWrite()->execute(
-                'INSERT INTO `simulation` (`instrument`, `final_balance`, `max_balance`, `min_balance`, `profits`, `losses`, `datetime`)
-                VALUES (:instrument, :final_balance, :max_balance, :min_balance, :profits, :losses, :datetime)', [
+                'INSERT INTO `simulation`
+                (`instrument`, `final_balance`, `max_balance`, `min_balance`, `profits`, `losses`, `simulation_start`, `simulation_end`, `datetime`)
+                VALUES
+                (:instrument, :final_balance, :max_balance, :min_balance, :profits, :losses, :simulation_start, :simulation_end, :datetime)', [
                     'instrument' => $simulation['instrument'],
                     'final_balance' => $simulation['finalBalance'],
                     'max_balance' => $simulation['maxBalance'],
                     'min_balance' => $simulation['minBalance'],
                     'profits' => $simulation['profits'],
                     'losses' => $simulation['losses'],
+                    'simulation_start' => $simulation['simulationStart'],
+                    'simulation_end' => $simulation['simulationEnd'],
                     'datetime' => $simulation['datetime']
                 ]
             );

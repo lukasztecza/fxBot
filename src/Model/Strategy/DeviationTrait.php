@@ -3,12 +3,8 @@ namespace TinyApp\Model\Strategy;
 
 trait DeviationTrait
 {
-    protected function getDeviation(array $lastPrices) : int
+    protected function getDeviation(array $lastPrices, int $fastAveragePeriod, int $slowAveragePeriod) : int
     {
-    //@TODO move all trait constants to passed params
-        $fastAveragePeriod = 4;
-        $slowAveragePeriod = 8;
-
         $averages = [
             'current' => ($lastPrices[0]['high'] + $lastPrices[0]['low']) / 2,
             'fast' => null,
