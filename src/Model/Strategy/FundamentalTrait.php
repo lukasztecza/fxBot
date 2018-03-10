@@ -5,6 +5,6 @@ trait FundamentalTrait
 {
     protected function getFundamental(string $selectedInstrument) : int
     {
-        return 0;
+        return rand(0,1) ? 1 : -1;
     }
 }

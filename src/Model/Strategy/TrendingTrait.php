@@ -3,9 +3,9 @@ namespace TinyApp\Model\Strategy;
 
 trait TrendingTrait
 {
-    protected function getTrend(array $lastPrices) : int
+    protected function getTrend(array $lastPrices, int $extremumRange) : int
     {
-        $this->appendLocalExtremas($lastPrices);
+        $this->appendLocalExtremas($lastPrices, $extremumRange);
         $lastHighs = [];
         $lastLows = [];
         foreach ($lastPrices as $price) {
@@ -13,10 +13,10 @@ trait TrendingTrait
                 break;
             }
 
-            if (isset($price['extrema'])) {
-                if ($price['extrema'] === 'max') {
+            if (isset($price['extremum'])) {
+                if ($price['extremum'] === 'max') {
                     $lastHighs[] = $price['high'];
-                } elseif ($price['extrema'] === 'min') {
+                } elseif ($price['extremum'] === 'min') {
                     $lastLows[] = $price['low'];
                 }
             }
@@ -34,13 +34,12 @@ trait TrendingTrait
         return 0;
     }
 
-    private function appendLocalExtremas(array &$values) : void
+    private function appendLocalExtremas(array &$values, int $extremumRange) : void
     {
-        $range = 16;
         foreach ($values as $key => $value) {
             $scoreMax = 0;
             $scoreMin = 0;
-            for ($i = -$range; $i <= $range; $i++) {
+            for ($i = -$extremumRange; $i <= $extremumRange; $i++) {
                 // not enough adjoining data
                 if (!isset($values[$key + $i])) {
                     continue 2;
@@ -56,11 +55,11 @@ trait TrendingTrait
             }
 
             // mark edge values
-            if ($scoreMax === 2 * $range + 1) {
-                $values[$key]['extrema'] = 'max';
+            if ($scoreMax === 2 * $extremumRange + 1) {
+                $values[$key]['extremum'] = 'max';
             }
-            if ($scoreMin === 2 * $range + 1) {
-                $values[$key]['extrema'] = 'min';
+            if ($scoreMin === 2 * $extremumRange + 1) {
+                $values[$key]['extremum'] = 'min';
             }
         }
     }
