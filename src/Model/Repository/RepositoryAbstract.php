@@ -7,10 +7,12 @@ use TinyApp\Model\Repository\DatabaseConnection;
 abstract class RepositoryAbstract implements RepositoryInterface
 {
     private $write;
+    private $counter;
 
     public function __construct(DatabaseConnection $write)
     {
         $this->write = $write;
+        $this->counter = 1;
     }
 
     public function getWrite() : DatabaseConnection
@@ -23,7 +25,7 @@ abstract class RepositoryAbstract implements RepositoryInterface
         return $this->write;
     }
 
-    public function getPages(string $sql, array $arguments, int $perPage) : int
+    protected function getPages(string $sql, array $arguments, int $perPage) : int
     {
         if ($perPage < 1) {
             throw new \Exception('Need at least one per page');
@@ -36,5 +38,18 @@ abstract class RepositoryAbstract implements RepositoryInterface
         }
 
         return 0;
+    }
+
+    protected function getInPlaceholdersIncludingParams(array $values, array &$params) : string
+    {
+        $placeholders = [];
+        foreach ($values as $value) {
+            $placeholder = ':value' . $this->counter;
+            $placeholders[] = $placeholder;
+            $params[ltrim($placeholder, ':')] = $value;
+            $this->counter++;
+        }
+
+        return implode(', ', $placeholders);
     }
 }

@@ -55,9 +55,19 @@ class PriceService
         try {
             $endDateTime = $currentDateTime ? new \DateTime($currentDateTime,new \DateTimeZone('UTC')) : new \DateTime(null, \DateTimeZone('UTC'));
             $endDateTime = $endDateTime->sub(new \DateInterval($period));
-            return $this->priceRepository->getPricesForDates($instrument, $endDateTime->format('Y-m-d H:i:s'), $currentDateTime);
+            $prices = $this->priceRepository->getPricesForDates($instrument, $endDateTime->format('Y-m-d H:i:s'), $currentDateTime);
+
+            $highLows = [];
+            foreach ($prices as $price) {
+                $highLows[] = [
+                    'high' => $price['high'],
+                    'low' => $price['low']
+                ];
+            }
+
+            return $highLows;
         } catch(\Throwable $e) {
-            trigger_error('Failed to get latest price with message ' . $e->getMessage());
+            trigger_error('Failed to get last prices by period with message ' . $e->getMessage());
 
             return [];
         }
