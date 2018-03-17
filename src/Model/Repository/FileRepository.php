@@ -103,9 +103,9 @@ class FileRepository extends RepositoryAbstract
     public function getByType(int $type, int $page, int $perPage) : array
     {
         $files = $this->getRead()->fetch(
-            'SELECT * FROM `files` WHERE `type` = :type LIMIT ' . ($page - 1) * $perPage . ', ' . $perPage, ['type' => $type]
+            'SELECT * FROM `file` WHERE `type` = :type LIMIT ' . ($page - 1) * $perPage . ', ' . $perPage, ['type' => $type]
         );
-        $pages = $this->getPages('SELECT COUNT(*) AS count FROM `files`', [], $perPage);
+        $pages = $this->getPages('SELECT COUNT(*) AS count FROM `file`', [], $perPage);
 
         return ['files' => $files, 'page' => $page, 'pages' => $pages];
     }
@@ -113,7 +113,7 @@ class FileRepository extends RepositoryAbstract
     public function getByName(string $name) : array
     {
         $files = $this->getRead()->fetch(
-            'SELECT * FROM `files` WHERE `name` = :name', ['name' => $name]
+            'SELECT * FROM `file` WHERE `name` = :name', ['name' => $name]
         );
 
         return $files ?? [];
@@ -152,22 +152,15 @@ class FileRepository extends RepositoryAbstract
 
     public function deleteFiles(array $ids) : bool
     {
-        $placeholders = '';
         $params = [];
-        foreach ($ids as $id) {
-            $placeholder = ':id' . $id;
-            $placeholders .= $placeholder . ',';
-            $params[$placeholder] = $id;
-        }
-        $placeholders = trim($placeholders, ',');
-        $placeholders = trim($placeholders, ',');
-        $files = $this->getWrite()->fetch('SELECT * FROM `files` WHERE `id` IN(' . $placeholders . ')', $params);
+        $placeholders = $this->getInPlaceholdersIncludingParams($ids, $params);
 
+        $files = $this->getWrite()->fetch('SELECT * FROM `file` WHERE `id` IN(' . $placeholders . ')', $params);
         if (empty($files)) {
             return false;
         }
 
-        $this->getWrite()->prepare('DELETE FROM `files` WHERE `id` = :id');
+        $this->getWrite()->prepare('DELETE FROM `file` WHERE `id` = :id');
         foreach ($files as $file) {
             $this->getWrite()->execute(null, ['id' => $file['id']]);
             unlink($this->getUploadPathByType($file['type']) . '/' . $file['name']);
@@ -228,7 +221,7 @@ class FileRepository extends RepositoryAbstract
     private function saveFile(string $name, int $type) : int
     {
         $affectedId = $this->getWrite()->execute(
-            'INSERT INTO `files` (`name`, `type`) VALUES (:name, :type)', [
+            'INSERT INTO `file` (`name`, `type`) VALUES (:name, :type)', [
                 'name' => $name,
                 'type' => $type
             ]

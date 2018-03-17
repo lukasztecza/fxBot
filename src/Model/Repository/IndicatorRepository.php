@@ -48,4 +48,19 @@ class IndicatorRepository extends RepositoryAbstract
 
         return !empty($records) ? array_pop($records) : [];
     }
+
+    public function getIndicatorsForDates(array $instruments, string $startDateTime, string $endDateTime) : array
+    {
+        $params = [];
+        $placeholders = $this->getInPlaceholdersIncludingParams($instruments, $params);
+        $params['startdatetime'] = $startDateTime;
+        $params['enddatetime'] = $endDateTime;
+
+        return $this->getRead()->fetch(
+            'SELECT * FROM `indicator`
+            WHERE `instrument` IN (' . $placeholders . ') AND `datetime` > :startdatetime AND `datetime` <= :enddatetime
+            ORDER BY `datetime` DESC',
+            $params
+        );
+    }
 }
