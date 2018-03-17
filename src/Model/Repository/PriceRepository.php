@@ -68,21 +68,11 @@ class PriceRepository extends RepositoryAbstract
 
     public function getPricesForDates(string $instrument, string $startDateTime, string $endDateTime) : array
     {
-        $records = $this->getRead()->fetch(
+        return $this->getRead()->fetch(
             'SELECT * FROM `price`
             WHERE `instrument` = :instrument AND `datetime` > :startdatetime AND `datetime` <= :enddatetime
             ORDER BY `datetime` DESC',
             ['instrument' => $instrument, 'startdatetime' => $startDateTime, 'enddatetime' => $endDateTime]
         );
-
-        $prices = [];
-        foreach ($records as $record) {
-            $prices[] = [
-                'high' => $record['high'],
-                'low' => $record['low']
-            ];
-        }
-
-        return $prices;
     }
 }
