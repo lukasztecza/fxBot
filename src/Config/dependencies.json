@@ -96,6 +96,14 @@
             "@clientFactory@"
         ]
     },
+    "forexFactoryFetchingService": {
+        "class": "TinyApp\\Model\\Service\\ForexFactoryFetchingService",
+        "inject": [
+            "%priceInstruments%",
+            "@indicatorService@",
+            "@clientFactory@"
+        ]
+    },
     "priceService": {
         "class": "TinyApp\\Model\\Service\\PriceService",
         "inject": [
@@ -116,7 +124,7 @@
             "%oandaAccount%",
             "%selectedStrategy%",
             "@strategyFactory@",
-            "@tradeRepository"
+            "@tradeRepository@"
         ]
     },
     "simulationService": {
@@ -125,8 +133,8 @@
             "%priceInstruments%",
             "@priceService@",
             "@strategyFactory@",
-            "@tradeRepository",
-            "@simulationRepository"
+            "@tradeRepository@",
+            "@simulationRepository@"
         ]
     },
     "strategyFactory": {
@@ -199,7 +207,7 @@
     "populateIndicatorsCommand": {
         "class": "TinyApp\\Model\\Command\\PopulateIndicatorsCommand",
         "inject": [
-            "@oandaFetchingService@"
+            "@forexFactoryFetchingService@"
         ]
     },
     "tradeCommand": {

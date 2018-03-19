@@ -166,10 +166,8 @@ class OandaFetchingService implements FetchingServiceInterface
                 'datetime' => (
                     \DateTime::createFromFormat(self::UNIX_TIMESTAMP_FORMAT, $value['timestamp'])
                 )->format(self::INTERNAL_DATETIME_FORMAT),
-                'name' => $value['title'],
-                'unit' => $value['unit'] ?? null,
+                'name' => $value['title'] . !empty($value['unit']) ? ' ' . $value['unit'] : '',
                 'forecast' => $value['forecast'] ?? null,
-                'market' => $value['market'] ?? null,
                 'actual' => $value['actual']
             ];
         }

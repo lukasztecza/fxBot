@@ -11,9 +11,8 @@ CREATE TABLE IF NOT EXISTS `indicator` (
     `instrument` CHAR(3) COLLATE utf8_general_ci NOT NULL,
     `datetime` DATETIME NOT NULL,
     `name` VARCHAR(32) COLLATE utf8_general_ci NOT NULL,
-    `unit` VARCHAR(16) DEFAULT NULL,
+    `type` VARCHAR(16) COLLATE utf8_general_ci DEFAULT NULL,
     `forecast` DECIMAL(10,5) DEFAULT NULL,
-    `market` DECIMAL(10,5) DEFAULT NULL,
     `actual` DECIMAL(10,5) NOT NULL,
     PRIMARY KEY (`instrument`, `datetime`, `name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;

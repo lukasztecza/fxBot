@@ -44,9 +44,8 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
     {
         $lastIndicators = $this->indicatorService->getLastIndicatorsByPeriod($selectedInstrument, 'P2M', $currentDateTime);
+        $selectedInstrument = $this->selectInstrument($lastIndicators);
         $fundamental = $this->getFundamental($lastIndicators, $selectedInstrument);
-        //@TODO for simulations use getFundamental but add also selectInstrument
-        //$selectInstrument = $this->selectInstrument($lastIndicators);
 
         $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, 'P7D', $currentDateTime);
         $trend = $this->getTrend($lastPrices, $this->extremumRange);
