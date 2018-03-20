@@ -31,7 +31,7 @@ class ValidatorFactory
             return $csrfToken;
         }
 
-        $value = md5(time() . rand(1,1000000));
+        $value = md5(time() . random_int(1,1000000));
         $this->sessionService->set(['csrfToken' => $value]);
 
         return $value;
