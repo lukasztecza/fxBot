@@ -9,13 +9,13 @@ use HttpClient\ClientFactory;
 class ForexFactoryFetchingService implements FetchingServiceInterface
 {
     private const INTERNAL_DATETIME_FORMAT = 'Y-m-d H:i:s';
-    private const BEGINING_DATETIME = '2017-01-01 00:00:00';
-    private const INTERVAL = 'P1M';
+    private const BEGINING_DATETIME = '2017-02-05 00:00:00';
+    private const INTERVAL = 'P7D';
 
     private const CALENDAR_TABLE_START = '<table class="calendar__table">';
     private const CALENDAR_TABLE_END = '<div class="foot">';
 
-    private const DAY_KEY = 0;
+    private const DATE_KEY = 0;
     private const TIME_KEY = 1;
     private const INSTRUMENT_KEY = 2;
     private const NAME_KEY = 4;
@@ -81,8 +81,8 @@ class ForexFactoryFetchingService implements FetchingServiceInterface
         $dom->loadHTML($output);
         $data = [];
         $rows = $dom->getElementsByTagName('tr');
-        $currentDay = 1;
-        $currentTime = '00:00:00';
+        $currentDate = $startDateTime->format('Y-m-d');
+        $currentTime = $startDateTime->format('H:i:s');
 
         foreach ($rows as $row) {
             $dataChunk = [];
@@ -93,6 +93,7 @@ class ForexFactoryFetchingService implements FetchingServiceInterface
             if (count($dataChunk) > 9) {
                 $instrument = $dataChunk[self::INSTRUMENT_KEY];
                 $included = false;
+
                 foreach ($this->priceInstruments as $priceInstrument) {
                     if (!empty($instrument) && strpos($priceInstrument, $instrument) !== false) {
                         $included = true;
@@ -103,38 +104,46 @@ class ForexFactoryFetchingService implements FetchingServiceInterface
                     continue 1;
                 }
 
+                $time = preg_replace('/[^0-9:apm]/', '', $dataChunk[self::TIME_KEY]);
+                $time = \DateTime::createFromFormat('h:ia', $time);
+                if (!empty($time)) {
+                    $currentTime = $time->format('H:i:s');
+                }
+                $date = trim($dataChunk[self::DATE_KEY]);
+                $date = substr($date, 3);
+                $date = \DateTime::createFromFormat('M j', $date);
+                if (!empty($date)) {
+                    $currentDate = $date->format('m-d');
+                }
+
                 $actual = preg_replace('/[^0-9\.-]/', '', $dataChunk[self::ACTUAL_KEY]);
                 if (empty($actual)) {
                     continue 1;
                 }
-
-                $unit = preg_replace('/[0-9\.-]/', '', $dataChunk[self::ACTUAL_KEY]);
                 $forecast = preg_replace('/[^0-9\.-]/', '', $dataChunk[self::FORECAST_KEY]);
 
                 $time = preg_replace('/[^0-9:apm]/', '', $dataChunk[self::TIME_KEY]);
-                if (strpos($time, 'pm') !== false) {
-                    $time = str_replace('pm', '', $time);
-                    $time .= ':00';
-                    $timeElements = explode(':', $time);
-                    if ($timeElements[0] != 12) {
-                        $timeElements[0] += 12;
-                    }
-                    $time = implode(':', $timeElements);
-                } elseif (strpos($time, 'am') !== false) {
-                    $time = str_replace('am', '', $time);
-                    $time .= ':00';
-                } else {
-                    $time = null;
+                $time = \DateTime::createFromFormat('h:ia', $time);
+                if (!empty($time)) {
+                    $currentTime = $time->format('H:i:s');
                 }
-                $currentTime = !empty($time) ? $time : $currentTime;
-                $day = preg_replace('/[^0-9]/', '', $dataChunk[self::DAY_KEY]);
-                $currentDay = !empty($day) ? $day : $currentDay;
-//@TODO get day by current day but switch month when it reaches down
+                $date = trim($dataChunk[self::DATE_KEY]);
+                $date = substr($date, 3);
+                $date = \DateTime::createFromFormat('M j', $date);
+                if (!empty($date)) {
+                    $currentDate = $date->format('m-d');
+                }
+
+                if ($currentDate > $startDateTime->format('m-d')) {
+                    $dateTime = $startDateTime->format('Y') . '-' . $currentDate . ' ' . $currentTime;
+                } else {
+                    $dateTime = $endDateTime->format('Y') . '-' . $currentDate . ' ' . $currentTime;
+                }
+
+                $unit = preg_replace('/[0-9\.-]/', '', $dataChunk[self::ACTUAL_KEY]);
                 $data[] = [
                     'instrument' => $instrument,
-                    'datetime' => \DateTime::createFromFormat(
-                        'Y-M-j H:i:s', $year. '-' . $month . '-' . $currentDay . ' ' . $currentTime
-                    )->format('Y-m-d H:i:s'),
+                    'datetime' => $dateTime,
                     'name' => trim($dataChunk[self::NAME_KEY]) . (!empty($unit) ? ' ' . $unit : ''),
                     'type' => $this->getTypeByInstrumentAndName($dataChunk[self::INSTRUMENT_KEY], $dataChunk[self::NAME_KEY]),
                     'actual' => $actual,
