@@ -66,6 +66,10 @@
                     }
                 }
             ]
+        },
+        "forexFactoryClient": {
+            "uri": "%forexFactoryUri%",
+            "class": "TinyApp\\Model\\Client\\ForexFactoryClient"
         }
     },
 

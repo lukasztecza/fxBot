@@ -8,9 +8,9 @@ class IndicatorRepository extends RepositoryAbstract
         $this->getWrite()->begin();
         try {
             $this->getWrite()->prepare(
-                'INSERT INTO `indicator` (`instrument`, `datetime`, `name`, `unit`, `forecast`, `market`, `actual`)
-                VALUES (:instrument, :datetime, :name, :unit, :forecast1, :market1, :actual1)
-                ON DUPLICATE KEY UPDATE `forecast` = :forecast2, `market` = :market2, `actual` = :actual2'
+                'INSERT INTO `indicator` (`instrument`, `datetime`, `name`, `type`, `forecast`, `actual`)
+                VALUES (:instrument, :datetime, :name, :type, :forecast1, :actual1)
+                ON DUPLICATE KEY UPDATE `forecast` = :forecast2, `actual` = :actual2'
             );
             $affectedIds = [];
             foreach ($indicators as $indicator) {
@@ -18,12 +18,10 @@ class IndicatorRepository extends RepositoryAbstract
                     'instrument' => $indicator['instrument'],
                     'datetime' => $indicator['datetime'],
                     'name' => $indicator['name'],
-                    'unit' => $indicator['unit'],
+                    'type' => $indicator['type'],
                     'forecast1' => $indicator['forecast'],
-                    'market1' => $indicator['market'],
                     'actual1' => $indicator['actual'],
                     'forecast2' => $indicator['forecast'],
-                    'market2' => $indicator['market'],
                     'actual2' => $indicator['actual']
                 ]);
             }

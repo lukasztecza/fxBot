@@ -12,5 +12,6 @@
 
     "oandaApiUri": "",
     "oandaApiKey": "",
-    "oandaAccount" ""
+    "oandaAccount": "",
+    "forexFactoryUri": ""
 }
