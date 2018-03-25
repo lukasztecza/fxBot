@@ -33,6 +33,7 @@ class ForexFactoryClient extends ClientAbstract
     public function getIndicators(string $range) : array
     {
         $query = ['range' => $range];
+
         return $this->get(['calendar.php' => null], $query);
     }
 }

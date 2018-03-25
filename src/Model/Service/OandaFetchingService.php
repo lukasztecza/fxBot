@@ -9,6 +9,8 @@ use HttpClient\ClientFactory;
 class OandaFetchingService implements FetchingServiceInterface
 {
     private const INTERNAL_DATETIME_FORMAT = 'Y-m-d H:i:s';
+    private const OANDA_DATETIME_FORMAT = 'Y-m-d\TH:i:s.u000\Z';
+
     private const BEGINING_DATETIME = '2017-01-01 00:00:00';
     private const SHORT_INTERVAL = 'P14D';
     private const LONG_INTERVAL = 'P1Y';
@@ -65,7 +67,7 @@ class OandaFetchingService implements FetchingServiceInterface
         $latestPrice = $this->priceService->getLatestPriceByInstrument($instrument);
         $latestDateTime = $latestPrice['datetime'] ?? null;
         $dateTimes = $this->getDateTimesByLatest($latestDateTime, self::SHORT_INTERVAL);
-        $this->formatDateTimes($dateTimes, $this->oandaClient->getOandaDateTimeFormat());
+        $this->formatDateTimes($dateTimes);
         try {
             $response = $this->oandaClient->getPrices($instrument, $dateTimes['start'], $dateTimes['end']);
         } catch (\Throwable $e) {
@@ -109,7 +111,7 @@ class OandaFetchingService implements FetchingServiceInterface
             $values[] = [
                 'instrument' => $instrument,
                 'datetime' => (
-                    \DateTime::createFromFormat($this->oandaClient->getOandaDateTimeFormat(), $value['time'])
+                    \DateTime::createFromFormat(self::OANDA_DATETIME_FORMAT, $value['time'])
                 )->format(self::INTERNAL_DATETIME_FORMAT),
                 'open' => $value['mid']['o'],
                 'high' => $value['mid']['h'],
@@ -195,10 +197,10 @@ class OandaFetchingService implements FetchingServiceInterface
         ];
     }
 
-    private function formatDateTimes(array &$dateTimes, string $format) : void
+    private function formatDateTimes(array &$dateTimes) : void
     {
         foreach ($dateTimes as $key => $dateTime) {
-            $dateTimes[$key] = $dateTime ? $dateTime->format($this->oandaClient->getOandaDateTimeFormat()) : null;
+            $dateTimes[$key] = $dateTime ? $dateTime->format(self::OANDA_DATETIME_FORMAT) : null;
         }
     }
 

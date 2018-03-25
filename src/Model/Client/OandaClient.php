@@ -6,8 +6,6 @@ use TinyApp\Model\Strategy\Order;
 
 class OandaClient extends ClientAbstract
 {
-    private const OANDA_DATETIME_FORMAT = 'Y-m-d\TH:i:s.u000\Z';
-
     protected function getClientCurlOptions() : array
     {
         return [];
@@ -31,11 +29,6 @@ class OandaClient extends ClientAbstract
     protected function getClientPayload() : array
     {
         return [];
-    }
-
-    public function getOandaDateTimeFormat()
-    {
-        return self::OANDA_DATETIME_FORMAT;
     }
 
     public function getPrices(string $instrument, string $startDate, string $endDate = null) : array

@@ -5,7 +5,7 @@ abstract class FetchingServiceAbstract implements FetchingServiceInterface
 {
     private const BANK_RATE_INDICATOR = 'bank';
     private const INFLATION_INDICATOR = 'inflation';
-    private const COMPANIES_INDICATOR = 'production';
+    private const COMPANIES_INDICATOR = 'companies';
     private const TRADE_BALANCE_INDICATOR = 'trade';
     private const UNEMPLOYMENT_INDICATOR = 'unemployment';
     private const SALES_INDICATOR = 'sales';
