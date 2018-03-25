@@ -1,12 +1,12 @@
 <?php
 namespace TinyApp\Model\Service;
 
-use TinyApp\Model\Service\FetchingServiceInterface;
+use TinyApp\Model\Service\FetchingServiceAbstract;
 use TinyApp\Model\Service\PriceService;
 use TinyApp\Model\Service\MarketService;
 use HttpClient\ClientFactory;
 
-class ForexFactoryFetchingService implements FetchingServiceInterface
+class ForexFactoryFetchingService extends FetchingServiceAbstract
 {
     private const INTERNAL_DATETIME_FORMAT = 'Y-m-d H:i:s';
     private const BEGINING_DATETIME = '2017-02-05 00:00:00';
@@ -180,11 +180,116 @@ class ForexFactoryFetchingService implements FetchingServiceInterface
         $name = strtolower($name);
 
         switch ($instrument) {
+            case 'AUD':
+                switch (true) {
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getBankRateIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getInflationIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getCompaniesIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getTradeBalanceIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getUnemploymentIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getSalesIndicator();
+                }
+                break;
             case 'USD':
                 switch (true) {
                     case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
-                        return 'PPI';
-                    break 2;
+                        return $this->getBankRateIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getInflationIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getCompaniesIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getTradeBalanceIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getUnemploymentIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getSalesIndicator();
+                }
+                break;
+            case 'CAD':
+                switch (true) {
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getBankRateIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getInflationIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getCompaniesIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getTradeBalanceIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getUnemploymentIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getSalesIndicator();
+                }
+                break;
+            case 'JPY':
+                switch (true) {
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getBankRateIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getInflationIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getCompaniesIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getTradeBalanceIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getUnemploymentIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getSalesIndicator();
+                }
+                break;
+            case 'CHF':
+                switch (true) {
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getBankRateIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getInflationIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getCompaniesIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getTradeBalanceIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getUnemploymentIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getSalesIndicator();
+                }
+                break;
+            case 'EUR':
+                switch (true) {
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getBankRateIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getInflationIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getCompaniesIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getTradeBalanceIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getUnemploymentIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getSalesIndicator();
+                }
+                break;
+            case 'GBP':
+                switch (true) {
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getBankRateIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getInflationIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getCompaniesIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getTradeBalanceIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getUnemploymentIndicator();
+                    case strpos($name, 'ppi') !== false && strpos($name, 'core') === false:
+                        return $this->getSalesIndicator();
                 }
                 break;
         }
