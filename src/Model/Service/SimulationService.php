@@ -25,12 +25,14 @@ class SimulationService
     private $simulationRepository;
 
     private const STRATEGY_CLASS = 'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern';
+    private const RESULT_INSTRUMENT_IGNORE = true;
+    //@TODO create const or method to ignore instrument by strategy class
     private const CHANGING_PARAMETERS = [
-        'extremumRange' => [8, 16],
-        'fastAveragePeriod' => [4],
-        'slowAveragePeriod' => [8, 12],
-        'rigidStopLoss' => [0.003, 0.004],
-        'takeProfitMultiplier' => [3, 4, 5]
+        'extremumRange' => [10],
+        'fastAveragePeriod' => [3],
+        'slowAveragePeriod' => [9],
+        'rigidStopLoss' => [0.003],
+        'takeProfitMultiplier' => [4]
     ];
 
     public function __construct(
@@ -133,7 +135,7 @@ class SimulationService
                 $parameters['strategy'] = substr($settings['className'], strrpos($settings['className'], '\\') + 1);
                 $parameters['singleTransactionRisk'] = self::SINGLE_TRANSACTION_RISK;
                 $this->simulationRepository->saveSimulation([
-                    'instrument' => $settings['params']['instrument'],
+                    'instrument' => self::RESULT_INSTRUMENT_IGNORE ? 'VARIED' : $settings['params']['instrument'],
                     'parameters' => $parameters,
                     'finalBalance' => $balance,
                     'minBalance' => $minBalance,
