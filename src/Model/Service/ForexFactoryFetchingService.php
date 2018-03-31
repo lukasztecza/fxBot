@@ -9,7 +9,7 @@ use HttpClient\ClientFactory;
 class ForexFactoryFetchingService extends FetchingServiceAbstract
 {
     private const BEGINING_DATETIME = '2017-02-05 00:00:00';
-    private const INTERVAL = 'P7D';
+    private const INTERVAL = 'P14D';
 
     private const CALENDAR_TABLE_START = '<table class="calendar__table">';
     private const CALENDAR_TABLE_END = '<div class="foot">';
@@ -69,6 +69,7 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
         }
 
         $indicators = $this->buildIndicatorsValuesToStore($response['body'], $dateTimes['start'], $dateTimes['end']);
+
         if (empty($this->indicatorService->saveIndicators($indicators))) {
             return false;
         }
@@ -127,7 +128,7 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
                 }
                 $forecast = preg_replace('/[^0-9\.-]/', '', $dataChunk[self::FORECAST_KEY]);
 
-                if ($currentDay > $startDateTime->format(self::INTERNAL_DAY_FORMAT)) {
+                if ($currentDay >= $startDateTime->format(self::INTERNAL_DAY_FORMAT)) {
                     $dateTime = $startDateTime->format('Y') . '-' . $currentDay . ' ' . $currentTime;
                 } else {
                     $dateTime = $endDateTime->format('Y') . '-' . $currentDay . ' ' . $currentTime;
