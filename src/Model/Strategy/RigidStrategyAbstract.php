@@ -21,7 +21,6 @@ abstract class RigidStrategyAbstract extends StrategyAbstract
     {
         $selectedInstrument = $this->getInstrument();
 
-        // set rigid stop loss
         $rigidStopLoss = $this->getRigidStopLoss();
         if (strpos($selectedInstrument, 'JPY') !== false) {
             $rigidStopLoss *= 100;
