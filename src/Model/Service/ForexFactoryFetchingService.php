@@ -27,7 +27,7 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
     private const ACTUAL_KEY = 6;
     private const FORECAST_KEY = 7;
 
-    private $priceInstruments;
+    private $instruments;
     private $indicatorService;
     private $forexFactoryClient;
 
@@ -36,7 +36,14 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
         IndicatorService $indicatorService,
         ClientFactory $clientFactory
     ) {
-        $this->priceInstruments = $priceInstruments;
+        $this->instruments = [];
+        foreach ($priceInstruments as $priceInstrument) {
+            $instruments = implode('_', $priceInstrument);
+            foreach ($instruments as $instrument) {
+                $this->instruments[$instrument] = true;
+            }
+        }
+        $this->instruments = array_keys($this->instruments);
         $this->indicatorService = $indicatorService;
         $this->forexFactoryClient = $clientFactory->getClient('forexFactoryClient');
     }
@@ -98,15 +105,7 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
             }
             if (count($dataChunk) > 9) {
                 $instrument = $dataChunk[self::INSTRUMENT_KEY];
-                $included = false;
-
-                foreach ($this->priceInstruments as $priceInstrument) {
-                    if (!empty($instrument) && strpos($priceInstrument, $instrument) !== false) {
-                        $included = true;
-                        break 1;
-                    }
-                }
-                if (!$included) {
+                if (!in_array($instrument, $this->instruments)) {
                     continue 1;
                 }
 

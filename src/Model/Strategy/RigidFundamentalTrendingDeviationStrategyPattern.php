@@ -12,13 +12,14 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
     use TrendingTrait;
     use DeviationTrait;
 
-    private $indicatorService;
+    private $instruments;
     private $priceService;
+    private $indicatorService;
     private $extremumRange;
     private $fastAveragePeriod;
     private $slowAveragePeriod;
 
-    public function __construct(PriceService $priceService, IndicatorService $indicatorService, array $params)
+    public function __construct(array $priceInstruments, PriceService $priceService, IndicatorService $indicatorService, array $params)
     {
         if (
             empty($params['rigidStopLoss']) ||
@@ -31,6 +32,15 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
             throw new \Exception('Got wrong params ' . var_export($params, true));
         }
 
+        $this->instruments = [];
+        foreach ($priceInstruments as $priceInstrument) {
+            $instruments = implode('_', $priceInstrument);
+            foreach ($instruments as $instrument) {
+                $this->instruments[$instrument] = true;
+            }
+        }
+        $this->instruments = array_keys($this->instruments);
+ 
         $this->priceService = $priceService;
         $this->indicatorService = $indicatorService;
         $this->extremumRange = $params['extremumRange'];
