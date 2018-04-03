@@ -13,6 +13,7 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
     use DeviationTrait;
 
     private $instruments;
+    private $priceInstruments;
     private $priceService;
     private $indicatorService;
     private $extremumRange;
@@ -40,7 +41,7 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
             }
         }
         $this->instruments = array_keys($this->instruments);
- 
+        $this->priceInstruments = $priceInstruments;
         $this->priceService = $priceService;
         $this->indicatorService = $indicatorService;
         $this->extremumRange = $params['extremumRange'];
@@ -51,8 +52,7 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
 
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
     {
-    //TODO get instruments from injected list
-        $lastIndicators = $this->indicatorService->getLastIndicatorsByPeriod($instruments, 'P3M', $currentDateTime);
+        $lastIndicators = $this->indicatorService->getLastIndicatorsByPeriod($this->instruments, 'P3M', $currentDateTime);
         $indicatorsMap = [];
         foreach (array_keys($lastIndicators) as $instrument) {
             $indicatorsMap[$instrument] = 0;
