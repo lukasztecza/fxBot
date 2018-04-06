@@ -140,6 +140,7 @@
     "strategyFactory": {
         "class": "TinyApp\\Model\\Strategy\\StrategyFactory",
         "inject": [
+            "%priceInstruments%",
             "@priceService@",
             "@indicatorService@"
         ]

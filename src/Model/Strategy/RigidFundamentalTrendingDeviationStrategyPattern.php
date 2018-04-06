@@ -55,11 +55,15 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
         $lastIndicators = $this->indicatorService->getLastIndicatorsByPeriod($this->instruments, 'P3M', $currentDateTime);
         $indicatorsMap = [];
         foreach (array_keys($lastIndicators) as $instrument) {
-            $indicatorsMap[$instrument] = 0;
+            $indicatorsMap[$instrument] = ['bank' => [], 'inflation' => [], 'companies' => [], 'trade' => [], 'unemployment' => [], 'sales' => []];
         }
+        $index = count($lastIndicators);
+        while ($index--) {
 
-        $points = ['bank' => 0, 'inflation' => 0, 'companies' => 0, 'trade' => 0, 'unemployment' => 0, 'sales' => 0];
-        foreach ($lastIndicators as $block) {
+            if (count($indicatorsMap[$lastIndicators[$index]['instument']][$lastIndicators[$index]['type']]) < 2) {
+                $indicatorsMap[$lastIndicators[$index]['instument']][$lastIndicators[$index]['type']] = $lastIndicators[$index]['value'];
+            }
+
              //@TODO loop and see which interest rate is highest and which inflation is highest
 //back loop and set values in pointsMap for all keys if not filled yet for currency and type
 //next loop will over indicatorsMap will assign points and select the best pair to play and now figure out how to find a pair
