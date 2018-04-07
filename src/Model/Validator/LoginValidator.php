@@ -2,9 +2,9 @@
 namespace TinyApp\Model\Validator;
 
 use TinyApp\Model\System\Request;
-use TinyApp\Model\Validator\ValidatorAbstract;
+use TinyApp\Model\Validator\RequestValidatorAbstract;
 
-class LoginValidator extends ValidatorAbstract
+class LoginValidator extends RequestValidatorAbstract
 {
     public function validate(Request $request) : bool
     {

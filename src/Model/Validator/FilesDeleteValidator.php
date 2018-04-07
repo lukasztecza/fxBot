@@ -1,10 +1,10 @@
 <?php
 namespace TinyApp\Model\Validator;
 
-use TinyApp\Model\Validator\ValidatorAbstract;
+use TinyApp\Model\Validator\RequestValidatorAbstract;
 use TinyApp\Model\System\Request;
 
-class FilesDeleteValidator extends ValidatorAbstract
+class FilesDeleteValidator extends RequestValidatorAbstract
 {
     public function validate(Request $request) : bool
     {
