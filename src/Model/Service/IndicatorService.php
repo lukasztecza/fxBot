@@ -35,12 +35,11 @@ class IndicatorService
         }
     }
 
-    public function getLastIndicatorsByPeriod(string $instrument, string $period, string $currentDateTime = null) : array
+    public function getLastIndicatorsByPeriod(array $instruments, string $period, string $currentDateTime = null) : array
     {
         try {
             $endDateTime = $currentDateTime ? new \DateTime($currentDateTime,new \DateTimeZone('UTC')) : new \DateTime(null, \DateTimeZone('UTC'));
             $endDateTime = $endDateTime->sub(new \DateInterval($period));
-            $instruments = explode('_', $instrument);
             $indicators = $this->indicatorRepository->getIndicatorsForDates($instruments, $endDateTime->format('Y-m-d H:i:s'), $currentDateTime);
 
             $sortedIndicators = [];
