@@ -2,9 +2,10 @@
 namespace TinyApp\Model\Validator;
 
 use TinyApp\Model\Validator\ValidatorInterface;
+use TinyApp\Model\Validator\RequestValidatorInterface;
 use TinyApp\Model\System\Request;
 
-abstract class ValidatorAbstract implements ValidatorInterface
+abstract class RequestValidatorAbstract implements ValidatorInterface, RequestValidatorInterface
 {
     protected $error = '';
     private $csrfToken;

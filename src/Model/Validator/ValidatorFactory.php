@@ -2,6 +2,8 @@
 namespace TinyApp\Model\Validator;
 
 use TinyApp\Model\Validator\ValidatorInterface;
+use TinyApp\Model\Validator\ArrayValidatorInterface;
+use TinyApp\Model\Validator\RequestValidatorInterface;
 use TinyApp\Model\Service\SessionService;
 
 class ValidatorFactory
@@ -17,8 +19,12 @@ class ValidatorFactory
 
     public function create(string $class) : ValidatorInterface
     {
-        if (!in_array(ValidatorInterface::class, class_implements($class))) {
-            throw new \Exception('Wrong class exception, ' . $class . ' has to implement ' . ValidatorInterface::class);
+        $classInterfaces = class_implements($class);
+        if (
+            !in_array(ArrayValidatorInterface::class, $classInterfaces) &&
+            !in_array(RequestValidatorInterface::class, $classInterfaces)
+        ) {
+            throw new \Exception('Wrong class exception, ' . $class . ' has to implement ' . ArrayValidatorInterface::class . ' or ' . RequestValidatorInterface::class);
         }
 
         return new $class($this->csrfToken);
