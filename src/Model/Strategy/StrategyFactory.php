@@ -7,12 +7,14 @@ use TinyApp\Model\Strategy\StrategyInterface;
 
 class StrategyFactory
 {
+    private $priceIinstruments;
     private $priceService;
     private $indicatorService;
     private $strategies;
 
-    public function __construct(PriceService $priceService, IndicatorService $indicatorService)
+    public function __construct(array $priceInstruments, PriceService $priceService, IndicatorService $indicatorService)
     {
+        $this->priceInstruments = $priceInstruments;
         $this->priceService = $priceService;
         $this->indicatorService = $indicatorService;
     }
@@ -30,7 +32,7 @@ class StrategyFactory
 
         switch ($class) {
             case 'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern':
-                $strategy = new $class($this->priceService, $this->indicatorService, $params);
+                $strategy = new $class($this->priceInstruments, $this->priceService, $this->indicatorService, $params);
                 break;
             case 'TinyApp\Model\Strategy\MinSpreadRigidTrendingStrategyPattern':
             case 'TinyApp\Model\Strategy\RigidTrendingDeviationStrategyPattern':

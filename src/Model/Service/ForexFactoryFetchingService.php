@@ -9,7 +9,7 @@ use HttpClient\ClientFactory;
 class ForexFactoryFetchingService extends FetchingServiceAbstract
 {
     private const BEGINING_DATETIME = '2017-02-05 00:00:00';
-    private const INTERVAL = 'P7D';
+    private const INTERVAL = 'P14D';
 
     private const CALENDAR_TABLE_START = '<table class="calendar__table">';
     private const CALENDAR_TABLE_END = '<div class="foot">';
@@ -27,7 +27,7 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
     private const ACTUAL_KEY = 6;
     private const FORECAST_KEY = 7;
 
-    private $priceInstruments;
+    private $instruments;
     private $indicatorService;
     private $forexFactoryClient;
 
@@ -36,7 +36,14 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
         IndicatorService $indicatorService,
         ClientFactory $clientFactory
     ) {
-        $this->priceInstruments = $priceInstruments;
+        $this->instruments = [];
+        foreach ($priceInstruments as $priceInstrument) {
+            $instruments = explode('_', $priceInstrument);
+            foreach ($instruments as $instrument) {
+                $this->instruments[$instrument] = true;
+            }
+        }
+        $this->instruments = array_keys($this->instruments);
         $this->indicatorService = $indicatorService;
         $this->forexFactoryClient = $clientFactory->getClient('forexFactoryClient');
     }
@@ -69,6 +76,7 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
         }
 
         $indicators = $this->buildIndicatorsValuesToStore($response['body'], $dateTimes['start'], $dateTimes['end']);
+
         if (empty($this->indicatorService->saveIndicators($indicators))) {
             return false;
         }
@@ -97,15 +105,7 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
             }
             if (count($dataChunk) > 9) {
                 $instrument = $dataChunk[self::INSTRUMENT_KEY];
-                $included = false;
-
-                foreach ($this->priceInstruments as $priceInstrument) {
-                    if (!empty($instrument) && strpos($priceInstrument, $instrument) !== false) {
-                        $included = true;
-                        break 1;
-                    }
-                }
-                if (!$included) {
+                if (!in_array($instrument, $this->instruments)) {
                     continue 1;
                 }
 
@@ -127,7 +127,7 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
                 }
                 $forecast = preg_replace('/[^0-9\.-]/', '', $dataChunk[self::FORECAST_KEY]);
 
-                if ($currentDay > $startDateTime->format(self::INTERNAL_DAY_FORMAT)) {
+                if ($currentDay >= $startDateTime->format(self::INTERNAL_DAY_FORMAT)) {
                     $dateTime = $startDateTime->format('Y') . '-' . $currentDay . ' ' . $currentTime;
                 } else {
                     $dateTime = $endDateTime->format('Y') . '-' . $currentDay . ' ' . $currentTime;
