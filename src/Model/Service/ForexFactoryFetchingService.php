@@ -38,7 +38,7 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
     ) {
         $this->instruments = [];
         foreach ($priceInstruments as $priceInstrument) {
-            $instruments = implode('_', $priceInstrument);
+            $instruments = explode('_', $priceInstrument);
             foreach ($instruments as $instrument) {
                 $this->instruments[$instrument] = true;
             }

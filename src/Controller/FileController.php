@@ -79,7 +79,7 @@ class FileController implements ControllerInterface
         // Get files
         $filesPack = $this->fileService->getByType($type, $page);
         if (empty($filesPack['files'])) {
-            $this->sessionService->set(['flash' => ['type' => 'error', 'text' => 'There is no files under selected category']]);
+            $this->sessionService->set(['flash' => ['type' => 'error', 'text' => 'There is no files under selected category and page']]);
             return new Response(null, [], [], ['Location' => '/file']);
         }
 

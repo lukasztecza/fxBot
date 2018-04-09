@@ -35,7 +35,7 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
 
         $this->instruments = [];
         foreach ($priceInstruments as $priceInstrument) {
-            $instruments = implode('_', $priceInstrument);
+            $instruments = explode('_', $priceInstrument);
             foreach ($instruments as $instrument) {
                 $this->instruments[$instrument] = true;
             }
@@ -59,19 +59,17 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
         }
         $index = count($lastIndicators);
         while ($index--) {
-
-            if (count($indicatorsMap[$lastIndicators[$index]['instument']][$lastIndicators[$index]['type']]) < 2) {
-                $indicatorsMap[$lastIndicators[$index]['instument']][$lastIndicators[$index]['type']] = $lastIndicators[$index]['value'];
-            }
-
-             //@TODO loop and see which interest rate is highest and which inflation is highest
+//            if (
+//                count($indicatorsMap[$lastIndicators[$index]['instument']][$lastIndicators[$index]['type']]) < 2
+//            ) {
+//                $indicatorsMap[$lastIndicators[$index]['instument']][$lastIndicators[$index]['type']] = $lastIndicators[$index]['value'];
+//            }
+        }
+//@TODO loop and see which interest rate is highest and which inflation is highest
 //back loop and set values in pointsMap for all keys if not filled yet for currency and type
 //next loop will over indicatorsMap will assign points and select the best pair to play and now figure out how to find a pair
 //can check for XXX_YYY and YYY_XXX and if one exists then use it and change fundamental value accordingly
-
-
-            var_dump($lastIndicators);exit;
-        }
+        var_dump(count($lastIndicators['AUD']));exit;
 
         $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, 'P7D', $currentDateTime);
         $trend = $this->getTrend($lastPrices, $this->extremumRange);
