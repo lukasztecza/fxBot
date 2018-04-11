@@ -3,6 +3,7 @@ namespace TinyApp\Model\Service;
 
 abstract class FetchingServiceAbstract implements FetchingServiceInterface
 {
+    //@TODO it might be better to inject configurations to fetching service constructor and use same configuration in strategies
     private const BANK_RATE_INDICATOR = 'bank';
     private const INFLATION_INDICATOR = 'inflation';
     private const COMPANIES_INDICATOR = 'companies';
