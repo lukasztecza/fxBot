@@ -38,16 +38,9 @@ class IndicatorService
     public function getLastIndicatorsByPeriod(array $instruments, string $period, string $currentDateTime = null) : array
     {
         try {
-            $endDateTime = $currentDateTime ? new \DateTime($currentDateTime,new \DateTimeZone('UTC')) : new \DateTime(null, \DateTimeZone('UTC'));
-            $endDateTime = $endDateTime->sub(new \DateInterval($period));
-            $indicators = $this->indicatorRepository->getIndicatorsForDates($instruments, $endDateTime->format('Y-m-d H:i:s'), $currentDateTime);
-
-            $sortedIndicators = [];
-            foreach ($indicators as $indicator) {
-                $sortedIndicators[$indicator['instrument']][] = $indicator;
-            }
-
-            return $sortedIndicators;
+            $startDateTime = $currentDateTime ? new \DateTime($currentDateTime,new \DateTimeZone('UTC')) : new \DateTime(null, \DateTimeZone('UTC'));
+            $startDateTime = $startDateTime->sub(new \DateInterval($period));
+            return $this->indicatorRepository->getIndicatorsForDates($instruments, $startDateTime->format('Y-m-d H:i:s'), $currentDateTime);
         } catch(\Throwable $e) {
             trigger_error('Failed to get last indicators by period with message ' . $e->getMessage());
 
