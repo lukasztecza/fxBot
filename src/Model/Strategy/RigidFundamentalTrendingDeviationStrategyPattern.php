@@ -65,11 +65,11 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
             }
         }
 
-        $maxBank = $lowestUnemployment = $bestTradeChange = [];
+        $highestBankRate = $lowestUnemployment = $bestTradeRelativeChange = $bestCompaniesPerformance = $bestSalesPerformance = $highestInflationChange = [];
         foreach ($instrumentsValues as $instrument => $values) {
-            if (!isset($maxBank['instrument']) || $maxBank['value'] < $values['bank'][0]) {
-                $maxBank['value'] = $values['bank'][0];
-                $maxBank['instrument'] = $instrument;
+            if (!isset($highestBankRate['instrument']) || $highestBankRate['value'] < $values['bank'][0]) {
+                $highestBankRate['value'] = $values['bank'][0];
+                $highestBankRate['instrument'] = $instrument;
             }
 
             if (!isset($lowestUnemployment['instrument']) || $lowestUnemployment['value'] > $values['unemployment'][0]) {
@@ -77,23 +77,25 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
                 $lowestUnemployment['instrument'] = $instrument;
             }
 
+            if (!isset($bestCompaniesPerformance['instrument']) || $bestCompaniesPerformance['value'] > $values['companies'][0]) {
+                $bestTradeRelativeChange['value'] = $values['companies'][0];
+                $bestTradeRelativeChange['instrument'] = $instrument;
+            }
 
+            // @TODO filter also worst performing company
 
-            // @TODO relative value should be last
+            // @TODO relative value should be last or if failed should throw exception
+            // @TODO based on price instruments select one and return it
             if (!$values['trade'][1]) {
                 continue;
             }
             $change = $values['trade'][1] - $values['trade'][0] / $values['trade'][1];
-            if (!isset($bestTradeChange['instrument']) || $bestTradeChange['value'] < $change) {
-                $bestTradeChange['value'] = $change;
-                $bestTradeChange['instrument'] = $instrument;
+            if (!isset($bestTradeRelativeChange['instrument']) || $bestTradeRelativeChange['value'] < $change) {
+                $bestTradeRelativeChange['value'] = $change;
+                $bestTradeRelativeChange['instrument'] = $instrument;
             }
         }
 
-//@TODO loop and see which interest rate is highest and which inflation is highest
-//back loop and set values in pointsMap for all keys if not filled yet for currency and type
-//next loop will over indicatorsMap will assign points and select the best pair to play and now figure out how to find a pair
-//can check for XXX_YYY and YYY_XXX and if one exists then use it and change fundamental value accordingly
         var_dump('TODO rigidfundamental strategy');exit;
 
         $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, 'P7D', $currentDateTime);
