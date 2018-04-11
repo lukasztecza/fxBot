@@ -53,18 +53,26 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
     {
         $lastIndicators = $this->indicatorService->getLastIndicatorsByPeriod($this->instruments, 'P3M', $currentDateTime);
-        $indicatorsMap = [];
-        foreach (array_keys($lastIndicators) as $instrument) {
-            $indicatorsMap[$instrument] = ['bank' => [], 'inflation' => [], 'companies' => [], 'trade' => [], 'unemployment' => [], 'sales' => []];
-        }
-        $index = count($lastIndicators);
+
+        $instrumentsValues = [];
         while ($index--) {
-//            if (
-//                count($indicatorsMap[$lastIndicators[$index]['instument']][$lastIndicators[$index]['type']]) < 2
-//            ) {
-//                $indicatorsMap[$lastIndicators[$index]['instument']][$lastIndicators[$index]['type']] = $lastIndicators[$index]['value'];
-//            }
+            if (
+                in_array($lastIndicators[$index]['instrument'], $this->instruments) &&
+                !isset($instrumentsValues[$lastIndicators[$index]['instument']][$lastIndicators[$index]['type']][1])
+            ) {
+                $instrumentsValues[$lastIndicators[$index]['instument']][$lastIndicators[$index]['type']][] = $lastIndicators[$index]['value'];
+            }
         }
+
+        foreach ($instrumentsValues as $instrument => $values) {
+            if (!isset($maxBank['instrument']) || $maxBank['value'] < $values['bank']) {
+                $maxBank['value'] = $values['bank'];
+                $maxBank['instrument'] = $instrument;
+            }
+        }
+
+
+        
 //@TODO loop and see which interest rate is highest and which inflation is highest
 //back loop and set values in pointsMap for all keys if not filled yet for currency and type
 //next loop will over indicatorsMap will assign points and select the best pair to play and now figure out how to find a pair
