@@ -52,32 +52,49 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
 
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
     {
-        $lastIndicators = $this->indicatorService->getLastIndicatorsByPeriod($this->instruments, 'P3M', $currentDateTime);
-
+        $lastIndicators = $this->indicatorService->getLastIndicatorsByPeriod($this->instruments, 'P6M', $currentDateTime);
         $instrumentsValues = [];
-        while ($index--) {
+        $index = count($lastIndicators);
+        foreach ($lastIndicators as $index => $values) {
             if (
-                in_array($lastIndicators[$index]['instrument'], $this->instruments) &&
-                !isset($instrumentsValues[$lastIndicators[$index]['instument']][$lastIndicators[$index]['type']][1])
+                !empty($values['type']) &&
+                in_array($values['instrument'], $this->instruments) &&
+                !isset($instrumentsValues[$values['instrument']][$values['type']][1])
             ) {
-                $instrumentsValues[$lastIndicators[$index]['instument']][$lastIndicators[$index]['type']][] = $lastIndicators[$index]['value'];
+                $instrumentsValues[$values['instrument']][$values['type']][] = $values['actual'];
             }
         }
 
+        $maxBank = $lowestUnemployment = $bestTradeChange = [];
         foreach ($instrumentsValues as $instrument => $values) {
-            if (!isset($maxBank['instrument']) || $maxBank['value'] < $values['bank']) {
-                $maxBank['value'] = $values['bank'];
+            if (!isset($maxBank['instrument']) || $maxBank['value'] < $values['bank'][0]) {
+                $maxBank['value'] = $values['bank'][0];
                 $maxBank['instrument'] = $instrument;
             }
+
+            if (!isset($lowestUnemployment['instrument']) || $lowestUnemployment['value'] > $values['unemployment'][0]) {
+                $lowestUnemployment['value'] = $values['unemployment'][0];
+                $lowestUnemployment['instrument'] = $instrument;
+            }
+
+
+
+            // @TODO relative value should be last
+            if (!$values['trade'][1]) {
+                continue;
+            }
+            $change = $values['trade'][1] - $values['trade'][0] / $values['trade'][1];
+            if (!isset($bestTradeChange['instrument']) || $bestTradeChange['value'] < $change) {
+                $bestTradeChange['value'] = $change;
+                $bestTradeChange['instrument'] = $instrument;
+            }
         }
 
-
-        
 //@TODO loop and see which interest rate is highest and which inflation is highest
 //back loop and set values in pointsMap for all keys if not filled yet for currency and type
 //next loop will over indicatorsMap will assign points and select the best pair to play and now figure out how to find a pair
 //can check for XXX_YYY and YYY_XXX and if one exists then use it and change fundamental value accordingly
-        var_dump(count($lastIndicators['AUD']));exit;
+        var_dump('TODO rigidfundamental strategy');exit;
 
         $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, 'P7D', $currentDateTime);
         $trend = $this->getTrend($lastPrices, $this->extremumRange);
