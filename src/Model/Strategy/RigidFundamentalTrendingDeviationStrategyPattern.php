@@ -6,11 +6,13 @@ use TinyApp\Model\Service\PriceService;
 use TinyApp\Model\Service\IndicatorService;
 use TinyApp\Model\Strategy\TrendingTrait;
 use TinyApp\Model\Strategy\DeviationTrait;
+use TinyApp\Model\Strategy\IndicatorTrait;
 
 class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbstract
 {
     use TrendingTrait;
     use DeviationTrait;
+    use IndicatorTrait;
 
     private $instruments;
     private $priceInstruments;
@@ -53,51 +55,21 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
     {
         $lastIndicators = $this->indicatorService->getLastIndicatorsByPeriod($this->instruments, 'P6M', $currentDateTime);
-        $instrumentsValues = [];
-        $index = count($lastIndicators);
-        foreach ($lastIndicators as $index => $values) {
-            if (
-                !empty($values['type']) &&
-                in_array($values['instrument'], $this->instruments) &&
-                !isset($instrumentsValues[$values['instrument']][$values['type']][1])
-            ) {
-                $instrumentsValues[$values['instrument']][$values['type']][] = $values['actual'];
-            }
+        $scores = $this->getInstrumentScores($lastIndicators, $this->instruments, ['unemployment' => ['relative' => 0, 'absolute' => 1, 'expectations' => 0]]);
+
+        $worst = current(array_keys($scores, min($scores)));
+        $best = current(array_keys($scores, max($scores)));
+        if (in_array($worst . '_' . $best, $this->priceInstruments)) {
+            $selectedInstrument = $worst . '_' . $best;
+        } elseif (in_array($best . '_' . $worst, $this->priceInstruments)) {
+            $selectedInstrument = $best . '_' . $worst;
+        } else {
+            //@TODO
+            throw new \Exception('Could not select instrument');
         }
 
-        $highestBankRate = $lowestUnemployment = $bestTradeRelativeChange = $bestCompaniesPerformance = $bestSalesPerformance = $highestInflationChange = [];
-        foreach ($instrumentsValues as $instrument => $values) {
-            if (!isset($highestBankRate['instrument']) || $highestBankRate['value'] < $values['bank'][0]) {
-                $highestBankRate['value'] = $values['bank'][0];
-                $highestBankRate['instrument'] = $instrument;
-            }
-
-            if (!isset($lowestUnemployment['instrument']) || $lowestUnemployment['value'] > $values['unemployment'][0]) {
-                $lowestUnemployment['value'] = $values['unemployment'][0];
-                $lowestUnemployment['instrument'] = $instrument;
-            }
-
-            if (!isset($bestCompaniesPerformance['instrument']) || $bestCompaniesPerformance['value'] > $values['companies'][0]) {
-                $bestTradeRelativeChange['value'] = $values['companies'][0];
-                $bestTradeRelativeChange['instrument'] = $instrument;
-            }
-
-            // @TODO filter also worst performing company
-
-            // @TODO relative value should be last or if failed should throw exception
-            // @TODO based on price instruments select one and return it
-            if (!$values['trade'][1]) {
-                continue;
-            }
-            $change = $values['trade'][1] - $values['trade'][0] / $values['trade'][1];
-            if (!isset($bestTradeRelativeChange['instrument']) || $bestTradeRelativeChange['value'] < $change) {
-                $bestTradeRelativeChange['value'] = $change;
-                $bestTradeRelativeChange['instrument'] = $instrument;
-            }
-        }
-
-        var_dump('TODO rigidfundamental strategy');exit;
-
+//        var_dump($selectedInstrument);exit;
+//@TODO shift mapping outside and potentailly considered indicators too (maybe config)
         $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, 'P7D', $currentDateTime);
         $trend = $this->getTrend($lastPrices, $this->extremumRange);
         $deviation = $this->getDeviation($lastPrices, $this->fastAveragePeriod, $this->slowAveragePeriod);
@@ -111,4 +83,5 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
                 return 0;
         }
     }
+
 }
