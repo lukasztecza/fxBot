@@ -38,7 +38,7 @@ class ValidatorFactory
         if ($csrfToken !== null) {
             return $csrfToken;
         }
-
+//@TODO use bin2hex and random_byte
         $value = md5(time() . random_int(1,1000000));
         $this->sessionService->set(['csrfToken' => $value]);
 
