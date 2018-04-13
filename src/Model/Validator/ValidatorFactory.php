@@ -26,7 +26,9 @@ class ValidatorFactory
         ) {
             throw new \Exception('Wrong class exception, ' . $class . ' has to implement ' . ArrayValidatorInterface::class . ' or ' . RequestValidatorInterface::class);
         }
-
+        
+        //@TODO pass instance if exists and do not create new one each time
+        // do not pass csrfToken to ArrayValidators
         return new $class($this->csrfToken);
     }
 
