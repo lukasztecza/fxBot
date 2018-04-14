@@ -55,29 +55,40 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
     {
         $lastIndicators = $this->indicatorService->getLastIndicatorsByPeriod($this->instruments, 'P6M', $currentDateTime);
-        $scores = $this->getInstrumentScores($lastIndicators, $this->instruments, ['unemployment' => ['relative' => 0, 'absolute' => 1, 'expectations' => 0]]);
+        $scores = $this->getInstrumentScores($lastIndicators, $this->instruments, [
+//@TODO shift mapping parrameters outside and potentailly considered indicators too (maybe config)
+            'unemployment' => ['relative' => 0, 'absolute' => 1, 'expectations' => 0],
+            'bank' => ['relative' => 0, 'absolute' => -0.5, 'expectations' => 0],
+            'inflation' => ['relative' => 0.5, 'absolute' => 0, 'expectations' => 0],
+            'companies' => ['relative' => 0, 'absolute' => 1, 'expectations' => 0],
+            'trade' => ['relative' => 0.3, 'absolute' => 0, 'expectations' => 0],
+            'sales' => ['relative' => 0.5, 'absolute' => 0, 'expectations' => 0]
+        ]);
 
         $worst = current(array_keys($scores, min($scores)));
         $best = current(array_keys($scores, max($scores)));
         if (in_array($worst . '_' . $best, $this->priceInstruments)) {
             $selectedInstrument = $worst . '_' . $best;
+            $fundamental = -1;
         } elseif (in_array($best . '_' . $worst, $this->priceInstruments)) {
             $selectedInstrument = $best . '_' . $worst;
+            $fundamental = 1;
         } else {
             //@TODO
             throw new \Exception('Could not select instrument');
         }
 
-//        var_dump($selectedInstrument);exit;
-//@TODO shift mapping outside and potentailly considered indicators too (maybe config)
         $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, 'P7D', $currentDateTime);
         $trend = $this->getTrend($lastPrices, $this->extremumRange);
         $deviation = $this->getDeviation($lastPrices, $this->fastAveragePeriod, $this->slowAveragePeriod);
 
         switch (true) {
-            case $trend === 1 && $deviation === 1:
+            case $trend === 1 && $deviation === 1 && $fundamental === 1:
+            var_dump($selectedInstrument);
+            var_dump('buy');
                 return 1;
-            case $trend === -1 && $deviation === -1:
+            case $trend === -1 && $deviation === -1 && $fundamental === -1:
+            var_dump($selectedInstrument);var_dump('sell');
                 return -1;
             default:
                 return 0;
