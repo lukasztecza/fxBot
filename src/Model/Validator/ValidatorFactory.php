@@ -30,11 +30,12 @@ class ValidatorFactory
             throw new \Exception('Wrong class exception, ' . $class . ' has to implement ' . ArrayValidatorInterface::class . ' or ' . RequestValidatorInterface::class);
         }
 
-        if (!isset($this->validators[$class]) {
+        if (!isset($this->validators[$class])) {
             if ($requestValidator) {
                 $this->validators[$class] = new $class($this->csrfToken);
+            } else {
+                $this->validators[$class] = new $class();
             }
-            $this->validators[$class] = new $class();
         }
 
         return $this->validators[$class];
@@ -46,8 +47,8 @@ class ValidatorFactory
         if ($csrfToken !== null) {
             return $csrfToken;
         }
-//@TODO use bin2hex and random_byte
-        $value = md5(time() . random_int(1,1000000));
+
+        $value = bin2hex(random_bytes(16));
         $this->sessionService->set(['csrfToken' => $value]);
 
         return $value;
