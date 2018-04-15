@@ -28,15 +28,15 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
     public function __construct(array $priceInstruments, PriceService $priceService, IndicatorService $indicatorService, array $params)
     {
         if (
-            empty($params['rigidStopLoss']) ||
-            empty($params['takeProfitMultiplier']) ||
-            empty($params['instrument']) ||
-            empty($params['extremumRange']) ||
-            empty($params['fastAveragePeriod']) ||
-            empty($params['slowAveragePeriod']) ||
-            empty($params['actualFactor']) ||
-            empty($params['forecastFactor']) ||
-            empty($params['bankFactor'])
+            !isset($params['rigidStopLoss']) ||
+            !isset($params['takeProfitMultiplier']) ||
+            !isset($params['instrument']) ||
+            !isset($params['extremumRange']) ||
+            !isset($params['fastAveragePeriod']) ||
+            !isset($params['slowAveragePeriod']) ||
+            !isset($params['actualFactor']) ||
+            !isset($params['forecastFactor']) ||
+            !isset($params['bankFactor'])
         ) {
             throw new \Exception('Got wrong params ' . var_export($params, true));
         }
@@ -80,6 +80,7 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
         } else {
             throw new \Exception('Failed to select instrument');
         }
+        $this->instrument = $selectedInstrument;
 
         $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, 'P7D', $currentDateTime);
         $trend = $this->getTrend($lastPrices, $this->extremumRange);
