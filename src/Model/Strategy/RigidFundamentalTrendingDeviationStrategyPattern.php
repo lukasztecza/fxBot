@@ -64,7 +64,7 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
 
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
     {
-        $lastIndicators = $this->indicatorService->getLastIndicatorsByPeriod($this->instruments, 'P6M', $currentDateTime);
+        $lastIndicators = $this->indicatorService->getLastIndicatorsByPeriod($this->instruments, 'P12M', $currentDateTime);
         $scores = $this->getInstrumentScores($lastIndicators, $this->instruments, $this->actualFactor, $this->forecastFactor, $this->bankFactor);
         reset($scores);
         $worst = key($scores);
