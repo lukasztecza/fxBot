@@ -127,6 +127,7 @@ if ! [ -L /usr/bin/composer ]; then
     curl -Ss https://getcomposer.org/installer | php
     mv composer.phar /usr/bin/composer
 fi
+#@TODO change permissions
 composer install
 
 #@TODO create parameters here
