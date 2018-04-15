@@ -15,6 +15,7 @@ class SimulationService
     private const SIMULATION_START = '2017-06-11 00:00:00';
     private const SIMULATION_END = '2017-12-31 00:00:00';
 //    private const SIMULATION_END = '2017-02-01 00:00:00';
+    private const SIMULATION_STEP = 'PT20M';
 
     private const MAX_SPREAD = 0.0003;
 
@@ -31,14 +32,14 @@ class SimulationService
     ];
 
     private const CHANGING_PARAMETERS = [
-        'extremumRange' => [10],
+        'extremumRange' => [12],
         'fastAveragePeriod' => [3],
-        'slowAveragePeriod' => [9],
-        'rigidStopLoss' => [0.003],
-        'takeProfitMultiplier' => [4],
+        'slowAveragePeriod' => [10],
+        'rigidStopLoss' => [0.002],
+        'takeProfitMultiplier' => [3],
         'actualFactor' => [1],
-        'forecastFactor' => [1],
-        'bankFactor' => [1]
+        'forecastFactor' => [0],
+        'bankFactor' => [1.5]
     ];
 
     public function __construct(
@@ -87,7 +88,7 @@ class SimulationService
                 }
 
                 $currentDate = (new \DateTime($currentDate, new \DateTimeZone('UTC')));
-                $currentDate = $currentDate->add(new \DateInterval('PT15M'))->format('Y-m-d H:i:s');
+                $currentDate = $currentDate->add(new \DateInterval(self::SIMULATION_STEP))->format('Y-m-d H:i:s');
 
                 $prices = $this->priceService->getInitialPrices($this->priceInstruments, $currentDate);
                 $prices = $this->getCurrentPrices($prices);
@@ -102,6 +103,7 @@ class SimulationService
                     try {
                         $activeOrder = $strategy->getOrder($prices, $balance, $currentDate);
                         if (!empty($activeOrder)) {
+//echo 'Open ' . $activeOrder->getInstrument() . ' ' . ($activeOrder->getUnits() > 0 ? 'buy' : 'sell') . ' at ' . $activeOrder->getPrice() . ' on ' . $currentDate . PHP_EOL;
                             $executedTrades++;
                         }
                     } catch(\Throwable $e) {
@@ -116,6 +118,7 @@ class SimulationService
                         abs($activeOrder->getPrice() - $activeOrder->getTakeProfit()) / abs($activeOrder->getPrice() - $activeOrder->getStopLoss())
                     ));
                     echo str_pad('PROFIT', 10) . str_pad($this->formatBalance($balance), 10) . $currentDate . PHP_EOL;
+//echo 'Closed with profit ' . $activeOrder->getInstrument() . ' at ' . $prices[$activeOrder->getInstrument()]['bid'] . '/' . $prices[$activeOrder->getInstrument()]['ask'] . ' on ' . $currentDate . PHP_EOL;
                     $profits++;
                     $activeOrder = null;
                 } elseif (
@@ -124,6 +127,7 @@ class SimulationService
                 ) {
                     $balance = $balance - ($balance * self::SINGLE_TRANSACTION_RISK);
                     echo str_pad('LOSS', 10) . str_pad($this->formatBalance($balance), 10) . $currentDate . PHP_EOL;
+//echo 'Closed with loss ' . $activeOrder->getInstrument() . ' at ' . $prices[$activeOrder->getInstrument()]['bid'] . '/' . $prices[$activeOrder->getInstrument()]['ask'] . ' on ' . $currentDate . PHP_EOL;
                     $losses++;
                     $activeOrder = null;
                 }
