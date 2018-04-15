@@ -176,44 +176,44 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
             case 'AUD':
                 switch (true) {
                     case strpos($name, 'cash') !== false && strpos($name, 'rate') !== false:
-                        return $this->getBankRateIndicator();
+                        return $this->indicatorService->getBankRateIndicator();
                     case strpos($name, 'inflation') !== false && strpos($name, 'gauge') !== false:
-                        return $this->getInflationIndicator();
+                        return $this->indicatorService->getInflationIndicator();
                     case (
                             strpos($name, 'nab') !== false &&
                             strpos($name, 'business') !== false &&
                             strpos($name, 'confidence') !== false &&
                             strpos($name, 'quarterly') === false
                         ):
-                        return $this->getCompaniesIndicator();
+                        return $this->indicatorService->getCompaniesIndicator();
                     case strpos($name, 'trade') !== false && strpos($name, 'balance') !== false:
-                        return $this->getTradeBalanceIndicator();
+                        return $this->indicatorService->getTradeBalanceIndicator();
                     case strpos($name, 'unemployment') !== false && strpos($name, 'rate') !== false:
-                        return $this->getUnemploymentIndicator();
+                        return $this->indicatorService->getUnemploymentIndicator();
                     case strpos($name, 'retail') !== false && strpos($name, 'sales') !== false:
-                        return $this->getSalesIndicator();
+                        return $this->indicatorService->getSalesIndicator();
                 }
                 break;
             case 'USD':
                 switch (true) {
                     case strpos($name, 'rate') !== false && strpos($name, 'funds') !== false:
-                        return $this->getBankRateIndicator();
+                        return $this->indicatorService->getBankRateIndicator();
                     case strpos($name, 'cpi') !== false && strpos($name, 'core') === false:
-                        return $this->getInflationIndicator();
+                        return $this->indicatorService->getInflationIndicator();
                     case strpos($name, 'pmi') !== false && strpos($name, 'final') !== false && strpos($name, 'services') !== false:
-                        return $this->getCompaniesIndicator();
+                        return $this->indicatorService->getCompaniesIndicator();
                     case strpos($name, 'trade') !== false && strpos($name, 'balance') !== false && strpos($name, 'goods') === false:
-                        return $this->getTradeBalanceIndicator();
+                        return $this->indicatorService->getTradeBalanceIndicator();
                     case strpos($name, 'unemployment') !== false && strpos($name, 'rate') !== false:
-                        return $this->getUnemploymentIndicator();
+                        return $this->indicatorService->getUnemploymentIndicator();
                     case strpos($name, 'retail') !== false && strpos($name, 'core') === false:
-                        return $this->getSalesIndicator();
+                        return $this->indicatorService->getSalesIndicator();
                 }
                 break;
             case 'CAD':
                 switch (true) {
                     case strpos($name, 'overnight') !== false && strpos($name, 'rate') !== false:
-                        return $this->getBankRateIndicator();
+                        return $this->indicatorService->getBankRateIndicator();
                     case (
                             strpos($name, 'cpi') !== false &&
                             strpos($name, 'core') === false &&
@@ -221,53 +221,53 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
                             strpos($name, 'median') === false &&
                             strpos($name, 'trimmed') === false
                         ):
-                        return $this->getInflationIndicator();
+                        return $this->indicatorService->getInflationIndicator();
                     case strpos($name, 'ivey') !== false && strpos($name, 'pmi') !== false:
-                        return $this->getCompaniesIndicator();
+                        return $this->indicatorService->getCompaniesIndicator();
                     case strpos($name, 'trade') !== false && strpos($name, 'balance') !== false:
-                        return $this->getTradeBalanceIndicator();
+                        return $this->indicatorService->getTradeBalanceIndicator();
                     case strpos($name, 'unemployment') !== false && strpos($name, 'rate') !== false:
-                        return $this->getUnemploymentIndicator();
+                        return $this->indicatorService->getUnemploymentIndicator();
                     case strpos($name, 'retail') !== false && strpos($name, 'core') === false:
-                        return $this->getSalesIndicator();
+                        return $this->indicatorService->getSalesIndicator();
                 }
                 break;
             case 'JPY':
                 switch (true) {
                     case strpos($name, 'policy') !== false && strpos($name, 'rate') !== false:
-                        return $this->getBankRateIndicator();
+                        return $this->indicatorService->getBankRateIndicator();
                     case strpos($name, 'national') !== false && strpos($name, 'cpi') !== false:
-                        return $this->getInflationIndicator();
+                        return $this->indicatorService->getInflationIndicator();
                     case strpos($name, 'final') !== false && strpos($name, 'pmi') !== false:
-                        return $this->getCompaniesIndicator();
+                        return $this->indicatorService->getCompaniesIndicator();
                     case strpos($name, 'trade') !== false && strpos($name, 'balance') !== false:
-                        return $this->getTradeBalanceIndicator();
+                        return $this->indicatorService->getTradeBalanceIndicator();
                     case strpos($name, 'unemployment') !== false && strpos($name, 'rate') !== false:
-                        return $this->getUnemploymentIndicator();
+                        return $this->indicatorService->getUnemploymentIndicator();
                     case strpos($name, 'retail') !== false && strpos($name, 'sales') !== false:
-                        return $this->getSalesIndicator();
+                        return $this->indicatorService->getSalesIndicator();
                 }
                 break;
             case 'CHF':
                 switch (true) {
                     case strpos($name, 'libor') !== false && strpos($name, 'rate') !== false:
-                        return $this->getBankRateIndicator();
+                        return $this->indicatorService->getBankRateIndicator();
                     case strpos($name, 'cpi') !== false:
-                        return $this->getInflationIndicator();
+                        return $this->indicatorService->getInflationIndicator();
                     case strpos($name, 'pmi') !== false:
-                        return $this->getCompaniesIndicator();
+                        return $this->indicatorService->getCompaniesIndicator();
                     case strpos($name, 'trade') !== false && strpos($name, 'balance') !== false:
-                        return $this->getTradeBalanceIndicator();
+                        return $this->indicatorService->getTradeBalanceIndicator();
                     case strpos($name, 'unemployment') !== false && strpos($name, 'rate') !== false:
-                        return $this->getUnemploymentIndicator();
+                        return $this->indicatorService->getUnemploymentIndicator();
                     case strpos($name, 'retail') !== false && strpos($name, 'sales') !== false:
-                        return $this->getSalesIndicator();
+                        return $this->indicatorService->getSalesIndicator();
                 }
                 break;
             case 'EUR':
                 switch (true) {
                     case strpos($name, 'bid') !== false && strpos($name, 'rate') !== false:
-                        return $this->getBankRateIndicator();
+                        return $this->indicatorService->getBankRateIndicator();
                     case (
                             strpos($name, 'final') !== false &&
                             strpos($name, 'cpi') !== false &&
@@ -275,7 +275,7 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
                             strpos($name, 'french') === false &&
                             strpos($name, 'german') === false
                         ):
-                        return $this->getInflationIndicator();
+                        return $this->indicatorService->getInflationIndicator();
                     case (
                             strpos($name, 'final') !== false &&
                             strpos($name, 'services') !== false &&
@@ -283,7 +283,7 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
                             strpos($name, 'french') === false &&
                             strpos($name, 'german') === false
                         ):
-                        return $this->getCompaniesIndicator();
+                        return $this->indicatorService->getCompaniesIndicator();
                     case (
                             strpos($name, 'trade') !== false &&
                             strpos($name, 'balance') !== false &&
@@ -291,37 +291,37 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
                             strpos($name, 'german') === false &&
                             strpos($name, 'italian') === false
                         ):
-                        return $this->getTradeBalanceIndicator();
+                        return $this->indicatorService->getTradeBalanceIndicator();
                     case (
                             strpos($name, 'unemployment') !== false &&
                             strpos($name, 'rate') !== false &&
                             strpos($name, 'italian') === false &&
                             strpos($name, 'spanish') === false
                         ):
-                        return $this->getUnemploymentIndicator();
+                        return $this->indicatorService->getUnemploymentIndicator();
                     case (
                             strpos($name, 'retail') !== false &&
                             strpos($name, 'sales') !== false &&
                             strpos($name, 'german') === false &&
                             strpos($name, 'italian') === false
                         ):
-                        return $this->getSalesIndicator();
+                        return $this->indicatorService->getSalesIndicator();
                 }
                 break;
             case 'GBP':
                 switch (true) {
                     case strpos($name, 'official') !== false && strpos($name, 'rate') !== false && strpos($name, 'votes') === false:
-                        return $this->getBankRateIndicator();
+                        return $this->indicatorService->getBankRateIndicator();
                     case strpos($name, 'cpi') !== false && strpos($name, 'core') === false:
-                        return $this->getInflationIndicator();
+                        return $this->indicatorService->getInflationIndicator();
                     case strpos($name, 'services') !== false && strpos($name, 'pmi') !== false:
-                        return $this->getCompaniesIndicator();
+                        return $this->indicatorService->getCompaniesIndicator();
                     case strpos($name, 'trade') !== false && strpos($name, 'balance') !== false:
-                        return $this->getTradeBalanceIndicator();
+                        return $this->indicatorService->getTradeBalanceIndicator();
                     case strpos($name, 'unemployment') !== false && strpos($name, 'rate') !== false:
-                        return $this->getUnemploymentIndicator();
+                        return $this->indicatorService->getUnemploymentIndicator();
                     case strpos($name, 'retail') !== false && strpos($name, 'sales') !== false && strpos($name, 'monitor') === false:
-                        return $this->getSalesIndicator();
+                        return $this->indicatorService->getSalesIndicator();
                 }
                 break;
         }
