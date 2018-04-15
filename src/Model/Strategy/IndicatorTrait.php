@@ -27,6 +27,10 @@ trait IndicatorTrait
         $bankRates = [];
         foreach ($typeValues as $type => $instrumentValues) {
             foreach ($instrumentValues as $instrument => $values) {
+                if (!isset($values['actual'][0]) || !isset($values['actual'][1])) {
+                    continue;
+                }
+
                 if (
                     ($type === 'unemployment' && $values['actual'][0] < $values['actual'][1]) ||
                     ($type !== 'unemployment' && $values['actual'][0] > $values['actual'][1])
@@ -36,6 +40,10 @@ trait IndicatorTrait
                     } else {
                         $instrumentScores[$instrument] = $actualFactors;
                     }
+                }
+
+                if (!isset($values['forecast'][0])) {
+                    continue;
                 }
 
                 if (
