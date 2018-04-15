@@ -2,22 +2,17 @@
 namespace TinyApp\Model\Validator;
 
 use TinyApp\Model\Validator\ValidatorInterface;
+use TinyApp\Model\Validator\ValidatorAbstract;
 use TinyApp\Model\Validator\RequestValidatorInterface;
 use TinyApp\Model\System\Request;
 
-abstract class RequestValidatorAbstract implements ValidatorInterface, RequestValidatorInterface
+abstract class RequestValidatorAbstract extends ValidatorAbstract implements RequestValidatorInterface
 {
-    protected $error = '';
     private $csrfToken;
 
     public function __construct(string $csrfToken)
     {
         $this->csrfToken = $csrfToken;
-    }
-
-    public function getError() : string
-    {
-        return $this->error;
     }
 
     final public function check(Request $request, $checkOrigin = true, $checkCsrfToken = true) : bool
