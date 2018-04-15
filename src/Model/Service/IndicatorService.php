@@ -5,10 +5,47 @@ use TinyApp\Model\Repository\IndicatorRepository;
 
 class IndicatorService
 {
+    private const BANK_RATE_INDICATOR = 'bank';
+    private const INFLATION_INDICATOR = 'inflation';
+    private const COMPANIES_INDICATOR = 'companies';
+    private const TRADE_BALANCE_INDICATOR = 'trade';
+    private const UNEMPLOYMENT_INDICATOR = 'unemployment';
+    private const SALES_INDICATOR = 'sales';
+
     private $indicatorRepository;
 
     public function __construct(IndicatorRepository $indicatorRepository) {
         $this->indicatorRepository = $indicatorRepository;
+    }
+
+    public function getBankRateIndicator() : string
+    {
+        return self::BANK_RATE_INDICATOR;
+    }
+
+    public function getInflationIndicator() : string
+    {
+        return self::INFLATION_INDICATOR;
+    }
+
+    public function getCompaniesIndicator() : string
+    {
+        return self::COMPANIES_INDICATOR;
+    }
+
+    public function getTradeBalanceIndicator() : string
+    {
+        return self::TRADE_BALANCE_INDICATOR;
+    }
+
+    public function getUnemploymentIndicator() : string
+    {
+        return self::UNEMPLOYMENT_INDICATOR;
+    }
+
+    public function getSalesIndicator() : string
+    {
+        return self::SALES_INDICATOR;
     }
 
     public function saveIndicators(array $indicators) : array
@@ -38,16 +75,9 @@ class IndicatorService
     public function getLastIndicatorsByPeriod(array $instruments, string $period, string $currentDateTime = null) : array
     {
         try {
-            $endDateTime = $currentDateTime ? new \DateTime($currentDateTime,new \DateTimeZone('UTC')) : new \DateTime(null, \DateTimeZone('UTC'));
-            $endDateTime = $endDateTime->sub(new \DateInterval($period));
-            $indicators = $this->indicatorRepository->getIndicatorsForDates($instruments, $endDateTime->format('Y-m-d H:i:s'), $currentDateTime);
-
-            $sortedIndicators = [];
-            foreach ($indicators as $indicator) {
-                $sortedIndicators[$indicator['instrument']][] = $indicator;
-            }
-
-            return $sortedIndicators;
+            $startDateTime = $currentDateTime ? new \DateTime($currentDateTime,new \DateTimeZone('UTC')) : new \DateTime(null, \DateTimeZone('UTC'));
+            $startDateTime = $startDateTime->sub(new \DateInterval($period));
+            return $this->indicatorRepository->getIndicatorsForDates($instruments, $startDateTime->format('Y-m-d H:i:s'), $currentDateTime);
         } catch(\Throwable $e) {
             trigger_error('Failed to get last indicators by period with message ' . $e->getMessage());
 
