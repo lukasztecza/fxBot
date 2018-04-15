@@ -10,24 +10,35 @@ class ValidatorFactory
 {
     private $sessionService;
     private $csrfToken;
+    private $validators;
 
     public function __construct(SessionService $sessionService)
     {
         $this->sessionService = $sessionService;
         $this->csrfToken = $this->generateCsrfToken();
+        $this->validators = [];
     }
 
     public function create(string $class) : ValidatorInterface
     {
         $classInterfaces = class_implements($class);
+        $requestValidator = in_array(RequestValidatorInterface::class, $classInterfaces);
         if (
             !in_array(ArrayValidatorInterface::class, $classInterfaces) &&
-            !in_array(RequestValidatorInterface::class, $classInterfaces)
+            !$requestValidator
         ) {
             throw new \Exception('Wrong class exception, ' . $class . ' has to implement ' . ArrayValidatorInterface::class . ' or ' . RequestValidatorInterface::class);
         }
 
-        return new $class($this->csrfToken);
+        if (!isset($this->validators[$class])) {
+            if ($requestValidator) {
+                $this->validators[$class] = new $class($this->csrfToken);
+            } else {
+                $this->validators[$class] = new $class();
+            }
+        }
+
+        return $this->validators[$class];
     }
 
     private function generateCsrfToken() : string
@@ -37,7 +48,7 @@ class ValidatorFactory
             return $csrfToken;
         }
 
-        $value = md5(time() . random_int(1,1000000));
+        $value = bin2hex(random_bytes(16));
         $this->sessionService->set(['csrfToken' => $value]);
 
         return $value;

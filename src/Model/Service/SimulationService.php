@@ -24,15 +24,21 @@ class SimulationService
     private $tradeRepository;
     private $simulationRepository;
 
-    private const STRATEGY_CLASS = 'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern';
+    private const STRATEGY_CLASS_FOR_SIMULATION = 'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern';
     private const RESULT_INSTRUMENT_IGNORE = true;
-    //@TODO create const or method to ignore instrument by strategy class
+    private const INSTRUMENT_INDIPENDENT = [
+        'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern'
+    ];
+
     private const CHANGING_PARAMETERS = [
         'extremumRange' => [10],
         'fastAveragePeriod' => [3],
         'slowAveragePeriod' => [9],
         'rigidStopLoss' => [0.003],
-        'takeProfitMultiplier' => [4]
+        'takeProfitMultiplier' => [4],
+        'actualFactor' => [1],
+        'forecastFactor' => [1],
+        'bankFactor' => [1]
     ];
 
     public function __construct(
@@ -135,7 +141,7 @@ class SimulationService
                 $parameters['strategy'] = substr($settings['className'], strrpos($settings['className'], '\\') + 1);
                 $parameters['singleTransactionRisk'] = self::SINGLE_TRANSACTION_RISK;
                 $this->simulationRepository->saveSimulation([
-                    'instrument' => self::RESULT_INSTRUMENT_IGNORE ? 'VARIED' : $settings['params']['instrument'],
+                    'instrument' => in_array($settings['className'], self::INSTRUMENT_INDIPENDENT) ? 'VARIED' : $settings['params']['instrument'],
                     'parameters' => $parameters,
                     'finalBalance' => $balance,
                     'minBalance' => $minBalance,
@@ -189,7 +195,7 @@ class SimulationService
 
             if ($key === $lastKey) {
                 $strategies[] = [
-                    'className' => self::STRATEGY_CLASS,
+                    'className' => self::STRATEGY_CLASS_FOR_SIMULATION,
                     'params' => $params
                 ];
             } else {
