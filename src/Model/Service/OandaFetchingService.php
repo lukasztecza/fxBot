@@ -11,7 +11,7 @@ class OandaFetchingService implements FetchingServiceInterface
     private const INTERNAL_DATETIME_FORMAT = 'Y-m-d H:i:s';
     private const OANDA_DATETIME_FORMAT = 'Y-m-d\TH:i:s.u000\Z';
 
-    private const BEGINING_DATETIME = '2017-01-01 00:00:00';
+    private const BEGINING_DATETIME = '2010-01-01 00:00:00';
     private const SHORT_INTERVAL = 'P14D';
     private const LONG_INTERVAL = 'P1Y';
     private const UNIX_TIMESTAMP_FORMAT = 'U';
