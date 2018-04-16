@@ -21,9 +21,13 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
     private $extremumRange;
     private $fastAveragePeriod;
     private $slowAveragePeriod;
-    private $actualFactor;
-    private $forecastFactor;
     private $bankFactor;
+    private $inflationFactor;
+    private $tradeFactor;
+    private $companiesFactor;
+    private $salesFactor;
+    private $unemploymentFactor;
+    private $bankRelativeFactor;
 
     public function __construct(array $priceInstruments, PriceService $priceService, IndicatorService $indicatorService, array $params)
     {
@@ -34,9 +38,13 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
             !isset($params['extremumRange']) ||
             !isset($params['fastAveragePeriod']) ||
             !isset($params['slowAveragePeriod']) ||
-            !isset($params['actualFactor']) ||
-            !isset($params['forecastFactor']) ||
-            !isset($params['bankFactor'])
+            !isset($params['bankFactor']) ||
+            !isset($params['inflationFactor']) ||
+            !isset($params['tradeFactor']) ||
+            !isset($params['companiesFactor']) ||
+            !isset($params['salesFactor']) ||
+            !isset($params['unemploymentFactor']) ||
+            !isset($params['bankRelativeFactor'])
         ) {
             throw new \Exception('Got wrong params ' . var_export($params, true));
         }
@@ -55,9 +63,13 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
         $this->extremumRange = $params['extremumRange'];
         $this->fastAveragePeriod = $params['fastAveragePeriod'];
         $this->slowAveragePeriod = $params['slowAveragePeriod'];
-        $this->actualFactor = $params['actualFactor'];
-        $this->forecastFactor = $params['forecastFactor'];
         $this->bankFactor = $params['bankFactor'];
+        $this->inflationFactor = $params['inflationFactor'];
+        $this->tradeFactor = $params['tradeFactor'];
+        $this->companiesFactor = $params['companiesFactor'];
+        $this->salesFactor = $params['salesFactor'];
+        $this->unemploymentFactor = $params['unemploymentFactor'];
+        $this->bankRelativeFactor = $params['bankRelativeFactor'];
 
         parent::__construct($params['rigidStopLoss'], $params['takeProfitMultiplier'], $params['instrument']);
     }
@@ -65,7 +77,17 @@ class RigidFundamentalTrendingDeviationStrategyPattern extends RigidStrategyAbst
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
     {
         $lastIndicators = $this->indicatorService->getLastIndicatorsByPeriod($this->instruments, 'P12M', $currentDateTime);
-        $scores = $this->getInstrumentScores($lastIndicators, $this->instruments, $this->actualFactor, $this->forecastFactor, $this->bankFactor);
+        $scores = $this->getInstrumentScores(
+            $lastIndicators,
+            $this->instruments,
+            $this->bankFactor,
+            $this->inflationFactor,
+            $this->tradeFactor,
+            $this->companiesFactor,
+            $this->salesFactor,
+            $this->unemploymentFactor,
+            $this->bankRelativeFactor
+        );
         reset($scores);
         $worst = key($scores);
         end($scores);

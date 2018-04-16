@@ -83,5 +83,12 @@ INSERT INTO `parameter` (`id`, `name`) VALUES
     (5, 'strategy'),
     (6, 'singleTransactionRisk'),
     (7, 'fastAveragePeriod'),
-    (8, 'slowAveragePeriod')
+    (8, 'slowAveragePeriod'),
+    (9, 'bankFactor'),
+    (10, 'inflationFactor'),
+    (11, 'tradeFactor'),
+    (12, 'companiesFactor'),
+    (13, 'salesFactor'),
+    (14, 'unemploymentFactor'),
+    (15, 'bankRelativeFactor')
 ON DUPLICATE KEY UPDATE `id` = `id`;
