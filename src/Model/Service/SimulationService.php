@@ -13,7 +13,7 @@ class SimulationService
 
     private const MAX_ITERATIONS_PER_STRATEGY = 4000000;
     private const SIMULATION_START = '2010-03-01 00:00:00';
-    private const SIMULATION_END = '2018-04-01 00:00:00';
+    private const SIMULATION_END = '2018-03-01 00:00:00';
     private const SIMULATION_STEP = 'PT20M';
 
     private const MAX_SPREAD = 0.0003;
@@ -24,25 +24,29 @@ class SimulationService
     private $tradeRepository;
     private $simulationRepository;
 
-    private const STRATEGY_CLASS_FOR_SIMULATION = 'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern';
+    private const STRATEGY_CLASS_FOR_SIMULATION = 'TinyApp\Model\Strategy\RigidFundamentalTrendingStrategyPattern';
     private const RESULT_INSTRUMENT_IGNORE = true;
     private const INSTRUMENT_INDIPENDENT = [
-        'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern'
+        'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern',
+        'TinyApp\Model\Strategy\RigidFundamentalTrendingAverageDistanceStrategyPattern',
+        'TinyApp\Model\Strategy\RigidFundamentalTrendingStrategyPattern'
     ];
 
     private const CHANGING_PARAMETERS = [
-        'extremumRange' => [9],
+        'extremumRange' => [5, 10, 15],
         'fastAveragePeriod' => [3],
         'slowAveragePeriod' => [9],
-        'rigidStopLoss' => [0.002],
-        'takeProfitMultiplier' => [4],
-        'bankFactor' => [1, 3],
-        'inflationFactor' => [1, 3],
-        'tradeFactor' => [1, 3],
-        'companiesFactor' => [1, 3],
-        'salesFactor' => [1, 3],
-        'unemploymentFactor' => [1, 3],
-        'bankRelativeFactor' => [1, 3]
+        'rigidStopLoss' => [0.001, 0.002, 0.003],
+        'takeProfitMultiplier' => [5],
+        'bankFactor' => [1],
+        'inflationFactor' => [1],
+        'tradeFactor' => [2],
+        'companiesFactor' => [2],
+        'salesFactor' => [2],
+        'unemploymentFactor' => [2],
+        'bankRelativeFactor' => [1],
+        'averageDistancePeriod' => [12],
+        'averageDistanceFactor' => [1]
     ];
 
     public function __construct(
@@ -86,7 +90,7 @@ class SimulationService
                 if ($balance < self::INITIAL_TEST_BALANCE / 2) {
                     $balance = 0;
                     break 1;
-                } elseif ($balance > self::INITIAL_TEST_BALANCE * 10) {
+                } elseif ($balance > self::INITIAL_TEST_BALANCE * 100) {
                     break 1;
                 }
 
@@ -177,11 +181,17 @@ class SimulationService
         end($changingParameters);
         $lastKey = key($changingParameters);
 
-//        foreach ($this->priceInstruments as $instrument) {
-            $params = ['instrument' => in_array(self::STRATEGY_CLASS_FOR_SIMULATION, self::INSTRUMENT_INDIPENDENT) ? 'VARIED' : $instrument];
+        if (in_array(self::STRATEGY_CLASS_FOR_SIMULATION, self::INSTRUMENT_INDIPENDENT)) {
+            $params = ['instrument' => 'VARIED'];
             reset($changingParameters);
             $this->nestIteration($counter, $strategies, $changingParameters, $lastKey, $params);
-//        }
+        } else {
+            foreach ($this->priceInstruments as $instrument) {
+                $params = ['instrument' => $instrument];
+                reset($changingParameters);
+                $this->nestIteration($counter, $strategies, $changingParameters, $lastKey, $params);
+            }
+        }
 
         return $strategies;
     }
