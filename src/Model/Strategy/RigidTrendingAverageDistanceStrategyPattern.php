@@ -4,16 +4,16 @@ namespace TinyApp\Model\Strategy;
 use TinyApp\Model\Strategy\RigidStrategyAbstract;
 use TinyApp\Model\Service\PriceService;
 use TinyApp\Model\Strategy\TrendingTrait;
-use TinyApp\Model\Strategy\DeviationTrait;
+use TinyApp\Model\Strategy\AverageDistanceTrait;
 
-class RigidTrendingDeviationStrategyPattern extends RigidStrategyAbstract
+class RigidTrendingAverageDistanceStrategyPattern extends RigidStrategyAbstract
 {
     use TrendingTrait;
-    use DeviationTrait;
+    use AverageDistanceTrait;
 
     private $priceService;
-    private $fastAveragePeriod;
-    private $slowAveragePeriod;
+    private $averageDistancePeriod;
+    private $averageDistanceFactor;
 
     public function __construct(PriceService $priceService, array $params)
     {
@@ -22,16 +22,16 @@ class RigidTrendingDeviationStrategyPattern extends RigidStrategyAbstract
             empty($params['takeProfitMultiplier']) ||
             empty($params['instrument']) ||
             empty($params['extremumRange']) ||
-            empty($params['fastAveragePeriod']) ||
-            empty($params['slowAveragePeriod'])
+            empty($params['averageDistancePeriod']) ||
+            empty($params['averageDistanceFactor'])
         ) {
             throw new \Exception('Got wrong params ' . var_export($params, true));
         }
 
         $this->priceService = $priceService;
         $this->extremumRange = $params['extremumRange'];
-        $this->fastAveragePeriod = $params['fastAveragePeriod'];
-        $this->slowAveragePeriod = $params['slowAveragePeriod'];
+        $this->averageDistancePeriod = $params['averageDistancePeriod'];
+        $this->averageDistanceFactor = $params['averageDistanceFactor'];
         parent::__construct($params['rigidStopLoss'], $params['takeProfitMultiplier'], $params['instrument']);
     }
 
@@ -40,12 +40,12 @@ class RigidTrendingDeviationStrategyPattern extends RigidStrategyAbstract
         $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, 'P7D', $currentDateTime);
 
         $trend = $this->getTrend($lastPrices, $this->extremumRange);
-        $deviation = $this->getDeviation($lastPrices, $this->fastAveragePeriod, $this->slowAveragePeriod);
+        $distance = $this->getAverageDistance($lastPrices, $this->averageDistancePeriod, $this->averageDistanceFactor);
 
         switch (true) {
-            case $trend === 1 && $deviation === 1:
+            case $trend === 1 && $distance === 1:
                 return 1;
-            case $trend === -1 && $deviation === -1:
+            case $trend === -1 && $distance === -1:
                 return -1;
             default:
                 return 0;
