@@ -6,9 +6,13 @@ trait IndicatorTrait
     protected function getInstrumentScores(
         array $lastIndicators,
         array $instruments,
-        float $actualFactors,
-        float $forecastFactor,
-        float $bankFactor
+        float $bankFactor,
+        float $inflationFactor,
+        float $tradeFactor,
+        float $companiesFactor,
+        float $salesFactor,
+        float $unemploymentFactor,
+        float $bankRelativeFactor
     ) : array
     {
         $typeValues = [];
@@ -35,32 +39,12 @@ trait IndicatorTrait
                     ($type === 'unemployment' && $values['actual'][0] < $values['actual'][1]) ||
                     ($type !== 'unemployment' && $values['actual'][0] > $values['actual'][1])
                 ) {
+                    $factorName = $type . 'Factor';
                     if (isset($instrumentScores[$instrument])) {
-                        $instrumentScores[$instrument] = $instrumentScores[$instrument] + $actualFactors;
+                        $instrumentScores[$instrument] = $instrumentScores[$instrument] + $$factorName;
                     } else {
-                        $instrumentScores[$instrument] = $actualFactors;
+                        $instrumentScores[$instrument] = $$factorName;
                     }
-                }
-
-                if (!isset($values['forecast'][0])) {
-                    continue;
-                }
-
-                if (
-                    ($type === 'unemployment' && $values['actual'][0] < $values['forecast'][0]) ||
-                    ($type !== 'unemployment' && $values['actual'][0] > $values['forecast'][0])
-                ) {
-                    if (isset($instrumentScores[$instrument])) {
-                        $instrumentScores[$instrument] = $instrumentScores[$instrument] + $forecastFactor;
-                    } else {
-                        $instrumentScores[$instrument] = $forecastFactor;
-                    }
-                }
-
-                if (
-                    ($type === 'bank')
-                ) {
-                    $bankRates[$instrument] = $values['actual'][0];
                 }
             }
         }
@@ -68,7 +52,7 @@ trait IndicatorTrait
         $counter = 0;
         foreach ($bankRates as $instrument => $value) {
             $instrumentScores[$instrument] = isset($instrumentScores[$instrument]) ? $instrumentScores[$instrument] + $counter : $counter;
-            $counter = $counter + $bankFactor;
+            $counter = $counter + $bankRelativeFactor;
         }
         asort($instrumentScores);
 

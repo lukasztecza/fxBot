@@ -11,7 +11,7 @@ class SimulationService
     private const INITIAL_TEST_BALANCE = 100;
     private const SINGLE_TRANSACTION_RISK = 0.03;
 
-    private const MAX_ITERATIONS_PER_STRATEGY = 40000;
+    private const MAX_ITERATIONS_PER_STRATEGY = 4000000;
     private const SIMULATION_START = '2010-03-01 00:00:00';
     private const SIMULATION_END = '2018-04-01 00:00:00';
     private const SIMULATION_STEP = 'PT20M';
@@ -31,14 +31,18 @@ class SimulationService
     ];
 
     private const CHANGING_PARAMETERS = [
-        'extremumRange' => [12],
+        'extremumRange' => [9],
         'fastAveragePeriod' => [3],
-        'slowAveragePeriod' => [10],
+        'slowAveragePeriod' => [9],
         'rigidStopLoss' => [0.002],
-        'takeProfitMultiplier' => [3],
-        'actualFactor' => [1],
-        'forecastFactor' => [0],
-        'bankFactor' => [1.5]
+        'takeProfitMultiplier' => [4],
+        'bankFactor' => [1, 3],
+        'inflationFactor' => [1, 3],
+        'tradeFactor' => [1, 3],
+        'companiesFactor' => [1, 3],
+        'salesFactor' => [1, 3],
+        'unemploymentFactor' => [1, 3],
+        'bankRelativeFactor' => [1, 3]
     ];
 
     public function __construct(
@@ -79,7 +83,7 @@ class SimulationService
             $activeOrder = null;
             while ($counter < self::MAX_ITERATIONS_PER_STRATEGY && $currentDate < self::SIMULATION_END) {
                 $counter++;
-                if ($balance < self::INITIAL_TEST_BALANCE / 10) {
+                if ($balance < self::INITIAL_TEST_BALANCE / 2) {
                     $balance = 0;
                     break 1;
                 } elseif ($balance > self::INITIAL_TEST_BALANCE * 10) {
@@ -102,7 +106,6 @@ class SimulationService
                     try {
                         $activeOrder = $strategy->getOrder($prices, $balance, $currentDate);
                         if (!empty($activeOrder)) {
-//echo 'Open ' . $activeOrder->getInstrument() . ' ' . ($activeOrder->getUnits() > 0 ? 'buy' : 'sell') . ' at ' . $activeOrder->getPrice() . ' on ' . $currentDate . PHP_EOL;
                             $executedTrades++;
                         }
                     } catch(\Throwable $e) {
@@ -116,8 +119,7 @@ class SimulationService
                     $balance = $balance + ($balance * self::SINGLE_TRANSACTION_RISK * (
                         abs($activeOrder->getPrice() - $activeOrder->getTakeProfit()) / abs($activeOrder->getPrice() - $activeOrder->getStopLoss())
                     ));
-                    echo str_pad('PROFIT', 10) . str_pad($this->formatBalance($balance), 10) . $currentDate . PHP_EOL;
-//echo 'Closed with profit ' . $activeOrder->getInstrument() . ' at ' . $prices[$activeOrder->getInstrument()]['bid'] . '/' . $prices[$activeOrder->getInstrument()]['ask'] . ' on ' . $currentDate . PHP_EOL;
+                    echo str_pad('PROFIT', 10) . str_pad($this->formatBalance($balance), 10) . $currentDate . ' ' . $activeOrder->getInstrument() . PHP_EOL;
                     $profits++;
                     $activeOrder = null;
                 } elseif (
@@ -125,8 +127,7 @@ class SimulationService
                     ($activeOrder->getUnits() < 0 && $activeOrder->getStopLoss() < $prices[$activeOrder->getInstrument()]['ask'])
                 ) {
                     $balance = $balance - ($balance * self::SINGLE_TRANSACTION_RISK);
-                    echo str_pad('LOSS', 10) . str_pad($this->formatBalance($balance), 10) . $currentDate . PHP_EOL;
-//echo 'Closed with loss ' . $activeOrder->getInstrument() . ' at ' . $prices[$activeOrder->getInstrument()]['bid'] . '/' . $prices[$activeOrder->getInstrument()]['ask'] . ' on ' . $currentDate . PHP_EOL;
+                    echo str_pad('LOSS', 10) . str_pad($this->formatBalance($balance), 10) . $currentDate . ' ' . $activeOrder->getInstrument() . PHP_EOL;
                     $losses++;
                     $activeOrder = null;
                 }
@@ -176,11 +177,11 @@ class SimulationService
         end($changingParameters);
         $lastKey = key($changingParameters);
 
-        foreach ($this->priceInstruments as $instrument) {
-            $params = ['instrument' => $instrument];
+//        foreach ($this->priceInstruments as $instrument) {
+            $params = ['instrument' => in_array(self::STRATEGY_CLASS_FOR_SIMULATION, self::INSTRUMENT_INDIPENDENT) ? 'VARIED' : $instrument];
             reset($changingParameters);
             $this->nestIteration($counter, $strategies, $changingParameters, $lastKey, $params);
-        }
+//        }
 
         return $strategies;
     }
