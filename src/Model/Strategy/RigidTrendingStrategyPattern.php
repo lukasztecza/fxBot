@@ -10,14 +10,21 @@ class RigidTrendingStrategyPattern extends RigidStrategyAbstract
     use TrendingTrait;
 
     private $priceService;
+    private $extremumRange;
 
     public function __construct(PriceService $priceService, array $params)
     {
-        if (empty($params['rigidStopLoss']) || empty($params['takeProfitMultiplier']) || empty($params['instrument'])) {
+        if (
+            empty($params['rigidStopLoss']) ||
+            empty($params['takeProfitMultiplier']) ||
+            empty($params['instrument']) ||
+            empty($params['extremumRange'])
+        ) {
             throw new \Exception('Got wrong params ' . var_export($params, true));
         }
 
         $this->priceService = $priceService;
+        $this->extremumRange = $params['extremumRange'];
         parent::__construct($params['rigidStopLoss'], $params['takeProfitMultiplier'], $params['instrument']);
     }
 
@@ -25,6 +32,6 @@ class RigidTrendingStrategyPattern extends RigidStrategyAbstract
     {
         $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, 'P7D', $currentDateTime);
 
-        return $this->getTrend($lastPrices);
+        return $this->getTrend($lastPrices, $this->extremumRange);
     }
 }

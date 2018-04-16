@@ -6,10 +6,9 @@ use TinyApp\Model\Strategy\Order;
 
 abstract class MinSpreadRigidStrategyAbstract extends RigidStrategyAbstract
 {
-    public function __construct(float $rigidStopLoss, float $takeProfitMultiplier)
+    public function __construct(array $params)
     {
-        $this->rigidStopLoss = $rigidStopLoss;
-        $this->takeProfitMultiplier = $takeProfitMultiplier;
+        parent::__construct($params['rigidStopLoss'], $params['takeProfitMultiplier'], $params['instrument']);
     }
 
     public function getOrder(array $prices, float $balance, string $currentDateTime = null) : ?Order

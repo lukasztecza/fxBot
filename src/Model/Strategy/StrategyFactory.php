@@ -32,10 +32,13 @@ class StrategyFactory
 
         switch ($class) {
             case 'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern':
+            case 'TinyApp\Model\Strategy\RigidFundamentalTrendingAverageDistanceStrategyPattern':
+            case 'TinyApp\Model\Strategy\RigidFundamentalTrendingStrategyPattern':
                 $strategy = new $class($this->priceInstruments, $this->priceService, $this->indicatorService, $params);
                 break;
             case 'TinyApp\Model\Strategy\MinSpreadRigidTrendingStrategyPattern':
             case 'TinyApp\Model\Strategy\RigidTrendingDeviationStrategyPattern':
+            case 'TinyApp\Model\Strategy\RigidTrendingAverageDistanceStrategyPattern':
             case 'TinyApp\Model\Strategy\RigidTrendingStrategyPattern':
             case 'TinyApp\Model\Strategy\RigidDeviationStrategyPattern':
                 $strategy = new $class($this->priceService, $params);
