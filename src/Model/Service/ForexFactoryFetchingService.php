@@ -8,7 +8,7 @@ use HttpClient\ClientFactory;
 
 class ForexFactoryFetchingService extends FetchingServiceAbstract
 {
-    private const BEGINING_DATETIME = '2017-02-05 00:00:00';
+    private const BEGINING_DATETIME = '2010-01-01 00:00:00';
     private const INTERVAL = 'P14D';
 
     private const CALENDAR_TABLE_START = '<table class="calendar__table">';
@@ -158,8 +158,9 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
 
         $endDate = clone $startDate;
         $endDate->add(new \DateInterval(self::INTERVAL));
+        $currentDate = new \DateTime(null, new \DateTimeZone('UTC'));
         if ($endDate > new \DateTime(null, new \DateTimeZone('UTC'))) {
-            $endDate = null;
+            $endDate = $currentDate;
         }
 
         return [
