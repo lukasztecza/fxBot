@@ -35,7 +35,8 @@ abstract class StrategyAbstract implements StrategyInterface
         array $currentPrices,
         string $tradeInstrument,
         float $closeTradeInstrumentRate
-    ) {
+    ) : int
+    {
         $currencies = explode('_', $tradeInstrument);
         $baseCurrency = $currencies[0];
         $quoteCurrency = $currencies[1];
@@ -60,7 +61,9 @@ abstract class StrategyAbstract implements StrategyInterface
                 break;
         }
         if (empty($homeInstrument)) {
-            throw new \Exception('Could not find home instrument for trade instrument ' . var_export($tradeInstrument, true));
+            trigger_error('Could not find home instrument for trade instrument ' . var_export($tradeInstrument, true), E_USER_NOTICE);
+
+            return 0;
         }
 
         $balanceRisk = $balance * self::SINGLE_TRANSACTION_RISK;
@@ -71,11 +74,15 @@ abstract class StrategyAbstract implements StrategyInterface
         } elseif($closeTradeInstrumentRate < $currentPrices[$tradeInstrument]['bid']) {
             $openTradeInstrumentRate = $currentPrices[$tradeInstrument]['ask'];
         }
+
         if (empty($openTradeInstrumentRate)) {
-            throw new \Exception(
+            trigger_error(
                 'Wrong close price of the trade instrument ' . var_export($closeTradeInstrumentRate, true) .
-                ' for current prices ' . var_export($currentPrices[$tradeInstrument], true)
+                ' for current prices ' . var_export($currentPrices[$tradeInstrument], true),
+                E_USER_NOTICE
             );
+
+            return 0;
         }
 
         return (int)($balanceRisk / (abs($closeTradeInstrumentRate - $openTradeInstrumentRate) * $homeInstrumentRate));

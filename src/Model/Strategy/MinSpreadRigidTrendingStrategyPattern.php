@@ -10,21 +10,27 @@ class MinSpreadRigidTrendingStrategyPattern extends MinSpreadRigidStrategyAbstra
     use TrendingTrait;
 
     private $priceService;
+    private $extremumRange;
 
     public function __construct(PriceService $priceService, array $params)
     {
-        if (empty($params['rigidStopLoss']) || empty($params['takeProfitMultiplier'])) {
+        if (
+            empty($params['rigidStopLoss']) ||
+            empty($params['takeProfitMultiplier']) ||
+            empty($params['extremumRange'])
+        ) {
             throw new \Exception('Got wrong params ' . var_export($params, true));
         }
 
         $this->priceService = $priceService;
-        parent::__construct($params['rigidStopLoss'], $params['takeProfitMultiplier']);
+        $this->extremumRange = $params['extremumRange'];
+        parent::__construct($params);
     }
 
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
     {
         $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, 'P7D', $currentDateTime);
 
-        return $this->getTrend($lastPrices);
+        return $this->getTrend($lastPrices, $this->extremumRange);
     }
 }
