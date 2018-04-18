@@ -24,29 +24,32 @@ class SimulationService
     private $tradeRepository;
     private $simulationRepository;
 
-    private const STRATEGY_CLASS_FOR_SIMULATION = 'TinyApp\Model\Strategy\RigidFundamentalTrendingStrategyPattern';
+    private const STRATEGY_CLASS_FOR_SIMULATION = 'TinyApp\Model\Strategy\RigidFundamentalTrendingLongAveragesDeviationStrategyPattern';
     private const RESULT_INSTRUMENT_IGNORE = true;
     private const INSTRUMENT_INDIPENDENT = [
+        'TinyApp\Model\Strategy\RigidFundamentalTrendingLongAveragesDeviationStrategyPattern',
         'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern',
         'TinyApp\Model\Strategy\RigidFundamentalTrendingAverageDistanceStrategyPattern',
         'TinyApp\Model\Strategy\RigidFundamentalTrendingStrategyPattern'
     ];
 
     private const CHANGING_PARAMETERS = [
-        'extremumRange' => [5, 10, 15],
+        'extremumRange' => [20],
         'fastAveragePeriod' => [3],
         'slowAveragePeriod' => [9],
-        'rigidStopLoss' => [0.001, 0.002, 0.003],
-        'takeProfitMultiplier' => [5],
-        'bankFactor' => [1],
-        'inflationFactor' => [1],
-        'tradeFactor' => [2],
-        'companiesFactor' => [2],
-        'salesFactor' => [2],
-        'unemploymentFactor' => [2],
-        'bankRelativeFactor' => [1],
+        'rigidStopLoss' => [0.003],
+        'takeProfitMultiplier' => [4],
+        'bankFactor' => [1, 10],
+        'inflationFactor' => [1, 10],
+        'tradeFactor' => [1, 10],
+        'companiesFactor' => [1, 10],
+        'salesFactor' => [1, 10],
+        'unemploymentFactor' => [1, 10],
+        'bankRelativeFactor' => [1, 10],
         'averageDistancePeriod' => [12],
-        'averageDistanceFactor' => [1]
+        'averageDistanceFactor' => [0.1],
+        'longAverageFast' => [100],
+        'longAverageSlow' => [400]
     ];
 
     public function __construct(
@@ -123,7 +126,12 @@ class SimulationService
                     $balance = $balance + ($balance * self::SINGLE_TRANSACTION_RISK * (
                         abs($activeOrder->getPrice() - $activeOrder->getTakeProfit()) / abs($activeOrder->getPrice() - $activeOrder->getStopLoss())
                     ));
-                    echo str_pad('PROFIT', 10) . str_pad($this->formatBalance($balance), 10) . $currentDate . ' ' . $activeOrder->getInstrument() . PHP_EOL;
+                    echo
+                        str_pad('PROFIT', 10) . str_pad($this->formatBalance($balance), 10) . $currentDate .
+                        ' performed ' . ($activeOrder->getUnits() > 0 ? 'Buy  ' : 'Sell ') . str_pad($activeOrder->getPrice(), 10) .
+                        ' on ' . $activeOrder->getInstrument() . ' closed due to ask ' . str_pad($prices[$activeOrder->getInstrument()]['ask'], 10) .
+                        ' bid ' . str_pad($prices[$activeOrder->getInstrument()]['bid'], 10) . PHP_EOL
+                    ;
                     $profits++;
                     $activeOrder = null;
                 } elseif (
@@ -131,7 +139,12 @@ class SimulationService
                     ($activeOrder->getUnits() < 0 && $activeOrder->getStopLoss() < $prices[$activeOrder->getInstrument()]['ask'])
                 ) {
                     $balance = $balance - ($balance * self::SINGLE_TRANSACTION_RISK);
-                    echo str_pad('LOSS', 10) . str_pad($this->formatBalance($balance), 10) . $currentDate . ' ' . $activeOrder->getInstrument() . PHP_EOL;
+                    echo
+                        str_pad('LOSS', 10) . str_pad($this->formatBalance($balance), 10) . $currentDate .
+                        ' performed ' . ($activeOrder->getUnits() > 0 ? 'Buy  ' : 'Sell ') . str_pad($activeOrder->getPrice(), 10) .
+                        ' on ' . $activeOrder->getInstrument() . ' closed due to ask ' . str_pad($prices[$activeOrder->getInstrument()]['ask'], 10) .
+                        ' bid ' . str_pad($prices[$activeOrder->getInstrument()]['bid'], 10) . PHP_EOL
+                    ;
                     $losses++;
                     $activeOrder = null;
                 }
@@ -157,7 +170,7 @@ class SimulationService
                     'profits' => $profits,
                     'losses' => $losses,
                     'simulationStart' => self::SIMULATION_START,
-                    'simulationEnd' => self::SIMULATION_END,
+                    'simulationEnd' => $currentDate,
                     'datetime' => (new \DateTime(null, new \DateTimeZone('UTC')))->format('Y-m-d H:i:s'),
                 ]);
             } catch (\Throwable $e) {

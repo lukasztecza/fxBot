@@ -31,6 +31,7 @@ class StrategyFactory
         }
 
         switch ($class) {
+            case 'TinyApp\Model\Strategy\RigidFundamentalTrendingLongAveragesDeviationStrategyPattern':
             case 'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern':
             case 'TinyApp\Model\Strategy\RigidFundamentalTrendingAverageDistanceStrategyPattern':
             case 'TinyApp\Model\Strategy\RigidFundamentalTrendingStrategyPattern':
