@@ -1,19 +1,15 @@
 <?php
 namespace TinyApp\Model\Strategy;
 
-trait MultipleAveragesTrait
+trait AverageCrossingTrait
 {
     protected function getAverageDirection(
         array $lastPrices,
-        int $signalFastAverage,
-        int $signalSlowAverage,
-        int $fastAverage,
-        int $slowAverage
+        int $fast,
+        int $slow
     ) : int {
         $averages = [
             'current' => ($price['high'] + $price['low']) / 2,
-            'signalFast' => null,
-            'signalSlow' => null,
             'fast' => null,
             'slow' => null
         ];
@@ -23,12 +19,6 @@ trait MultipleAveragesTrait
             $sum += ($price['high'] + $price['low']) / 2;
             $counter++;
             switch (true) {
-                case $signalFastAverage - $counter === 0:
-                    $averages['signalFast'] = $sum / $counter;
-                    break 1;
-                case $signalSlowAverage - $counter === 0:
-                    $averages['signalSlow'] = $sum / $counter;
-                    break 1;
                 case $fastAverage - $counter === 0:
                     $averages['fast'] = $sum / $counter;
                     break 1;
