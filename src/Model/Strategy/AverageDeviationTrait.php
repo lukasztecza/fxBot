@@ -3,12 +3,10 @@ namespace TinyApp\Model\Strategy;
 
 trait AverageDeviationTrait
 {
-    protected function getAverageDirection(
+    protected function getAverageDeviationDirection(
         array $lastPrices,
-        int $signalFastAverage,
-        int $signalSlowAverage,
-        int $fastAverage,
-        int $slowAverage,
+        int $fast,
+        int $slow,
         int $highLowDifferenceFactor
     ) : int {
         $this->appendLocalExtremas($lastPrices, $extremumRange);
@@ -27,16 +25,13 @@ trait AverageDeviationTrait
                 }
             }
         }
-
         if (count($lastHighs) < 1 && count($lastLows) < 1) {
             return 0;
         }
+
         $lastLowHighDifference = $lastHighs[0] - $lastLows[0];
-//@todo use it to trigger entry points
         $averages = [
-            'current' => ($price['high'] + $price['low']) / 2,
-            'signalFast' => null,
-            'signalSlow' => null,
+            'current' => ($lastPrices[0]['high'] + $lastPricesp[0]['low']) / 2,
             'fast' => null,
             'slow' => null
         ];
@@ -46,16 +41,10 @@ trait AverageDeviationTrait
             $sum += ($price['high'] + $price['low']) / 2;
             $counter++;
             switch (true) {
-                case $signalFastAverage - $counter === 0:
-                    $averages['signalFast'] = $sum / $counter;
-                    break 1;
-                case $signalSlowAverage - $counter === 0:
-                    $averages['signalSlow'] = $sum / $counter;
-                    break 1;
-                case $fastAverage - $counter === 0:
+                case $fast - $counter === 0:
                     $averages['fast'] = $sum / $counter;
                     break 1;
-                case $slowAverage - $counter === 0:
+                case $slow - $counter === 0:
                     $averages['slow'] = $sum / $counter;
                     break 1;
             }
@@ -64,16 +53,12 @@ trait AverageDeviationTrait
         switch (true) {
             case
                 $averages['fast'] > $averages['slow'] &&
-                $averages['current'] < $averages['fast'] - $highLowDifferenceFactor * $lastLowHighDifference &&
-                $averages['current'] > $averages['signalFast'] &&
-                $averages['current'] < $averages['signalSlow']
+                $averages['current'] < $averages['fast'] - $highLowDifferenceFactor * $lastLowHighDifference
             :
                 return 1;
             case
                 $averages['fast'] < $averages['slow'] &&
-                $averages['current'] > $averages['fast'] + $highLowDifferenceFactor * $lastLowHighDifference &&
-                $averages['current'] < $averages['signalFast'] &&
-                $averages['current'] > $averages['signalSlow']
+                $averages['current'] > $averages['fast'] + $highLowDifferenceFactor * $lastLowHighDifference
             :
                 return -1;
             default:

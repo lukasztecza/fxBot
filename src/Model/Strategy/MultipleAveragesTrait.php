@@ -11,7 +11,7 @@ trait MultipleAveragesTrait
         int $slowAverage
     ) : int {
         $averages = [
-            'current' => ($price['high'] + $price['low']) / 2,
+            'current' => ($lastPrices[0]['high'] + $lastPrices[0]['low']) / 2,
             'signalFast' => null,
             'signalSlow' => null,
             'fast' => null,
@@ -37,7 +37,7 @@ trait MultipleAveragesTrait
                     break 1;
             }
         }
-
+//@TODO update this thing
         switch (true) {
             case
                 $averages['fast'] > $averages['slow'] &&

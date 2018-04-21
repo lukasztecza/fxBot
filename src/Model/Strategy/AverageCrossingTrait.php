@@ -3,13 +3,17 @@ namespace TinyApp\Model\Strategy;
 
 trait AverageCrossingTrait
 {
-    protected function getAverageDirection(
+    protected function getAverageCrossingDirection(
         array $lastPrices,
         int $fast,
         int $slow
     ) : int {
+        if (empty($lastPrices)) {
+            return 0;
+        }
+
         $averages = [
-            'current' => ($price['high'] + $price['low']) / 2,
+            'current' => ($lastPrices[0]['high'] + $lastPrices[0]['low']) / 2,
             'fast' => null,
             'slow' => null
         ];
@@ -19,10 +23,10 @@ trait AverageCrossingTrait
             $sum += ($price['high'] + $price['low']) / 2;
             $counter++;
             switch (true) {
-                case $fastAverage - $counter === 0:
+                case $fast - $counter === 0:
                     $averages['fast'] = $sum / $counter;
                     break 1;
-                case $slowAverage - $counter === 0:
+                case $slow - $counter === 0:
                     $averages['slow'] = $sum / $counter;
                     break 1;
             }
@@ -32,19 +36,15 @@ trait AverageCrossingTrait
             case
                 $averages['fast'] > $averages['slow'] &&
                 $averages['current'] > $averages['slow'] &&
-                $averages['current'] < $averages['fast'] &&
-                $averages['current'] > $averages['signalFast'] &&
-                $averages['current'] < $averages['signalSlow']
+                $averages['current'] < $averages['fast']
             :
-                return 1;
+                return -1;
             case
                 $averages['fast'] < $averages['slow'] &&
                 $averages['current'] < $averages['slow'] &&
-                $averages['current'] > $averages['fast'] &&
-                $averages['current'] < $averages['signalFast'] &&
-                $averages['current'] > $averages['signalSlow']
+                $averages['current'] > $averages['fast']
             :
-                return -1;
+                return 1;
             default:
                 return 0;
         }

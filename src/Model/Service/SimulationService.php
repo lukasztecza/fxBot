@@ -24,7 +24,8 @@ class SimulationService
     private $tradeRepository;
     private $simulationRepository;
 
-    private const STRATEGY_CLASS_FOR_SIMULATION = 'TinyApp\Model\Strategy\RigidFundamentalTrendingLongAveragesDeviationStrategyPattern';
+    //private const STRATEGY_CLASS_FOR_SIMULATION = 'TinyApp\Model\Strategy\RigidFundamentalTrendingLongAveragesDeviationStrategyPattern';
+    private const STRATEGY_CLASS_FOR_SIMULATION = 'TinyApp\Model\Strategy\RigidMultipleAveragesStrategyPattern';
     private const RESULT_INSTRUMENT_IGNORE = true;
     private const INSTRUMENT_INDIPENDENT = [
         'TinyApp\Model\Strategy\RigidFundamentalTrendingLongAveragesDeviationStrategyPattern',
@@ -34,22 +35,12 @@ class SimulationService
     ];
 
     private const CHANGING_PARAMETERS = [
-        'extremumRange' => [20],
-        'fastAveragePeriod' => [3],
-        'slowAveragePeriod' => [9],
-        'rigidStopLoss' => [0.003],
-        'takeProfitMultiplier' => [4],
-        'bankFactor' => [1, 10],
-        'inflationFactor' => [1, 10],
-        'tradeFactor' => [1, 10],
-        'companiesFactor' => [1, 10],
-        'salesFactor' => [1, 10],
-        'unemploymentFactor' => [1, 10],
-        'bankRelativeFactor' => [1, 10],
-        'averageDistancePeriod' => [12],
-        'averageDistanceFactor' => [0.1],
-        'longAverageFast' => [100],
-        'longAverageSlow' => [400]
+        'rigidStopLoss' => [0.002],
+        'takeProfitMultiplier' => [5],
+        'signalFast' => [20],
+        'signalSlow' => [40],
+        'fastAverage' => [200],
+        'slowAverage' => [400]
     ];
 
     public function __construct(

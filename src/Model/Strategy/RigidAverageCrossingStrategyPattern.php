@@ -2,16 +2,15 @@
 namespace TinyApp\Model\Strategy;
 
 use TinyApp\Model\Strategy\RigidStrategyAbstract;
-use TinyApp\Model\Strategy\MultipleAveragesTrait;
+use TinyApp\Model\Strategy\AverageCrossingTrait;
 use TinyApp\Model\Service\PriceService;
 
-class RigidMultipleAveragesStrategyPattern extends RigidStrategyAbstract
+class RigidAverageCrossingStrategyPattern extends RigidStrategyAbstract
 {
-    use MultipleAveragesTrait;
+    use AverageCrossingTrait;
 
     private $priceService;
-    private $signalFast;
-    private $signalSlow;
+    private $signalAverage;
     private $fastAverage;
     private $slowAverage;
 
@@ -21,19 +20,15 @@ class RigidMultipleAveragesStrategyPattern extends RigidStrategyAbstract
             empty($params['rigidStopLoss']) ||
             empty($params['takeProfitMultiplier']) ||
             empty($params['instrument']) ||
-            empty($params['signalFast']) ||
-            empty($params['signalSlow']) ||
-            empty($params['fastAverage']) ||
-            empty($params['slowAverage'])
+            empty($params['fast']) ||
+            empty($params['slow'])
         ) {
             throw new \Exception('Got wrong params ' . var_export($params, true));
         }
 
         $this->priceService = $priceService;
-        $this->signalFast = $params['signalFast'];
-        $this->signalSlow = $params['signalSlow'];
-        $this->fastAverage = $params['fastAverage'];
-        $this->slowAverage = $params['slowAverage'];
+        $this->fast = $params['fast'];
+        $this->slow = $params['slow'];
         parent::__construct($params['rigidStopLoss'], $params['takeProfitMultiplier'], $params['instrument']);
     }
 
@@ -41,6 +36,6 @@ class RigidMultipleAveragesStrategyPattern extends RigidStrategyAbstract
     {
         $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, 'P7D', $currentDateTime);
 
-        return $this->getAverageDirection($lastPrices, $this->signalFast, $this->slowAverage, $this->fastAverage, $this->slowAverage);
+        return $this->getAverageCrossingDirection($lastPrices, $this->fast, $this->slow);
     }
 }
