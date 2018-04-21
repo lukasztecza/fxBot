@@ -3,7 +3,7 @@ namespace TinyApp\Model\Strategy;
 
 trait DeviationTrait
 {
-    protected function getDeviation(array $lastPrices, int $fastAveragePeriod, int $slowAveragePeriod) : int
+    protected function getDeviationDirection(array $lastPrices, int $fast, int $slow) : int
     {
         $averages = [
             'current' => ($lastPrices[0]['high'] + $lastPrices[0]['low']) / 2,
@@ -16,14 +16,10 @@ trait DeviationTrait
             $sum += ($price['high'] + $price['low']) / 2;
             $counter++;
             switch (true) {
-                case $fastAveragePeriod - $counter > 0:
-                    continue 2;
-                case $fastAveragePeriod - $counter === 0:
+                case $fast - $counter === 0:
                     $averages['fast'] = $sum / $counter;
                     break 1;
-                case $slowAveragePeriod - $counter > 0:
-                    continue 2;
-                case $slowAveragePeriod - $counter === 0:
+                case $slow - $counter === 0:
                     $averages['slow'] = $sum / $counter;
                     break 2;
             }

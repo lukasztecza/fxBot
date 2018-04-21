@@ -12,7 +12,6 @@ trait TrendingTrait
             if (count($lastHighs) > 1 && count($lastLows) > 1) {
                 break;
             }
-
             if (isset($price['extremum'])) {
                 if ($price['extremum'] === 'max') {
                     $lastHighs[] = $price['high'];
