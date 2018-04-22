@@ -26,9 +26,9 @@ trait LongAverageTrait
 
         switch (true) {
             case $averages['fast'] > $averages['slow']:
-                return 1;
-            case $averages['fast'] < $averages['slow']:
                 return -1;
+            case $averages['fast'] < $averages['slow']:
+                return 1;
             default:
                 return 0;
         }
