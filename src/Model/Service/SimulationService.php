@@ -25,7 +25,7 @@ class SimulationService
     private $simulationRepository;
 
     //private const STRATEGY_CLASS_FOR_SIMULATION = 'TinyApp\Model\Strategy\RigidFundamentalTrendingLongAveragesDeviationStrategyPattern';
-    private const STRATEGY_CLASS_FOR_SIMULATION = 'TinyApp\Model\Strategy\RigidMultipleAveragesStrategyPattern';
+    private const STRATEGY_CLASS_FOR_SIMULATION = 'TinyApp\Model\Strategy\RigidTrendingLongAverageDeviationStrategyPattern';
     private const RESULT_INSTRUMENT_IGNORE = true;
     private const INSTRUMENT_INDIPENDENT = [
         'TinyApp\Model\Strategy\RigidFundamentalTrendingLongAveragesDeviationStrategyPattern',
@@ -37,6 +37,7 @@ class SimulationService
     private const CHANGING_PARAMETERS = [
         'rigidStopLoss' => [0.002],
         'takeProfitMultiplier' => [5],
+        'extremumRange' => [20],
         'signalFast' => [20],
         'signalSlow' => [40],
         'fastAverage' => [200],

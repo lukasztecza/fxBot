@@ -44,6 +44,7 @@ class StrategyFactory
             case 'TinyApp\Model\Strategy\RigidDeviationStrategyPattern':
             case 'TinyApp\Model\Strategy\RigidMultipleAveragesStrategyPattern':
             case 'TinyApp\Model\Strategy\RigidAverageCrossingStrategyPattern':
+            case 'TinyApp\Model\Strategy\RigidTrendingLongAverageDeviationStrategyPattern':
                 $strategy = new $class($this->priceService, $params);
                 break;
             case 'TinyApp\Model\Strategy\MinSpreadRigidRandomStrategyPattern':
