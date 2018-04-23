@@ -3,7 +3,7 @@ namespace TinyApp\Model\Strategy;
 
 trait LongAverageTrait
 {
-    protected function getAverageMovement(array $lastPrices, int $longAverageFast, int $longAverageSlow) : int
+    protected function getLongAverageDirection(array $lastPrices, int $fast, int $slow) : int
     {
         $averages = [
             'fast' => null,
@@ -15,14 +15,10 @@ trait LongAverageTrait
             $sum += ($price['high'] + $price['low']) / 2;
             $counter++;
             switch (true) {
-                case $longAverageFast - $counter > 0:
-                    continue 2;
-                case $longAverageFast - $counter === 0:
+                case $fast - $counter === 0:
                     $averages['fast'] = $sum / $counter;
                     break 1;
-                case $longAverageSlow - $counter > 0:
-                    continue 2;
-                case $longAverageSlow - $counter === 0:
+                case $slow - $counter === 0:
                     $averages['slow'] = $sum / $counter;
                     break 2;
             }
@@ -30,9 +26,9 @@ trait LongAverageTrait
 
         switch (true) {
             case $averages['fast'] > $averages['slow']:
-                return 1;
-            case $averages['fast'] < $averages['slow']:
                 return -1;
+            case $averages['fast'] < $averages['slow']:
+                return 1;
             default:
                 return 0;
         }

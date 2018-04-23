@@ -1,9 +1,9 @@
 <?php
 namespace TinyApp\Model\Strategy;
 
-trait DeviationTrait
+trait LongAverageCurrentTrait
 {
-    protected function getDeviationDirection(array $lastPrices, int $fast, int $slow) : int
+    protected function getLongAverageCurrentDirection(array $lastPrices, int $fast, int $slow) : int
     {
         $averages = [
             'current' => ($lastPrices[0]['high'] + $lastPrices[0]['low']) / 2,
@@ -26,9 +26,9 @@ trait DeviationTrait
         }
 
         switch (true) {
-            case $averages['current'] < $averages['fast'] && $averages['current'] > $averages['slow']:
+            case $averages['fast'] > $averages['slow'] && $averages['current'] > $averages['fast']:
                 return -1;
-            case $averages['current'] > $averages['fast'] && $averages['current'] < $averages['slow']:
+            case $averages['fast'] < $averages['slow'] && $averages['current'] < $averages['fast']:
                 return 1;
             default:
                 return 0;

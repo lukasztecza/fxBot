@@ -13,8 +13,7 @@ trait IndicatorTrait
         float $salesFactor,
         float $unemploymentFactor,
         float $bankRelativeFactor
-    ) : array
-    {
+    ) : array {
         $typeValues = [];
         foreach ($lastIndicators as $index => $values) {
             if (
