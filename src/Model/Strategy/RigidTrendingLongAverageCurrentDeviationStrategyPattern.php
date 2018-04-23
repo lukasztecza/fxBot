@@ -3,14 +3,14 @@ namespace TinyApp\Model\Strategy;
 
 use TinyApp\Model\Strategy\RigidStrategyAbstract;
 use TinyApp\Model\Strategy\TrendingTrait;
-use TinyApp\Model\Strategy\LongAverageTrait;
+use TinyApp\Model\Strategy\LongAverageCurrentTrait;
 use TinyApp\Model\Strategy\DeviationTrait;
 use TinyApp\Model\Service\PriceService;
 
-class RigidTrendingLongAverageDeviationStrategyPattern extends RigidStrategyAbstract
+class RigidTrendingLongAverageCurrentDeviationStrategyPattern extends RigidStrategyAbstract
 {
     use TrendingTrait;
-    use LongAverageTrait;
+    use LongAverageCurrentTrait;
     use DeviationTrait;
 
     private $priceService;
@@ -46,8 +46,8 @@ class RigidTrendingLongAverageDeviationStrategyPattern extends RigidStrategyAbst
 
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
     {
-        $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, 'P10D', $currentDateTime);
-        $longAverageDirection = $this->getLongAverageDirection($lastPrices, $this->fastAverage, $this->slowAverage);
+        $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, 'P7D', $currentDateTime);
+        $longAverageDirection = $this->getLongAverageCurrentDirection($lastPrices, $this->fastAverage, $this->slowAverage);
         $trendingDirection = $this->getTrend($lastPrices, $this->extremumRange);
         $deviationDirection = $this->getDeviationDirection($lastPrices, $this->signalFast, $this->signalSlow);
 

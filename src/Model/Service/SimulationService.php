@@ -8,11 +8,11 @@ use TinyApp\Model\Repository\SimulationRepository;
 
 class SimulationService
 {
-    private const INITIAL_TEST_BALANCE = 100;
+    private const INITIAL_TEST_BALANCE = 1000;
     private const SINGLE_TRANSACTION_RISK = 0.03;
 
     private const MAX_ITERATIONS_PER_STRATEGY = 4000000;
-    private const SIMULATION_START = '2010-03-01 00:00:00';
+    private const SIMULATION_START = '2011-03-01 00:00:00';
     private const SIMULATION_END = '2018-03-01 00:00:00';
     private const SIMULATION_STEP = 'PT20M';
 
@@ -24,24 +24,31 @@ class SimulationService
     private $tradeRepository;
     private $simulationRepository;
 
-    //private const STRATEGY_CLASS_FOR_SIMULATION = 'TinyApp\Model\Strategy\RigidFundamentalTrendingLongAveragesDeviationStrategyPattern';
-    private const STRATEGY_CLASS_FOR_SIMULATION = 'TinyApp\Model\Strategy\RigidTrendingLongAverageDeviationStrategyPattern';
+    private const STRATEGY_CLASS_FOR_SIMULATION = 'TinyApp\Model\Strategy\RigidLongAverageTrendingDeviationStrategy';
     private const RESULT_INSTRUMENT_IGNORE = true;
     private const INSTRUMENT_INDIPENDENT = [
         'TinyApp\Model\Strategy\RigidFundamentalTrendingLongAveragesDeviationStrategyPattern',
         'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern',
         'TinyApp\Model\Strategy\RigidFundamentalTrendingAverageDistanceStrategyPattern',
-        'TinyApp\Model\Strategy\RigidFundamentalTrendingStrategyPattern'
+        'TinyApp\Model\Strategy\RigidFundamentalTrendingStrategyPattern',
+        'TinyApp\Model\Strategy\RigidFundamentalTrendingLongAverageDeviationStrategyPattern'
     ];
 
     private const CHANGING_PARAMETERS = [
-        'rigidStopLoss' => [0.002],
+        'rigidStopLoss' => [0.0025],
         'takeProfitMultiplier' => [5],
-        'extremumRange' => [20],
+        'extremumRange' => [12],
         'signalFast' => [20],
         'signalSlow' => [40],
         'fastAverage' => [200],
-        'slowAverage' => [400]
+        'slowAverage' => [400],
+//        'bankFactor' => [1],
+//        'inflationFactor' => [1],
+//        'tradeFactor' => [1],
+//        'companiesFactor' => [1],
+//        'salesFactor' => [1],
+//        'unemploymentFactor' => [1],
+//        'bankRelativeFactor' => [0.1]
     ];
 
     public function __construct(
@@ -85,7 +92,7 @@ class SimulationService
                 if ($balance < self::INITIAL_TEST_BALANCE / 2) {
                     $balance = 0;
                     break 1;
-                } elseif ($balance > self::INITIAL_TEST_BALANCE * 100) {
+                } elseif ($balance > self::INITIAL_TEST_BALANCE * 1000) {
                     break 1;
                 }
 

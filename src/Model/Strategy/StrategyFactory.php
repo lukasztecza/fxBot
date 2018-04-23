@@ -35,6 +35,7 @@ class StrategyFactory
             case 'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern':
             case 'TinyApp\Model\Strategy\RigidFundamentalTrendingAverageDistanceStrategyPattern':
             case 'TinyApp\Model\Strategy\RigidFundamentalTrendingStrategyPattern':
+            case 'TinyApp\Model\Strategy\RigidFundamentalTrendingLongAverageDeviationStrategyPattern':
                 $strategy = new $class($this->priceInstruments, $this->priceService, $this->indicatorService, $params);
                 break;
             case 'TinyApp\Model\Strategy\MinSpreadRigidTrendingStrategyPattern':
@@ -45,6 +46,8 @@ class StrategyFactory
             case 'TinyApp\Model\Strategy\RigidMultipleAveragesStrategyPattern':
             case 'TinyApp\Model\Strategy\RigidAverageCrossingStrategyPattern':
             case 'TinyApp\Model\Strategy\RigidTrendingLongAverageDeviationStrategyPattern':
+            case 'TinyApp\Model\Strategy\RigidTrendingLongAverageCurrentDeviationStrategyPattern':
+            case 'TinyApp\Model\Strategy\RigidLongAverageTrendingDeviationStrategy':
                 $strategy = new $class($this->priceService, $params);
                 break;
             case 'TinyApp\Model\Strategy\MinSpreadRigidRandomStrategyPattern':
