@@ -18,9 +18,10 @@ class SimulationService
     private const SIMULATION_STEP = 'PT20M';
 
     private const STRATEGIES_CLASS_FOR_SIMULATION = [
-        'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern',
-        'TinyApp\Model\Strategy\RigidLongAverageTrendingDeviationStrategy',
-        'TinyApp\Model\Strategy\RigidRandomStrategyPattern'
+        'TinyApp\Model\Strategy\RigidAverageTrendLongAverageDeviationStrategy',
+//        'TinyApp\Model\Strategy\RigidLongAverageTrendingDeviationStrategy',
+//        'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern',
+//        'TinyApp\Model\Strategy\RigidRandomStrategyPattern'
     ];
     private const INSTRUMENT_INDEPENDENT_STRATEGIES = [
         'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern'
