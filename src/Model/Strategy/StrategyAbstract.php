@@ -30,13 +30,12 @@ abstract class StrategyAbstract implements StrategyInterface
     To calculate units use:
     units = (max risk in home currency) / ((closing rate of currency instrument - opening rate of currency instrument) * quote/home rate)
     */
-    public function calculateUnits(
+    protected function calculateUnits(
         float $balance,
         array $currentPrices,
         string $tradeInstrument,
         float $closeTradeInstrumentRate
-    ) : int
-    {
+    ) : int {
         $currencies = explode('_', $tradeInstrument);
         $baseCurrency = $currencies[0];
         $quoteCurrency = $currencies[1];
@@ -88,5 +87,103 @@ abstract class StrategyAbstract implements StrategyInterface
         return (int)($balanceRisk / (abs($closeTradeInstrumentRate - $openTradeInstrumentRate) * $homeInstrumentRate));
     }
 
-    abstract function getOrder(array $prices, float $balance) : ?Order;
+    protected function getAveragesByPeriods(array $lastPrices, int $fast, int $slow) : array
+    {
+        $averages = [
+            'fast' => null,
+            'slow' => null
+        ];
+        $sum = 0;
+        $counter = 0;
+        foreach ($lastPrices as $key => $price) {
+            $sum += ($price['high'] + $price['low']) / 2;
+            $counter++;
+            switch (true) {
+                case $fast - $counter === 0:
+                    $averages['fast'] = $sum / $counter;
+                    break 1;
+                case $slow - $counter === 0:
+                    $averages['slow'] = $sum / $counter;
+                    break 2;
+            }
+        }
+
+        return $averages;
+    }
+
+    protected function getTrend(array $lastPrices, int $extremumRange) : int
+    {
+        $this->appendLocalExtremas($lastPrices, $extremumRange);
+        $lastHighs = [];
+        $lastLows = [];
+        foreach ($lastPrices as $price) {
+            if (count($lastHighs) > 1 && count($lastLows) > 1) {
+                break;
+            }
+            if (isset($price['extremum'])) {
+                if ($price['extremum'] === 'max') {
+                    $lastHighs[] = $price['high'];
+                } elseif ($price['extremum'] === 'min') {
+                    $lastLows[] = $price['low'];
+                }
+            }
+        }
+
+        if (count($lastHighs) > 1 && count($lastLows) > 1) {
+            switch (true) {
+                case $lastLows[0] > $lastLows[1] && $lastHighs[0] > $lastHighs[1]:
+                    return 1;
+                case $lastLows[0] < $lastLows[1] && $lastHighs[0] < $lastHighs[1]:
+                    return -1;
+            }
+        }
+
+        return 0;
+    }
+
+    protected function getDeviationDirection(array $lastPrices, int $fast, int $slow) : int
+    {
+        if (!isset($lastPrices[0]['high']) || !isset($lastPrices[0]['low'])) {
+            return 0;
+        }
+        $averages = $this->getAveragesByPeriods($lastPrices, $fast, $slow);
+        $averages['current'] = ($lastPrices[0]['high'] + $lastPrices[0]['low']) / 2;
+
+        switch (true) {
+            case $averages['current'] < $averages['fast'] && $averages['current'] > $averages['slow']:
+                return -1;
+            case $averages['current'] > $averages['fast'] && $averages['current'] < $averages['slow']:
+                return 1;
+            default:
+                return 0;
+        }
+    }
+
+    private function appendLocalExtremas(array &$lastPrices, int $extremumRange) : void
+    {
+        foreach ($lastPrices as $key => $value) {
+            $scoreMax = 0;
+            $scoreMin = 0;
+            for ($i = -$extremumRange; $i <= $extremumRange; $i++) {
+                if (!isset($lastPrices[$key + $i])) {
+                    continue 2;
+                }
+                if ($lastPrices[$key + $i]['high'] <= $value['high']) {
+                    $scoreMax++;
+                }
+                if ($lastPrices[$key + $i]['low'] >= $value['low']) {
+                    $scoreMin++;
+                }
+            }
+
+            if ($scoreMax === 2 * $extremumRange + 1) {
+                $lastPrices[$key]['extremum'] = 'max';
+            }
+            if ($scoreMin === 2 * $extremumRange + 1) {
+                $lastPrices[$key]['extremum'] = 'min';
+            }
+        }
+    }
+
+    abstract public function getOrder(array $prices, float $balance) : ?Order;
 }

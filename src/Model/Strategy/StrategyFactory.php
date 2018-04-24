@@ -30,36 +30,8 @@ class StrategyFactory
             return $this->strategies[$namespaceLessClass];
         }
 
-        switch ($class) {
-            case 'TinyApp\Model\Strategy\RigidFundamentalTrendingLongAveragesDeviationStrategyPattern':
-            case 'TinyApp\Model\Strategy\RigidFundamentalTrendingDeviationStrategyPattern':
-            case 'TinyApp\Model\Strategy\RigidFundamentalTrendingAverageDistanceStrategyPattern':
-            case 'TinyApp\Model\Strategy\RigidFundamentalTrendingStrategyPattern':
-            case 'TinyApp\Model\Strategy\RigidFundamentalTrendingLongAverageDeviationStrategyPattern':
-                $strategy = new $class($this->priceInstruments, $this->priceService, $this->indicatorService, $params);
-                break;
-            case 'TinyApp\Model\Strategy\MinSpreadRigidTrendingStrategyPattern':
-            case 'TinyApp\Model\Strategy\RigidTrendingDeviationStrategyPattern':
-            case 'TinyApp\Model\Strategy\RigidTrendingAverageDistanceStrategyPattern':
-            case 'TinyApp\Model\Strategy\RigidTrendingStrategyPattern':
-            case 'TinyApp\Model\Strategy\RigidDeviationStrategyPattern':
-            case 'TinyApp\Model\Strategy\RigidMultipleAveragesStrategyPattern':
-            case 'TinyApp\Model\Strategy\RigidAverageCrossingStrategyPattern':
-            case 'TinyApp\Model\Strategy\RigidTrendingLongAverageDeviationStrategyPattern':
-            case 'TinyApp\Model\Strategy\RigidTrendingLongAverageCurrentDeviationStrategyPattern':
-            case 'TinyApp\Model\Strategy\RigidLongAverageTrendingDeviationStrategy':
-                $strategy = new $class($this->priceService, $params);
-                break;
-            case 'TinyApp\Model\Strategy\MinSpreadRigidRandomStrategyPattern':
-            case 'TinyApp\Model\Strategy\RigidRandomStrategyPattern':
-                $strategy = new $class($params);
-                break;
-            //default strategies are not patterns so there is no need to create new object every time it is called
-            default:
-                $strategy = new $class();
-                $this->strategies[$namespaceLessClass] = $strategy;
-                break;
-        }
+        $strategy = new $class($this->priceInstruments, $this->priceService, $this->indicatorService, $params);
+        $this->strategies[$namespaceLessClass] = $strategy;
 
         return $strategy;
     }
