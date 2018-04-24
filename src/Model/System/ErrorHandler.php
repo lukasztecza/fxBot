@@ -33,6 +33,7 @@ class ErrorHandler
 
     private function log(int $type, string $message, string $file, int $line, string $reason, array $context) : void
     {
+//@TODO context spams log with huge data maybe we could ignore it totally    
         // Sanitize context and message variables to prevent log injections
         $context = json_encode($context);
         $message = json_encode($message);
