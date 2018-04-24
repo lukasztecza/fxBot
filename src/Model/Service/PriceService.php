@@ -53,9 +53,17 @@ class PriceService
     public function getLastPricesByPeriod(string $instrument, string $period, string $currentDateTime = null) : array
     {
         try {
-            $endDateTime = $currentDateTime ? new \DateTime($currentDateTime,new \DateTimeZone('UTC')) : new \DateTime(null, \DateTimeZone('UTC'));
+            if (is_null($currentDateTime)) {
+                $currentDateTime = new \DateTime(null, new \DateTimeZone('UTC'));
+            } else {
+                $currentDateTime = new \DateTime($currentDateTime, new \DateTimeZone('UTC'));
+            }
+
+            $endDateTime = clone $currentDateTime;
             $endDateTime = $endDateTime->sub(new \DateInterval($period));
-            $prices = $this->priceRepository->getPricesForDates($instrument, $endDateTime->format('Y-m-d H:i:s'), $currentDateTime);
+            $prices = $this->priceRepository->getPricesForDates(
+                $instrument, $endDateTime->format('Y-m-d H:i:s'), $currentDateTime->format('Y-m-d H:i:s')
+            );
 
             $highLows = [];
             foreach ($prices as $price) {

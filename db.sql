@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS `parameter` (
     `id` INT(11) NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(32) COLLATE utf8_general_ci NOT NULL,
     PRIMARY KEY (`id`),
-    KEY (`name`)
+    CONSTRAINT `name` UNIQUE (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE IF NOT EXISTS `simulation_parameter` (
@@ -74,25 +74,3 @@ CREATE TABLE IF NOT EXISTS `simulation_parameter` (
     FOREIGN KEY (`parameter_id`) REFERENCES `parameter`(`id`) ON DELETE CASCADE,
     CONSTRAINT simulation_id_parameter_id UNIQUE (`simulation_id`, `parameter_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
-INSERT INTO `parameter` (`id`, `name`) VALUES
-    (1, 'instrument'),
-    (2, 'rigidStopLoss'),
-    (3, 'takeProfitMultiplier'),
-    (4, 'extremumRange'),
-    (5, 'strategy'),
-    (6, 'singleTransactionRisk'),
-    (7, 'fastAveragePeriod'),
-    (8, 'slowAveragePeriod'),
-    (9, 'bankFactor'),
-    (10, 'inflationFactor'),
-    (11, 'tradeFactor'),
-    (12, 'companiesFactor'),
-    (13, 'salesFactor'),
-    (14, 'unemploymentFactor'),
-    (15, 'bankRelativeFactor'),
-    (16, 'averageDistancePeriod'),
-    (17, 'averageDistanceFactor'),
-    (18, 'longAverageFast'),
-    (19, 'longAverageSlow')
-ON DUPLICATE KEY UPDATE `id` = `id`;
