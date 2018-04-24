@@ -15,18 +15,19 @@ trait IndicatorTrait
         float $bankRelativeFactor
     ) : array {
         $typeValues = [];
+        $instrumentScores = [];
         foreach ($lastIndicators as $index => $values) {
             if (
                 !empty($values['type']) &&
                 in_array($values['instrument'], $instruments) &&
                 !isset($typeValues[$values['type']][$values['instrument']]['actual'][1])
             ) {
+                $instrumentScores[$values['instrument']] = 0;
                 $typeValues[$values['type']][$values['instrument']]['actual'][] = $values['actual'];
                 $typeValues[$values['type']][$values['instrument']]['forecast'][] = $values['forecast'];
             }
         }
 
-        $instrumentScores = [];
         $bankRates = [];
         foreach ($typeValues as $type => $instrumentValues) {
             foreach ($instrumentValues as $instrument => $values) {
@@ -47,6 +48,7 @@ trait IndicatorTrait
                 }
             }
         }
+
         asort($bankRates);
         $counter = 0;
         foreach ($bankRates as $instrument => $value) {

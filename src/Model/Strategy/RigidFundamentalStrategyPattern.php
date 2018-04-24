@@ -4,25 +4,16 @@ namespace TinyApp\Model\Strategy;
 use TinyApp\Model\Strategy\RigidStrategyAbstract;
 use TinyApp\Model\Service\PriceService;
 use TinyApp\Model\Service\IndicatorService;
-use TinyApp\Model\Strategy\TrendingTrait;
-use TinyApp\Model\Strategy\DeviationTrait;
-use TinyApp\Model\Strategy\LongAverageTrait;
 use TinyApp\Model\Strategy\IndicatorTrait;
 
-class RigidFundamentalTrendingLongAveragesDeviationStrategyPattern extends RigidStrategyAbstract
+class RigidFundamentalStrategyPattern extends RigidStrategyAbstract
 {
-    use TrendingTrait;
-    use DeviationTrait;
-    use LongAverageTrait;
     use IndicatorTrait;
 
     private $instruments;
     private $priceInstruments;
     private $priceService;
     private $indicatorService;
-    private $extremumRange;
-    private $fastAveragePeriod;
-    private $slowAveragePeriod;
     private $bankFactor;
     private $inflationFactor;
     private $tradeFactor;
@@ -30,8 +21,6 @@ class RigidFundamentalTrendingLongAveragesDeviationStrategyPattern extends Rigid
     private $salesFactor;
     private $unemploymentFactor;
     private $bankRelativeFactor;
-    private $longAverageFast;
-    private $longAverageSlow;
 
     public function __construct(array $priceInstruments, PriceService $priceService, IndicatorService $indicatorService, array $params)
     {
@@ -39,18 +28,13 @@ class RigidFundamentalTrendingLongAveragesDeviationStrategyPattern extends Rigid
             !isset($params['rigidStopLoss']) ||
             !isset($params['takeProfitMultiplier']) ||
             !isset($params['instrument']) ||
-            !isset($params['extremumRange']) ||
-            !isset($params['fastAveragePeriod']) ||
-            !isset($params['slowAveragePeriod']) ||
             !isset($params['bankFactor']) ||
             !isset($params['inflationFactor']) ||
             !isset($params['tradeFactor']) ||
             !isset($params['companiesFactor']) ||
             !isset($params['salesFactor']) ||
             !isset($params['unemploymentFactor']) ||
-            !isset($params['bankRelativeFactor']) ||
-            !isset($params['longAverageFast']) ||
-            !isset($params['longAverageSlow'])
+            !isset($params['bankRelativeFactor'])
         ) {
             throw new \Exception('Got wrong params ' . var_export($params, true));
         }
@@ -66,9 +50,6 @@ class RigidFundamentalTrendingLongAveragesDeviationStrategyPattern extends Rigid
         $this->priceInstruments = $priceInstruments;
         $this->priceService = $priceService;
         $this->indicatorService = $indicatorService;
-        $this->extremumRange = $params['extremumRange'];
-        $this->fastAveragePeriod = $params['fastAveragePeriod'];
-        $this->slowAveragePeriod = $params['slowAveragePeriod'];
         $this->bankFactor = $params['bankFactor'];
         $this->inflationFactor = $params['inflationFactor'];
         $this->tradeFactor = $params['tradeFactor'];
@@ -76,8 +57,6 @@ class RigidFundamentalTrendingLongAveragesDeviationStrategyPattern extends Rigid
         $this->salesFactor = $params['salesFactor'];
         $this->unemploymentFactor = $params['unemploymentFactor'];
         $this->bankRelativeFactor = $params['bankRelativeFactor'];
-        $this->longAverageFast = $params['longAverageFast'];
-        $this->longAverageSlow = $params['longAverageSlow'];
 
         parent::__construct($params['rigidStopLoss'], $params['takeProfitMultiplier'], $params['instrument']);
     }
@@ -111,18 +90,6 @@ class RigidFundamentalTrendingLongAveragesDeviationStrategyPattern extends Rigid
         }
         $this->instrument = $selectedInstrument;
 
-        $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, 'P7D', $currentDateTime);
-        $trend = $this->getTrend($lastPrices, $this->extremumRange);
-        $averageMovement = $this->getAverageMovement($lastPrices, $this->longAverageFast, $this->longAverageSlow);
-        $deviation = $this->getDeviation($lastPrices, $this->fastAveragePeriod, $this->slowAveragePeriod);
-
-        switch (true) {
-            case $trend === 1 && $deviation === 1 && $averageMovement === 1 && $fundamental === 1:
-                return 1;
-            case $trend === -1 && $deviation === -1 && $averageMovement === -1 && $fundamental === -1:
-                return -1;
-            default:
-                return 0;
-        }
+        return $fundamental;
     }
 }
