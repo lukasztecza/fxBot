@@ -13,15 +13,15 @@ class SimulationService
     private const MAX_SPREAD = 0.0003;
 
     private const MAX_ITERATIONS_PER_STRATEGY = 4000000;
-    private const SIMULATION_START = '2010-05-19 00:00:00';
+    private const SIMULATION_START = '2010-03-01 00:00:00';
     private const SIMULATION_END = '2018-03-01 00:00:00';
     private const SIMULATION_STEP = 'PT20M';
 
     private const STRATEGIES_CLASS_FOR_SIMULATION = [
+        'TinyApp\Model\Strategy\RigidLongAverageTrendingDeviationStrategy',
         'TinyApp\Model\Strategy\RigidAverageTrendLongAverageDeviationStrategy',
-//        'TinyApp\Model\Strategy\RigidLongAverageTrendingDeviationStrategy',
-//        'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern',
-//        'TinyApp\Model\Strategy\RigidRandomStrategyPattern'
+        'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern',
+        'TinyApp\Model\Strategy\RigidRandomStrategyPattern'
     ];
     private const INSTRUMENT_INDEPENDENT_STRATEGIES = [
         'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern'
@@ -30,11 +30,12 @@ class SimulationService
     private const CHANGING_PARAMETERS = [
         'rigidStopLoss' => [0.0025],
         'takeProfitMultiplier' => [5],
+        'signalFastAverage' => [20],
+        'signalSlowAverage' => [40],
         'extremumRange' => [12],
-        'signalFast' => [20],
-        'signalSlow' => [40],
-        'fastAverage' => [200],
-        'slowAverage' => [400],
+        'longFastAverage' => [200],
+        'longSlowAverage' => [400],
+        'averageTrend' => [1000],
         'bankFactor' => [1],
         'inflationFactor' => [1],
         'tradeFactor' => [1],
