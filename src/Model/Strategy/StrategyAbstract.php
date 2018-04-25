@@ -87,31 +87,37 @@ abstract class StrategyAbstract implements StrategyInterface
         return (int)($balanceRisk / (abs($closeTradeInstrumentRate - $openTradeInstrumentRate) * $homeInstrumentRate));
     }
 
-    protected function getAveragesByPeriods(array $lastPrices, int $fast, int $slow) : array
+    protected function getAveragesByPeriods(array $lastPrices, array $averages) : array
     {
-        $averages = [
-            'fast' => null,
-            'slow' => null
-        ];
         $sum = 0;
         $counter = 0;
+        $return = [];
+        end($averages);
+        $lastName = key($averages);
+        reset($averages);
         foreach ($lastPrices as $key => $price) {
             $sum += ($price['high'] + $price['low']) / 2;
             $counter++;
-            switch (true) {
-                case $fast - $counter === 0:
-                    $averages['fast'] = $sum / $counter;
+            foreach ($averages as $name => $period) {
+                if ($period - $counter === 0) {
+                    $return[$name] = $sum / $counter;
+                    if ($lastName === $name) {
+                        break 2;
+                    }
                     break 1;
-                case $slow - $counter === 0:
-                    $averages['slow'] = $sum / $counter;
-                    break 2;
+                }
+            }
+        }
+        foreach ($averages as $name => $period) {
+            if (empty($return[$name])) {
+                trigger_error('Could not create proper averages array', E_USER_NOTICE);
             }
         }
 
-        return $averages;
+        return $return;
     }
 
-    protected function getTrend(array $lastPrices, int $extremumRange) : int
+    protected function getChannelDirection(array $lastPrices, int $extremumRange) : int
     {
         $this->appendLocalExtremas($lastPrices, $extremumRange);
         $lastHighs = [];
@@ -146,7 +152,7 @@ abstract class StrategyAbstract implements StrategyInterface
         if (!isset($lastPrices[0]['high']) || !isset($lastPrices[0]['low'])) {
             return 0;
         }
-        $averages = $this->getAveragesByPeriods($lastPrices, $fast, $slow);
+        $averages = $this->getAveragesByPeriods($lastPrices, ['fast' => $fast, 'slow' => $slow]);
         $averages['current'] = ($lastPrices[0]['high'] + $lastPrices[0]['low']) / 2;
 
         switch (true) {
