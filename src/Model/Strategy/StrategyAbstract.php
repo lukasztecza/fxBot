@@ -117,7 +117,7 @@ abstract class StrategyAbstract implements StrategyInterface
         return $return;
     }
 
-    protected function getTrend(array $lastPrices, int $extremumRange) : int
+    protected function getChannelDirection(array $lastPrices, int $extremumRange) : int
     {
         $this->appendLocalExtremas($lastPrices, $extremumRange);
         $lastHighs = [];
