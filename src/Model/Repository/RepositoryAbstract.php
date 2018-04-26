@@ -2,14 +2,14 @@
 namespace TinyApp\Model\Repository;
 
 use TinyApp\Model\Repository\RepositoryInterface;
-use TinyApp\Model\Repository\DatabaseConnection;
+use TinyApp\Model\Repository\DatabaseConnectionInterface;
 
 abstract class RepositoryAbstract implements RepositoryInterface
 {
     private $write;
     private $counter;
 
-    public function __construct(DatabaseConnection $write)
+    public function __construct(DatabaseConnectionInterface $write)
     {
         $this->write = $write;
         $this->counter = 1;

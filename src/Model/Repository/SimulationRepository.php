@@ -52,7 +52,6 @@ class SimulationRepository extends RepositoryAbstract
                 $e->getMessage() . ' with payload ' . var_export($simulation, true),
                 E_USER_NOTICE
             );
-
             $this->getWrite()->rollBack();
             throw $e;
         }

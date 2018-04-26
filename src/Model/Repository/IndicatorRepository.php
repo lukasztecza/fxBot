@@ -1,6 +1,8 @@
 <?php
 namespace TinyApp\Model\Repository;
 
+use TinyApp\Model\Repository\DatabaseConnectionInterface;
+
 class IndicatorRepository extends RepositoryAbstract
 {
     public function saveIndicators(array $indicators) : array

@@ -119,6 +119,9 @@ mysql -u "$MYSQL_USER" -p"$MYSQL_USER_PASSWORD" -h $MYSQL_HOST $MYSQL_DATABASE <
 # Restart apache
 service apache2 restart
 
+# Install redis
+apt-get install redis-server
+
 # Install git
 apt-get install -y git
 
@@ -126,11 +129,9 @@ apt-get install -y git
 if ! [ -L /usr/bin/composer ]; then
     curl -Ss https://getcomposer.org/installer | php
     mv composer.phar /usr/bin/composer
+    chmod +x /usr/bin/composer
 fi
-#@TODO change permissions
-composer install
-
-#@TODO create parameters here
+composer install --no-plugins --no-scripts
 
 #@TODO install webpack
 
