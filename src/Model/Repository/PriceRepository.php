@@ -1,8 +1,20 @@
 <?php
 namespace TinyApp\Model\Repository;
 
+use TinyApp\Model\Repository\DatabaseConnectionInterface;
+use TinyApp\Model\Repository\MemoryStorageInterface;
+
 class PriceRepository extends RepositoryAbstract
 {
+    private $storage;
+
+    public function __construct(DatabaseConnectionInterface $write, MemoryStorageInterface $storage)
+    {
+        parent::__construct($write);
+        $this->storage = $storage;
+        //@TODO allow usage of redis for simulations
+    }
+
     public function savePrices(array $prices) : array
     {
         $this->getWrite()->begin();

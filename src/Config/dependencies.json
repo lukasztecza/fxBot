@@ -154,17 +154,20 @@
         "inject": [
             "%databaseEngine%",
             "%databaseHost%",
+            "%databasePort%",
             "%databaseName%",
             "%databaseUser%",
             "%databasePassword%"
         ]
     },
-    "redis_client": {
+    "redisClient": {
         "class": "TinyApp\\Model\\Repository\\RedisStorage",
         "inject": [
-            "tcp",
-            "127.0.0.1",
-            "6379"
+            "%redisScheme%",
+            "%redisHost%",
+            "%redisPort%",
+            "%redisPassword%",
+            "%redisMaxTtl%"
         ]
     },
     "fileRepository" : {
@@ -176,13 +179,15 @@
     "priceRepository": {
         "class": "TinyApp\\Model\\Repository\\PriceRepository",
         "inject": [
-            "@writeConnection@"
+            "@writeConnection@",
+            "@redisClient@"
         ]
     },
     "indicatorRepository": {
         "class": "TinyApp\\Model\\Repository\\IndicatorRepository",
         "inject": [
-            "@writeConnection@"
+            "@writeConnection@",
+            "@redisClient@"
         ]
     },
     "tradeRepository": {
@@ -228,8 +233,7 @@
     "simulationCommand": {
         "class": "TinyApp\\Model\\Command\\SimulationCommand",
         "inject": [
-            "@simulationService@",
-            "@redis_client@"
+            "@simulationService@"
         ]
     }
 }
