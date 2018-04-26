@@ -15,12 +15,12 @@ abstract class RepositoryAbstract implements RepositoryInterface
         $this->counter = 1;
     }
 
-    public function getWrite() : DatabaseConnection
+    public function getWrite() : DatabaseConnectionInterface
     {
         return $this->write;
     }
 
-    public function getRead() : DatabaseConnection
+    public function getRead() : DatabaseConnectionInterface
     {
         return $this->write;
     }

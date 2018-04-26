@@ -8,11 +8,11 @@ class PdoDatabaseConnection implements DatabaseConnectionInterface
     private $connection;
     private $statement;
 
-    public function __construct(string $engine, string $host, string $database, string $user, string $password)
+    public function __construct(string $engine, string $host, string $port, string $database, string $user, string $password)
     {
         try {
             $this->connection = new \PDO(
-                $engine . ':host=' . $host . ';dbname=' . $database . ';charset=utf8',
+                $engine . ':host=' . $host . ';port=' . $port . ';dbname=' . $database . ';charset=utf8',
                 $user,
                 $password
             );

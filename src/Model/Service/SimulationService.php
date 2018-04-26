@@ -5,7 +5,6 @@ use TinyApp\Model\Service\PriceService;
 use TinyApp\Model\Strategy\StrategyFactory;
 use TinyApp\Model\Repository\TradeRepository;
 use TinyApp\Model\Repository\SimulationRepository;
-use TinyApp\Model\Repository\MemoryStorageInterface;
 
 class SimulationService
 {
@@ -51,23 +50,19 @@ class SimulationService
     private $strategyFactory;
     private $tradeRepository;
     private $simulationRepository;
-    private $memoryStorageInterface;
 
     public function __construct(
         array $priceInstruments,
         PriceService $priceService,
         StrategyFactory $strategyFactory,
         TradeRepository $tradeRepository,
-        SimulationRepository $simulationRepository,
-        MemoryStorageInterface $memoryStorageInterface
+        SimulationRepository $simulationRepository
     ) {
         $this->priceInstruments = $priceInstruments;
         $this->priceService = $priceService;
         $this->strategyFactory = $strategyFactory;
         $this->tradeRepository = $tradeRepository;
         $this->simulationRepository = $simulationRepository;
-        $this->memoryStorageInterface = $memoryStorageInterface;
-        //@TODO use redis instead of db to run simulation faster
     }
 
     public function run() : array

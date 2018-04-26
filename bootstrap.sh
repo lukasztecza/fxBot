@@ -121,6 +121,8 @@ service apache2 restart
 
 # Install redis
 apt-get install redis-server
+sed -i "s/# requirepass foobared/ requirepass pass/" /etc/redis/redis.conf
+service redis-server restart
 
 # Install git
 apt-get install -y git

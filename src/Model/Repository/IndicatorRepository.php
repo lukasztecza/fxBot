@@ -2,9 +2,18 @@
 namespace TinyApp\Model\Repository;
 
 use TinyApp\Model\Repository\DatabaseConnectionInterface;
+use TinyApp\Model\Repository\MemoryStorageInterface;
 
 class IndicatorRepository extends RepositoryAbstract
 {
+    private $storage;
+
+    public function __construct(DatabaseConnectionInterface $write, MemoryStorageInterface $storage)
+    {
+        parent::__construct($write);
+        $this->storage = $storage;
+    }
+
     public function saveIndicators(array $indicators) : array
     {
         $this->getWrite()->begin();

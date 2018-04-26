@@ -1,10 +1,10 @@
 <?php
 namespace TinyApp\Model\Repository;
 
-use TinyApp\Model\Repository\DatabaseConnection;
+use TinyApp\Model\Repository\DatabaseConnectionInterface;
 
 interface RepositoryInterface
 {
-    public function getWrite() : DatabaseConnection;
-    public function getRead() : DatabaseConnection;
+    public function getWrite() : DatabaseConnectionInterface;
+    public function getRead() : DatabaseConnectionInterface;
 }
