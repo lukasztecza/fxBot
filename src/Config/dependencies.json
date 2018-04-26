@@ -150,13 +150,21 @@
 
 
     "writeConnection": {
-        "class": "TinyApp\\Model\\Repository\\DatabaseConnection",
+        "class": "TinyApp\\Model\\Repository\\PdoDatabaseConnection",
         "inject": [
             "%databaseEngine%",
             "%databaseHost%",
             "%databaseName%",
             "%databaseUser%",
             "%databasePassword%"
+        ]
+    },
+    "redis_client": {
+        "class": "TinyApp\\Model\\Repository\\RedisStorage",
+        "inject": [
+            "tcp",
+            "127.0.0.1",
+            "6379"
         ]
     },
     "fileRepository" : {
@@ -220,7 +228,8 @@
     "simulationCommand": {
         "class": "TinyApp\\Model\\Command\\SimulationCommand",
         "inject": [
-            "@simulationService@"
+            "@simulationService@",
+            "@redis_client@"
         ]
     }
 }

@@ -38,10 +38,6 @@ class OutputMiddleware extends MiddlewareAbstract
     public function process(Request $request) : Response
     {
         $response = $this->getNext()->process($request);
-        if (!($response instanceof Response)) {
-            throw new \Exception('Controller has to return Response object, returned ' . var_export($response, true));
-        }
-
         $headers = $response->getHeaders();
         $headers['Content-Type'] = $headers['Content-Type'] ?? $this->defaultContentType;
         $location = $headers['Location'] ?? null;
