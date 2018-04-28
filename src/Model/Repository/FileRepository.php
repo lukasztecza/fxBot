@@ -1,6 +1,8 @@
 <?php
 namespace TinyApp\Model\Repository;
 
+use TinyApp\Model\Repository\DatabaseConnectionInterface;
+
 class FileRepository extends RepositoryAbstract
 {
     private const IMAGE_PUBLIC = 1;
@@ -38,7 +40,7 @@ class FileRepository extends RepositoryAbstract
         "wav" => "audio/x-wav"
     ];
 
-    public function __construct(DatabaseConnection $write)
+    public function __construct(DatabaseConnectionInterface $write)
     {
         parent::__construct($write);
         // Create tmp upload directory if it does not exist (has to be set in php.ini because it can not be set on runtime using ini_set)

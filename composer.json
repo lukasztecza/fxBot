@@ -18,6 +18,7 @@
     ],
     "require": {
         "php": ">=7.1",
+        "predis/predis": "v1.1.*",
         "lukasztecza/httpClient": "dev-master"
     },
     "require-dev": {

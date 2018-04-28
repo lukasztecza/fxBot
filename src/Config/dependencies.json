@@ -150,13 +150,32 @@
 
 
     "writeConnection": {
-        "class": "TinyApp\\Model\\Repository\\DatabaseConnection",
+        "class": "TinyApp\\Model\\Repository\\PdoDatabaseConnection",
         "inject": [
             "%databaseEngine%",
             "%databaseHost%",
+            "%databasePort%",
             "%databaseName%",
             "%databaseUser%",
             "%databasePassword%"
+        ]
+    },
+    "redisClient": {
+        "class": "TinyApp\\Model\\Repository\\RedisStorage",
+        "inject": [
+            "%redisScheme%",
+            "%redisHost%",
+            "%redisPort%",
+            "%redisPassword%",
+            "%redisMaxTtl%"
+        ]
+    },
+    "memcachedClient": {
+        "class": "TinyApp\\Model\\Repository\\MemcachedStorage",
+        "inject": [
+            "%memcachedHost%",
+            "%memcachedPort%",
+            "%memcachedMaxTtl%"
         ]
     },
     "fileRepository" : {
@@ -168,13 +187,15 @@
     "priceRepository": {
         "class": "TinyApp\\Model\\Repository\\PriceRepository",
         "inject": [
-            "@writeConnection@"
+            "@writeConnection@",
+            "@redisClient@"
         ]
     },
     "indicatorRepository": {
         "class": "TinyApp\\Model\\Repository\\IndicatorRepository",
         "inject": [
-            "@writeConnection@"
+            "@writeConnection@",
+            "@redisClient@"
         ]
     },
     "tradeRepository": {
@@ -193,6 +214,15 @@
 
 
 
+    "storeInMemoryCommand": {
+        "class": "TinyApp\\Model\\Command\\StoreInMemoryCommand",
+        "inject": [
+            "%priceInstruments%",
+            "@priceService@",
+            "@indicatorService@",
+            "@redisClient@"
+        ]
+    },
     "populateRandomCommand": {
         "class": "TinyApp\\Model\\Command\\PopulateRandomCommand",
         "inject": [

@@ -48,6 +48,14 @@ if ! fgrep key_buffer_size /etc/mysql/my.cnf; then
     echo 'key_buffer_size = 16M' | sudo tee -a /etc/mysql/my.cnf
 fi
 
+# Install redis
+apt-get install -y redis-server
+sed -i "s/# requirepass foobared/ requirepass pass/" /etc/redis/redis.conf
+service redis-server restart
+
+# Install memcached
+apt-get install -y memcached
+
 # Install php and modules
 apt-get install -y php"$PHP_VERSION" \
     php"$PHP_VERSION"-curl \
@@ -55,7 +63,8 @@ apt-get install -y php"$PHP_VERSION" \
     php"$PHP_VERSION"-gd \
     php"$PHP_VERSION"-mbstring \
     php"$PHP_VERSION"-dom \
-    php"$PHP_VERSION"-zip
+    php"$PHP_VERSION"-zip \
+    php"$PHP_VERSION"-memcached
 
 # Display all errors for php
 sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/"$PHP_VERSION"/apache2/php.ini
@@ -126,11 +135,9 @@ apt-get install -y git
 if ! [ -L /usr/bin/composer ]; then
     curl -Ss https://getcomposer.org/installer | php
     mv composer.phar /usr/bin/composer
+    chmod +x /usr/bin/composer
 fi
-#@TODO change permissions
-composer install
-
-#@TODO create parameters here
+composer install --no-plugins --no-scripts
 
 #@TODO install webpack
 

@@ -1,25 +1,36 @@
 <?php
 namespace TinyApp\Model\Repository;
 
-class DatabaseConnection
+use TinyApp\Model\Repository\DatabaseConnectionInterface;
+
+class PdoDatabaseConnection implements DatabaseConnectionInterface
 {
     private $connection;
     private $statement;
 
-    public function __construct($engine, $host, $database, $user, $password)
+    public function __construct(string $engine, string $host, string $port, string $database, string $user, string $password)
     {
-        $this->connection = new \PDO(
-            $engine . ':host=' . $host . ';dbname=' . $database . ';charset=utf8',
-            $user,
-            $password
-        );
-        $this->connection->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
-        $this->connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        try {
+            $this->connection = new \PDO(
+                $engine . ':host=' . $host . ';port=' . $port . ';dbname=' . $database . ';charset=utf8',
+                $user,
+                $password
+            );
+            $this->connection->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
+            $this->connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        } catch (\Throwable $e) {
+            throw new \Excpetion('Could not create pod connection');
+        }
     }
 
     public function prepare(string $sql) : void
     {
         $this->statement = $this->connection->prepare($sql);
+    }
+
+    public function clean() : void
+    {
+        $this->statement = null;
     }
 
     public function fetch(string $sql = null, array $arguments = []) : array
@@ -40,11 +51,6 @@ class DatabaseConnection
         $this->checkStatement($sql);
         $this->statement->execute($arguments);
         return $this->connection->lastInsertId();
-    }
-
-    public function clean() : void
-    {
-        $this->statement = null;
     }
 
     public function begin() : void
@@ -68,11 +74,7 @@ class DatabaseConnection
             $this->statement = $this->connection->prepare($sql);
         }
 
-        if (empty($this->statement)) {
-            throw new \Exception('No statement prepared');
-        }
-
-        if (!($this->statement instanceof \PDOStatement)) {
+        if (empty($this->statement) || !($this->statement instanceof \PDOStatement)) {
             throw new \Exception('No statement prepared');
         }
     }
