@@ -170,6 +170,14 @@
             "%redisMaxTtl%"
         ]
     },
+    "memcachedClient": {
+        "class": "TinyApp\\Model\\Repository\\MemcachedStorage",
+        "inject": [
+            "%memcachedHost%",
+            "%memcachedPort%",
+            "%memcachedMaxTtl%"
+        ]
+    },
     "fileRepository" : {
         "class": "TinyApp\\Model\\Repository\\FileRepository",
         "inject": [

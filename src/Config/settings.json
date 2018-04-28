@@ -28,7 +28,9 @@
     ],
 
     "priceInstruments": [
-        "USD_CAD"
+        "USD_CAD",
+        "EUR_USD",
+        "EUR_CAD"
     ],
 
     "clientConfiguration": {

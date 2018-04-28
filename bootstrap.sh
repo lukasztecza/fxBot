@@ -48,6 +48,14 @@ if ! fgrep key_buffer_size /etc/mysql/my.cnf; then
     echo 'key_buffer_size = 16M' | sudo tee -a /etc/mysql/my.cnf
 fi
 
+# Install redis
+apt-get install -y redis-server
+sed -i "s/# requirepass foobared/ requirepass pass/" /etc/redis/redis.conf
+service redis-server restart
+
+# Install memcached
+apt-get install -y memcached
+
 # Install php and modules
 apt-get install -y php"$PHP_VERSION" \
     php"$PHP_VERSION"-curl \
@@ -55,7 +63,8 @@ apt-get install -y php"$PHP_VERSION" \
     php"$PHP_VERSION"-gd \
     php"$PHP_VERSION"-mbstring \
     php"$PHP_VERSION"-dom \
-    php"$PHP_VERSION"-zip
+    php"$PHP_VERSION"-zip \
+    php"$PHP_VERSION"-memcached
 
 # Display all errors for php
 sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/"$PHP_VERSION"/apache2/php.ini
@@ -118,11 +127,6 @@ mysql -u "$MYSQL_USER" -p"$MYSQL_USER_PASSWORD" -h $MYSQL_HOST $MYSQL_DATABASE <
 
 # Restart apache
 service apache2 restart
-
-# Install redis
-apt-get install redis-server
-sed -i "s/# requirepass foobared/ requirepass pass/" /etc/redis/redis.conf
-service redis-server restart
 
 # Install git
 apt-get install -y git
