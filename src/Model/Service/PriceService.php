@@ -35,14 +35,14 @@ class PriceService
         }
     }
 
-    public function getInitialPrices(array $priceInstruments, string $initialDateTime = null) : array
+    public function getInitialPrices(array $priceInstruments, string $initialDateTime = null, bool $useCached = false) : array
     {
         try {
             if (!$initialDateTime) {
                 $initialDateTime = self::DEFAULT_INITIAL_DATE;
             }
 
-            return $this->priceRepository->getInitialPrices($priceInstruments, $initialDateTime);
+            return $this->priceRepository->getInitialPrices($priceInstruments, $initialDateTime, $useCached);
         } catch(\Throwable $e) {
             trigger_error('Failed to get initial prices with message ' . $e->getMessage());
 
@@ -50,7 +50,7 @@ class PriceService
         }
     }
 
-    public function getLastPricesByPeriod(string $instrument, string $period, string $currentDateTime = null) : array
+    public function getLastPricesByPeriod(string $instrument, string $period, string $currentDateTime = null, bool $useCached = false) : array
     {
         try {
             if (is_null($currentDateTime)) {
@@ -62,7 +62,7 @@ class PriceService
             $endDateTime = clone $currentDateTime;
             $endDateTime = $endDateTime->sub(new \DateInterval($period));
             $prices = $this->priceRepository->getPricesForDates(
-                $instrument, $endDateTime->format('Y-m-d H:i:s'), $currentDateTime->format('Y-m-d H:i:s')
+                $instrument, $endDateTime->format('Y-m-d H:i:s'), $currentDateTime->format('Y-m-d H:i:s'), $useCached
             );
 
             $highLows = [];

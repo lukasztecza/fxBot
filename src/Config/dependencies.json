@@ -206,6 +206,15 @@
 
 
 
+    "storeInMemoryCommand": {
+        "class": "TinyApp\\Model\\Command\\StoreInMemoryCommand",
+        "inject": [
+            "%priceInstruments%",
+            "@priceService@",
+            "@indicatorService@",
+            "@redisClient@"
+        ]
+    },
     "populateRandomCommand": {
         "class": "TinyApp\\Model\\Command\\PopulateRandomCommand",
         "inject": [
