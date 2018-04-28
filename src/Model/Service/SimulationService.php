@@ -14,7 +14,7 @@ class SimulationService
 
     private const MAX_ITERATIONS_PER_STRATEGY = 4000000;
     private const SIMULATION_START = '2010-03-01 00:00:00';
-    private const SIMULATION_END = '2013-03-01 00:00:00';
+    private const SIMULATION_END = '2018-03-01 00:00:00';
     private const SIMULATION_STEP = 'PT20M';
 
     private const STRATEGIES_CLASS_FOR_SIMULATION = [
@@ -26,7 +26,7 @@ class SimulationService
     private const INSTRUMENT_INDEPENDENT_STRATEGIES = [
         'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern'
     ];
-    private const USE_CACHED = true;
+    private const USE_CACHED = false;
 
     private const CHANGING_PARAMETERS = [
         'rigidStopLoss' => [0.0025],

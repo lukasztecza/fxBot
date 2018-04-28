@@ -9,7 +9,7 @@ use TinyApp\Model\Repository\MemoryStorageInterface;
 class StoreInMemoryCommand implements CommandInterface
 {
     private const START_DATE = '2010-03-01 00:00:00';
-    private const END_DATE = '2018-03-01 00:00:00';
+    private const END_DATE = '2011-03-01 00:00:00';
     private const SIMULATION_STEP = 'PT20M';
 
     private const LAST_PRICES_PERIOD = 'P7D';
@@ -30,8 +30,6 @@ class StoreInMemoryCommand implements CommandInterface
         $this->priceService = $priceService;
         $this->indicatorService = $indicatorService;
         $this->memoryStorage = $memoryStorage;
-        //@TODO redis gave improvement for 3 years 7min -> 5min
-        //try memcached
     }
 
     public function execute() : CommandResult
@@ -41,6 +39,9 @@ class StoreInMemoryCommand implements CommandInterface
         while ($counter < self::MAX_ITERATIONS_PER_STRATEGY && $currentDate < self::END_DATE) {
             $counter++;
             $currentDate = (new \DateTime($currentDate, new \DateTimeZone('UTC')));
+            if ($currentDate->format('d H:i:s') === '01 00:00:00') {
+                echo $currentDate->format('Y-m-d') . PHP_EOL;
+            }
             $currentDate = $currentDate->add(new \DateInterval(self::SIMULATION_STEP))->format('Y-m-d H:i:s');
 
             $initial = $this->priceService->getInitialPrices($this->priceInstruments, $currentDate);
