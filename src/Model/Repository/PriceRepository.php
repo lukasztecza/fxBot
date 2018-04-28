@@ -1,8 +1,19 @@
 <?php
 namespace TinyApp\Model\Repository;
 
+use TinyApp\Model\Repository\DatabaseConnectionInterface;
+use TinyApp\Model\Repository\MemoryStorageInterface;
+
 class PriceRepository extends RepositoryAbstract
 {
+    private $memoryStorage;
+
+    public function __construct(DatabaseConnectionInterface $write, MemoryStorageInterface $memoryStorage)
+    {
+        parent::__construct($write);
+        $this->memoryStorage = $memoryStorage;
+    }
+
     public function savePrices(array $prices) : array
     {
         $this->getWrite()->begin();
@@ -49,8 +60,15 @@ class PriceRepository extends RepositoryAbstract
         return !empty($records) ? array_pop($records) : [];
     }
 
-    public function getInitialPrices(array $priceInstruments, string $initialDateTime) : array
+    public function getInitialPrices(array $priceInstruments, string $initialDateTime, bool $useCached) : array
     {
+        if ($useCached) {
+            $result = $this->memoryStorage->get('initial_' . str_replace(' ', '_', $initialDateTime));
+            if (!empty($result)) {
+                return json_decode($result, true);
+            }
+        }
+
         $this->getRead()->prepare(
             'SELECT * FROM `price` WHERE `instrument` = :instrument AND `datetime` >= :datetime ORDER BY `datetime` ASC LIMIT 1'
         );
@@ -66,8 +84,15 @@ class PriceRepository extends RepositoryAbstract
         return $initialPrices;
     }
 
-    public function getPricesForDates(string $instrument, string $startDateTime, string $endDateTime) : array
+    public function getPricesForDates(string $instrument, string $startDateTime, string $endDateTime, bool $useCached) : array
     {
+        if ($useCached) {
+            $result = $this->memoryStorage->get('last_' . $instrument . '_' . str_replace(' ', '_', $endDateTime));
+            if (!empty($result)) {
+                return json_decode($result, true);
+            }
+        }
+
         return $this->getRead()->fetch(
             'SELECT * FROM `price`
             WHERE `instrument` = :instrument AND `datetime` > :startdatetime AND `datetime` <= :enddatetime
