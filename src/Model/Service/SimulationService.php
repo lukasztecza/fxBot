@@ -14,18 +14,19 @@ class SimulationService
 
     private const MAX_ITERATIONS_PER_STRATEGY = 4000000;
     private const SIMULATION_START = '2010-03-01 00:00:00';
-    private const SIMULATION_END = '2018-03-01 00:00:00';
+    private const SIMULATION_END = '2013-03-01 00:00:00';
     private const SIMULATION_STEP = 'PT20M';
 
     private const STRATEGIES_CLASS_FOR_SIMULATION = [
         'TinyApp\Model\Strategy\RigidLongAverageTrendingDeviationStrategy',
-        'TinyApp\Model\Strategy\RigidAverageTrendLongAverageDeviationStrategy',
-        'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern',
-        'TinyApp\Model\Strategy\RigidRandomStrategyPattern'
+//        'TinyApp\Model\Strategy\RigidAverageTrendLongAverageDeviationStrategy',
+//        'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern',
+//        'TinyApp\Model\Strategy\RigidRandomStrategyPattern'
     ];
     private const INSTRUMENT_INDEPENDENT_STRATEGIES = [
         'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern'
     ];
+    private const USE_CACHED = true;
 
     private const CHANGING_PARAMETERS = [
         'rigidStopLoss' => [0.0025],
@@ -96,7 +97,7 @@ class SimulationService
                 $currentDate = (new \DateTime($currentDate, new \DateTimeZone('UTC')));
                 $currentDate = $currentDate->add(new \DateInterval(self::SIMULATION_STEP))->format('Y-m-d H:i:s');
 
-                $prices = $this->priceService->getInitialPrices($this->priceInstruments, $currentDate);
+                $prices = $this->priceService->getInitialPrices($this->priceInstruments, $currentDate, self::USE_CACHED);
                 $prices = $this->getCurrentPrices($prices);
                 if (empty($prices)) {
                     return [
@@ -197,12 +198,12 @@ class SimulationService
 
         foreach (self::STRATEGIES_CLASS_FOR_SIMULATION as $strategy) {
             if (in_array($strategy, self::INSTRUMENT_INDEPENDENT_STRATEGIES)) {
-                $params = ['instrument' => 'VARIED'];
+                $params = ['instrument' => 'VARIED', 'useCached' => self::USE_CACHED];
                 reset($changingParameters);
                 $this->nestIteration($counter, $strategies, $changingParameters, $lastKey, $params, $strategy);
             } else {
                 foreach ($this->priceInstruments as $instrument) {
-                    $params = ['instrument' => $instrument];
+                    $params = ['instrument' => $instrument, 'useCached' => self::USE_CACHED];
                     reset($changingParameters);
                     $this->nestIteration($counter, $strategies, $changingParameters, $lastKey, $params, $strategy);
                 }
