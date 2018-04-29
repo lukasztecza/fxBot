@@ -28,8 +28,8 @@
     ],
 
     "priceInstruments": [
-        "USD_CAD",
         "EUR_USD",
+        "USD_CAD",
         "EUR_CAD"
     ],
 

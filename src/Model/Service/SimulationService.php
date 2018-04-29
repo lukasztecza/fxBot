@@ -13,37 +13,49 @@ class SimulationService
     private const MAX_SPREAD = 0.0003;
 
     private const MAX_ITERATIONS_PER_STRATEGY = 4000000;
-    private const SIMULATION_START = '2010-03-01 00:00:00';
+    private const SIMULATION_START = '2012-03-01 00:00:00';
     private const SIMULATION_END = '2018-03-01 00:00:00';
     private const SIMULATION_STEP = 'PT20M';
 
     private const STRATEGIES_CLASS_FOR_SIMULATION = [
-        'TinyApp\Model\Strategy\RigidLongAverageTrendingDeviationStrategy',
+          'TinyApp\Model\Strategy\RigidAverageTrendingStrategy',
+//        'TinyApp\Model\Strategy\RigidFundamentalTrendingStrategyPattern',
+//        'TinyApp\Model\Strategy\RigidTrendingStrategy',
+//        'TinyApp\Model\Strategy\RigidLongAverageDeviationStrategy',
+//        'TinyApp\Model\Strategy\RigidTrendingDeviationStrategy',
+//        'TinyApp\Model\Strategy\RigidLongAverageTrendingStrategy',
+//        'TinyApp\Model\Strategy\RigidLongAverageTrendingDeviationStrategy',
 //        'TinyApp\Model\Strategy\RigidAverageTrendLongAverageDeviationStrategy',
 //        'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern',
 //        'TinyApp\Model\Strategy\RigidRandomStrategyPattern'
     ];
     private const INSTRUMENT_INDEPENDENT_STRATEGIES = [
-        'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern'
+        'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern',
+        'TinyApp\Model\Strategy\RigidFundamentalTrendingStrategyPattern'
     ];
     private const USE_CACHED = false;
-
+//@TODO test averagetrending with longer average and compare to trending
+//@TODO add strategy which checks how long the price was above average and if long enough then trade
+//@TODO compare it alsow to longaverageDeviation strategy whith 20/40 200/400 0.0015/5
+//@TODO create hedging simulator for 0.0020/2 on eur/usd
+//@TODO try strategy which simply enters between 100/200 it will be deviation 100/200 strategy
     private const CHANGING_PARAMETERS = [
-        'rigidStopLoss' => [0.0025],
-        'takeProfitMultiplier' => [5],
-        'signalFastAverage' => [20],
-        'signalSlowAverage' => [40],
+        'rigidStopLoss' => [0.0015],
+        'takeProfitMultiplier' => [6],
+//        'signalFastAverage' => [20],
+//        'signalSlowAverage' => [40],
         'extremumRange' => [12],
-        'longFastAverage' => [200],
-        'longSlowAverage' => [400],
-        'averageTrend' => [1000],
-        'bankFactor' => [1],
-        'inflationFactor' => [1],
-        'tradeFactor' => [1],
-        'companiesFactor' => [1],
-        'salesFactor' => [1],
-        'unemploymentFactor' => [1],
-        'bankRelativeFactor' => [0.1]
+//        'longFastAverage' => [200],
+        'longSlowAverage' => [500],
+//        'averageTrend' => [1000],
+//        'bankFactor' => [1],
+//        'inflationFactor' => [1],
+//        'tradeFactor' => [1],
+//        'companiesFactor' => [1],
+//        'salesFactor' => [1],
+//        'unemploymentFactor' => [1],
+//        'bankRelativeFactor' => [0.1],
+         'followTrend' => [0]
     ];
 
     private $priceInstruments;
