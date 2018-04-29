@@ -156,6 +156,8 @@ abstract class StrategyAbstract implements StrategyInterface
         $averages['current'] = ($lastPrices[0]['high'] + $lastPrices[0]['low']) / 2;
 
         switch (true) {
+            case !isset($averages['current']) || !isset($averages['fast']):
+                return 0;
             case $averages['current'] < $averages['fast'] && $averages['current'] > $averages['slow']:
                 return -1;
             case $averages['current'] > $averages['fast'] && $averages['current'] < $averages['slow']:
