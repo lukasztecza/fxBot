@@ -74,5 +74,25 @@
         }
     },
 
-    "selectedStrategy": "TinyApp\\Model\\Strategy\\RigidLongAverageTrendingDeviationStrategy"
+    "strategyParams": {
+        "rigidStopLoss": "%rigidStopLoss%",
+        "takeProfitMultiplier": "%takeProfitMultiplier%",
+        "longFastAverage": "%longFastAverage%",
+        "longSlowAverage": "%longSlowAverage%",
+        "extremumRange": "%extremumRange%",
+        "signalFastAverage": "%signalFastAverage%",
+        "signalSlowAverage": "%signalSlowAverage%",
+        "averageTrend": "%averageTrend%",
+        "bankFactor": "%bankFactor%",
+        "inflationFactor": "%inflationFactor%",
+        "tradeFactor": "%tradeFactor%",
+        "companiesFactor": "%companiesFactor%",
+        "salesFactor": "%salesFactor%",
+        "unemploymentFactor": "%unemploymentFactor%",
+        "bankRelativeFactor": "%bankRelativeFactor%",
+        "followTrend": "%followTrend%",
+        "lastPricesPeriod": "%lastPricesPeriod%",
+        "useCached": "%useCached%",
+        "instrument": "%instrument%"
+    }
 }
