@@ -123,6 +123,7 @@
             "@clientFactory@",
             "%oandaAccount%",
             "%selectedStrategy%",
+            "%strategyParams%",
             "@strategyFactory@",
             "@tradeRepository@"
         ]
