@@ -14,7 +14,7 @@ class SimulationService
 
     private const MAX_ITERATIONS_PER_STRATEGY = 4000000;
     private const SIMULATION_START = '2010-03-01 00:00:00';
-    private const SIMULATION_END = '2018-03-01 00:00:00';
+    private const SIMULATION_END = '2010-03-15 00:00:00';
     private const SIMULATION_STEP = 'PT20M';
 
     private const FORCE_INSTRUMENT = 'EUR_USD';
@@ -40,7 +40,7 @@ class SimulationService
 
     private const CHANGING_PARAMETERS = [
         'rigidStopLoss' => [0.0025],
-        'takeProfitMultiplier' => [1,2,3,4,5],
+        'takeProfitMultiplier' => [3],
         'longFastAverage' => [50],
         'longSlowAverage' => [500],
         'extremumRange' => [24],
@@ -54,7 +54,8 @@ class SimulationService
         'salesFactor' => [1],
         'unemploymentFactor' => [1],
         'bankRelativeFactor' => [0.1],
-        'followTrend' => [0]
+        'followTrend' => [0],
+        'lastPricesPeriod' => ['P20D']
     ];
 
     private $priceInstruments;
