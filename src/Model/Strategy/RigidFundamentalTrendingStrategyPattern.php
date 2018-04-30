@@ -10,9 +10,6 @@ class RigidFundamentalTrendingStrategyPattern extends RigidStrategyAbstract
 {
     use IndicatorTrait;
 
-    private const EXTREMUM_RANGE = 12;
-    private const LAST_PRICES_PERIOD = 'P2D';
-
     private $instruments;
     private $priceInstruments;
     private $priceService;
@@ -24,6 +21,7 @@ class RigidFundamentalTrendingStrategyPattern extends RigidStrategyAbstract
     private $salesFactor;
     private $unemploymentFactor;
     private $bankRelativeFactor;
+    private $lastPricesPeriod;
 
     public function __construct(array $priceInstruments, PriceService $priceService, IndicatorService $indicatorService, array $params)
     {
@@ -38,7 +36,8 @@ class RigidFundamentalTrendingStrategyPattern extends RigidStrategyAbstract
             !isset($params['salesFactor']) ||
             !isset($params['unemploymentFactor']) ||
             !isset($params['bankRelativeFactor']) ||
-            !isset($params['extremumRange'])
+            !isset($params['extremumRange']) ||
+            !isset($params['lastPricesPeriod'])
         ) {
             throw new \Exception('Got wrong params ' . var_export($params, true));
         }
@@ -61,7 +60,8 @@ class RigidFundamentalTrendingStrategyPattern extends RigidStrategyAbstract
         $this->salesFactor = $params['salesFactor'];
         $this->unemploymentFactor = $params['unemploymentFactor'];
         $this->bankRelativeFactor = $params['bankRelativeFactor'];
-        $this->extremumRange = $params['extremumRange'] ?? self::EXTREMUM_RANGE;
+        $this->extremumRange = $params['extremumRange'];
+        $this->lastPricesPeriod = $params['lastPricesPeriod'];
 
         parent::__construct($params['rigidStopLoss'], $params['takeProfitMultiplier'], $params['instrument']);
     }
@@ -93,8 +93,9 @@ class RigidFundamentalTrendingStrategyPattern extends RigidStrategyAbstract
         } else {
             throw new \Exception('Failed to select instrument');
         }
+
         $this->instrument = $selectedInstrument;
-        $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, self::LAST_PRICES_PERIOD, $currentDateTime);
+        $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, $this->lastPricesPeriod, $currentDateTime);
         $channelDirection = $this->getChannelDirection($lastPrices, $this->extremumRange);
 
         switch (true) {
