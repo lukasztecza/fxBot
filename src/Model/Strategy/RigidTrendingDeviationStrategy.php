@@ -20,25 +20,36 @@ class RigidTrendingDeviationStrategy extends RigidStrategyAbstract
     private $signalFastAverage;
     private $signalSlowAverage;
     private $useCached;
+    private $lastPricesPeriod;
 
     public function __construct(array $instruments, PriceService $priceService, IndicatorService $indicatorService, $params)
     {
-        $this->priceService = $priceService;
-        $this->extremumRange = $params['extremumRange'] ?? self::EXTREMUM_RANGE;
-        $this->signalFastAverage = $params['signalFastAverage'] ?? self::SIGNAL_FAST_AVERAGE;
-        $this->signalSlowAverage = $params['signalSlowAverage'] ?? self::SIGNAL_SLOW_AVERAGE;
-        $this->useCached = $params['useCached'] ?? false;
+        if (
+            !isset($params['extremumRange']) ||
+            !isset($params['signalFastAverage']) ||
+            !isset($params['signalSlowAverage']) ||
+            !isset($params['useCached']) ||
+            !isset($params['lastPricesPeriod']) ||
+            !isset($params['rigidStopLoss']) ||
+            !isset($params['takeProfitMultiplier']) ||
+            !isset($params['instrument'])
+        ) {
+            throw new \Exception('Could not create strategy due to missing params');
+        }
 
-        parent::__construct(
-            ($params['rigidStopLoss'] ?? self::RIGID_STOP_LOSS),
-            ($params['takeProfitMultiplier'] ?? self::TAKE_PROFIT_MULTIPLIER),
-            ($params['instrument'] ?? self::INSTRUMENT)
-        );
+        $this->priceService = $priceService;
+        $this->extremumRange = $params['extremumRange'];
+        $this->signalFastAverage = $params['signalFastAverage'];
+        $this->signalSlowAverage = $params['signalSlowAverage'];
+        $this->useCached = $params['useCached'] ?? false;
+        $this->lastPricesPeriod = $params['lastPricesPeriod'];
+
+        parent::__construct($params['rigidStopLoss'], $params['takeProfitMultiplier'], $params['instrument']);
     }
 
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
     {
-        $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, self::LAST_PRICES_PERIOD, $currentDateTime, $this->useCached);
+        $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, $this->lastPricesPeriod, $currentDateTime, $this->useCached);
         $channelDirection = $this->getChannelDirection($lastPrices, $this->extremumRange);
         $deviationDirection = $this->getDeviationDirection($lastPrices, $this->signalFastAverage, $this->signalSlowAverage);
 

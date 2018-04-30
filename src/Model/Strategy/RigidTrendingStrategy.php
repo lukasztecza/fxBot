@@ -7,32 +7,35 @@ use TinyApp\Model\Service\IndicatorService;
 
 class RigidTrendingStrategy extends RigidStrategyAbstract
 {
-    private const RIGID_STOP_LOSS = 0.0025;
-    private const TAKE_PROFIT_MULTIPLIER = 5;
-    private const INSTRUMENT = 'USD_CAD';
-    private const LAST_PRICES_PERIOD = 'P7D';
-    private const EXTREMUM_RANGE = 12;
-
     private $priceService;
     private $extremumRange;
     private $useCached;
+    private $lastPricesPeriod;
 
     public function __construct(array $instruments, PriceService $priceService, IndicatorService $indicatorService, $params)
     {
-        $this->priceService = $priceService;
-        $this->extremumRange = $params['extremumRange'] ?? self::EXTREMUM_RANGE;
-        $this->useCached = $params['useCached'] ?? false;
+        if (
+            !isset($params['extremumRange']) ||
+            !isset($params['useCached']) ||
+            !isset($params['lastPricesPeriod']) ||
+            !isset($params['rigidStopLoss']) ||
+            !isset($params['takeProfitMultiplier']) ||
+            !isset($params['instrument'])
+        ) {
+            throw new \Exception('Could not create strategy due to missing params');
+        }
 
-        parent::__construct(
-            ($params['rigidStopLoss'] ?? self::RIGID_STOP_LOSS),
-            ($params['takeProfitMultiplier'] ?? self::TAKE_PROFIT_MULTIPLIER),
-            ($params['instrument'] ?? self::INSTRUMENT)
-        );
+        $this->priceService = $priceService;
+        $this->extremumRange = $params['extremumRange'];
+        $this->useCached = $params['useCached'];
+        $this->lastPricesPeriod = $params['lastPricesPeriod'];
+
+        parent::__construct($params['rigidStopLoss'], $params['takeProfitMultiplier'], $params['instrument']);
     }
 
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
     {
-        $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, self::LAST_PRICES_PERIOD, $currentDateTime, $this->useCached);
+        $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, $this->lastPricesPeriod, $currentDateTime, $this->useCached);
         return $this->getChannelDirection($lastPrices, $this->extremumRange);
     }
 }
