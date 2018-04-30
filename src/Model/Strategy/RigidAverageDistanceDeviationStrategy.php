@@ -7,43 +7,47 @@ use TinyApp\Model\Service\IndicatorService;
 
 class RigidAverageDistanceDeviationStrategy extends RigidStrategyAbstract
 {
-    private const RIGID_STOP_LOSS = 0.0010;
-    private const TAKE_PROFIT_MULTIPLIER = 6; // 7 and 8 also ok
-    private const INSTRUMENT = 'EUR_USD';
-    private const LAST_PRICES_PERIOD = 'P30D'; // P7D should be enough
-    private const LONG_FAST_AVERAGE = 100;
-    private const LONG_SLOW_AVERAGE = 200;
-    private const SIGNAL_FAST_AVERAGE = 10;
-    private const SIGNAL_SLOW_AVERAGE = 20;
-    private const FOLLOW_TREND = 0;
-
     private $priceService;
     private $longFastAverage;
     private $longSlowAverage;
     private $signalFastAverage;
     private $signalSlowAverage;
     private $useCached;
+    private $followTrend;
+    private $lastPricesPeriod;
 
     public function __construct(array $instruments, PriceService $priceService, IndicatorService $indicatorService, $params)
     {
-        $this->priceService = $priceService;
-        $this->longFastAverage = $params['longFastAverage'] ?? self::LONG_FAST_AVERAGE;
-        $this->longSlowAverage = $params['longSlowAverage'] ?? self::LONG_SLOW_AVERAGE;
-        $this->signalFastAverage = $params['signalFastAverage'] ?? self::SIGNAL_FAST_AVERAGE;
-        $this->signalSlowAverage = $params['signalSlowAverage'] ?? self::SIGNAL_SLOW_AVERAGE;
-        $this->useCached = $params['useCached'] ?? false;
-        $this->followTrend = $params['followTrend'] ?? self::FOLLOW_TREND;
+        if (
+            !isset($params['longFastAverage']) ||
+            !isset($params['longSlowAverage']) ||
+            !isset($params['signalFastAverage']) ||
+            !isset($params['signalSlowAverage']) ||
+            !isset($params['useCached']) ||
+            !isset($params['followTrend']) ||
+            !isset($params['lastPricesPeriod']) ||
+            !isset($params['rigidStopLoss']) ||
+            !isset($params['takeProfitMultiplier']) ||
+            !isset($params['instrument'])
+        ) {
+            throw new \Exception('Could not create strategy due to missing params');
+        }
 
-        parent::__construct(
-            ($params['rigidStopLoss'] ?? self::RIGID_STOP_LOSS),
-            ($params['takeProfitMultiplier'] ?? self::TAKE_PROFIT_MULTIPLIER),
-            ($params['instrument'] ?? self::INSTRUMENT)
-        );
+        $this->priceService = $priceService;
+        $this->longFastAverage = $params['longFastAverage'];
+        $this->longSlowAverage = $params['longSlowAverage'];
+        $this->signalFastAverage = $params['signalFastAverage'];
+        $this->signalSlowAverage = $params['signalSlowAverage'];
+        $this->useCached = $params['useCached'];
+        $this->followTrend = $params['followTrend'];
+        $this->lastPricesPeriod = $params['lastPricesPeriod'];
+
+        parent::__construct($params['rigidStopLoss'], $params['takeProfitMultiplier'], $params['instrument']);
     }
 
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
     {
-        $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, self::LAST_PRICES_PERIOD, $currentDateTime, $this->useCached);
+        $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, $this->lastPricesPeriod, $currentDateTime, $this->useCached);
         $longAverageDirection = $this->getLongAverageDirection($lastPrices, $this->longFastAverage, $this->longSlowAverage, $this->followTrend);
         $deviationDirection = $this->getDeviationDirection($lastPrices, $this->signalFastAverage, $this->signalSlowAverage);
 
@@ -64,9 +68,9 @@ class RigidAverageDistanceDeviationStrategy extends RigidStrategyAbstract
             case !isset($averages['fast']) || !isset($averages['slow']):
                 return 0;
             case $averages['fast'] > $averages['slow']:
-                return $followTrend ? 1 : -1;
+                return $this->followTrend ? 1 : -1;
             case $averages['fast'] < $averages['slow']:
-                return $followTrend ? -1 : 1;
+                return $this->followTrend ? -1 : 1;
             default:
                 return 0;
         }
