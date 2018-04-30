@@ -5,14 +5,12 @@ use TinyApp\Model\Strategy\RigidStrategyAbstract;
 use TinyApp\Model\Service\PriceService;
 use TinyApp\Model\Service\IndicatorService;
 
-class RigidLongAverageTrendingDeviationStrategy extends RigidStrategyAbstract
+class RigidLongAverageTrendingStrategy extends RigidStrategyAbstract
 {
     private $priceService;
     private $longFastAverage;
     private $longSlowAverage;
     private $extremumRange;
-    private $signalFastAverage;
-    private $signalSlowAverage;
     private $useCached;
     private $lastPricesPeriod;
 
@@ -22,8 +20,6 @@ class RigidLongAverageTrendingDeviationStrategy extends RigidStrategyAbstract
             !isset($params['longFastAverage']) ||
             !isset($params['longSlowAverage']) ||
             !isset($params['extremumRange']) ||
-            !isset($params['signalFastAverage']) ||
-            !isset($params['signalSlowAverage']) ||
             !isset($params['useCached']) ||
             !isset($params['lastPricesPeriod']) ||
             !isset($params['rigidStopLoss']) ||
@@ -37,8 +33,6 @@ class RigidLongAverageTrendingDeviationStrategy extends RigidStrategyAbstract
         $this->longFastAverage = $params['longFastAverage'];
         $this->longSlowAverage = $params['longSlowAverage'];
         $this->extremumRange = $params['extremumRange'];
-        $this->signalFastAverage = $params['signalFastAverage'];
-        $this->signalSlowAverage = $params['signalSlowAverage'];
         $this->useCached = $params['useCached'];
         $this->lastPricesPeriod = $params['lastPricesPeriod'];
 
@@ -50,12 +44,11 @@ class RigidLongAverageTrendingDeviationStrategy extends RigidStrategyAbstract
         $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, $this->lastPricesPeriod, $currentDateTime, $this->useCached);
         $longAverageDirection = $this->getLongAverageDirection($lastPrices, $this->longFastAverage, $this->longSlowAverage, false);
         $channelDirection = $this->getChannelDirection($lastPrices, $this->extremumRange);
-        $deviationDirection = $this->getDeviationDirection($lastPrices, $this->signalFastAverage, $this->signalSlowAverage);
 
         switch (true) {
-            case $longAverageDirection === 1 && $channelDirection === 1 && $deviationDirection === 1:
+            case $longAverageDirection === 1 && $channelDirection === 1:
                 return 1;
-            case $longAverageDirection === -1 && $channelDirection === -1 && $deviationDirection === -1:
+            case $longAverageDirection === -1 && $channelDirection === -1:
                 return -1;
             default:
                 return 0;

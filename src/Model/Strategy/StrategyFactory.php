@@ -10,7 +10,6 @@ class StrategyFactory
     private $priceIinstruments;
     private $priceService;
     private $indicatorService;
-    private $strategies;
 
     public function __construct(array $priceInstruments, PriceService $priceService, IndicatorService $indicatorService)
     {
@@ -24,15 +23,7 @@ class StrategyFactory
         if (!in_array(StrategyInterface::class, class_implements($class))) {
             throw new \Exception('Wrong class exception, ' . $class . ' has to implement ' . StrategyInterface::class);
         }
-        $namespaceLessClass = lcfirst(substr($class, strrpos($class, '\\') + 1));
 
-        if (isset($this->strategies[$namespaceLessClass])) {
-            return $this->strategies[$namespaceLessClass];
-        }
-
-        $strategy = new $class($this->priceInstruments, $this->priceService, $this->indicatorService, $params);
-        $this->strategies[$namespaceLessClass] = $strategy;
-
-        return $strategy;
+        return new $class($this->priceInstruments, $this->priceService, $this->indicatorService, $params);
     }
 }

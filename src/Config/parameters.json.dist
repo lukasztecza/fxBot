@@ -13,5 +13,38 @@
     "oandaApiUri": "",
     "oandaApiKey": "",
     "oandaAccount": "",
-    "forexFactoryUri": ""
+
+    "forexFactoryUri": "",
+
+    "redisScheme": "",
+    "redisHost": "",
+    "redisPort": "",
+    "redisPassword": "",
+    "redisMaxTtl": "",
+
+    "memcachedHost": "",
+    "memcachedPort": "",
+    "memcachedMaxTtl": "",
+
+    "selectedStrategy": "",
+
+    "rigidStopLoss": "",
+    "takeProfitMultiplier": "",
+    "longFastAverage": "",
+    "longSlowAverage": "",
+    "extremumRange": "",
+    "signalFastAverage": "",
+    "signalSlowAverage": "",
+    "averageTrend": "",
+    "bankFactor": "",
+    "inflationFactor": "",
+    "tradeFactor": "",
+    "companiesFactor": "",
+    "salesFactor": "",
+    "unemploymentFactor": "",
+    "bankRelativeFactor": "",
+    "followTrend": "",
+    "lastPricesPeriod": "",
+    "useCached": "",
+    "instrument" ""
 }

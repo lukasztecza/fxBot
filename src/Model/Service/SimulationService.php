@@ -14,28 +14,38 @@ class SimulationService
 
     private const MAX_ITERATIONS_PER_STRATEGY = 4000000;
     private const SIMULATION_START = '2010-03-01 00:00:00';
-    private const SIMULATION_END = '2018-03-01 00:00:00';
+    private const SIMULATION_END = '2010-03-15 00:00:00';
     private const SIMULATION_STEP = 'PT20M';
 
+    private const FORCE_INSTRUMENT = 'EUR_USD';
+
     private const STRATEGIES_CLASS_FOR_SIMULATION = [
+        'TinyApp\Model\Strategy\RigidAverageTrendingStrategy',
+        'TinyApp\Model\Strategy\RigidFundamentalTrendingStrategyPattern',
+        'TinyApp\Model\Strategy\RigidTrendingStrategy',
+        'TinyApp\Model\Strategy\RigidLongAverageDeviationStrategy',
+        'TinyApp\Model\Strategy\RigidAverageDistanceDeviationStrategy',
+        'TinyApp\Model\Strategy\RigidTrendingDeviationStrategy',
+        'TinyApp\Model\Strategy\RigidLongAverageTrendingStrategy',
         'TinyApp\Model\Strategy\RigidLongAverageTrendingDeviationStrategy',
-//        'TinyApp\Model\Strategy\RigidAverageTrendLongAverageDeviationStrategy',
-//        'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern',
-//        'TinyApp\Model\Strategy\RigidRandomStrategyPattern'
+        'TinyApp\Model\Strategy\RigidAverageTrendLongAverageDeviationStrategy',
+        'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern',
+        'TinyApp\Model\Strategy\RigidRandomStrategyPattern'
     ];
     private const INSTRUMENT_INDEPENDENT_STRATEGIES = [
-        'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern'
+        'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern',
+        'TinyApp\Model\Strategy\RigidFundamentalTrendingStrategyPattern'
     ];
     private const USE_CACHED = false;
 
     private const CHANGING_PARAMETERS = [
         'rigidStopLoss' => [0.0025],
-        'takeProfitMultiplier' => [5],
+        'takeProfitMultiplier' => [3],
+        'longFastAverage' => [50],
+        'longSlowAverage' => [500],
+        'extremumRange' => [24],
         'signalFastAverage' => [20],
-        'signalSlowAverage' => [40],
-        'extremumRange' => [12],
-        'longFastAverage' => [200],
-        'longSlowAverage' => [400],
+        'signalSlowAverage' => [60],
         'averageTrend' => [1000],
         'bankFactor' => [1],
         'inflationFactor' => [1],
@@ -43,7 +53,9 @@ class SimulationService
         'companiesFactor' => [1],
         'salesFactor' => [1],
         'unemploymentFactor' => [1],
-        'bankRelativeFactor' => [0.1]
+        'bankRelativeFactor' => [0.1],
+        'followTrend' => [0],
+        'lastPricesPeriod' => ['P20D']
     ];
 
     private $priceInstruments;
@@ -87,7 +99,7 @@ class SimulationService
             $activeOrder = null;
             while ($counter < self::MAX_ITERATIONS_PER_STRATEGY && $currentDate < self::SIMULATION_END) {
                 $counter++;
-                if ($balance < self::INITIAL_TEST_BALANCE / 2) {
+                if ($balance < self::INITIAL_TEST_BALANCE / 5) {
                     $balance = 0;
                     break 1;
                 } elseif ($balance > self::INITIAL_TEST_BALANCE * 1000) {
@@ -199,6 +211,10 @@ class SimulationService
         foreach (self::STRATEGIES_CLASS_FOR_SIMULATION as $strategy) {
             if (in_array($strategy, self::INSTRUMENT_INDEPENDENT_STRATEGIES)) {
                 $params = ['instrument' => 'VARIED', 'useCached' => self::USE_CACHED];
+                reset($changingParameters);
+                $this->nestIteration($counter, $strategies, $changingParameters, $lastKey, $params, $strategy);
+            } elseif(!is_null(self::FORCE_INSTRUMENT)) {
+                $params = ['instrument' => self::FORCE_INSTRUMENT, 'useCached' => self::USE_CACHED];
                 reset($changingParameters);
                 $this->nestIteration($counter, $strategies, $changingParameters, $lastKey, $params, $strategy);
             } else {

@@ -13,6 +13,7 @@ class TradeService
     private $oandaClient;
     private $oandaAccount;
     private $selectedStrategy;
+    private $strategyParams;
     private $strategyFactory;
     private $tradeRepository;
 
@@ -21,6 +22,7 @@ class TradeService
         ClientFactory $clientFactory,
         string $oandaAccount,
         string $selectedStrategy,
+        array $strategyParams,
         StrategyFactory $strategyFactory,
         TradeRepository $tradeRepository
     ) {
@@ -28,6 +30,7 @@ class TradeService
         $this->oandaClient = $clientFactory->getClient('oandaClient');
         $this->oandaAccount = $oandaAccount;
         $this->selectedStrategy = $selectedStrategy;
+        $this->strategyParams = $strategyParams;
         $this->strategyFactory = $strategyFactory;
         $this->tradeRepository = $tradeRepository;
     }
@@ -38,6 +41,9 @@ class TradeService
         if (empty($accountDetails)) {
             return ['status' => false, 'message' => 'Could not get account details'];
         }
+        if ($accountDetails['openPositionCount'] >= self::MAX_ALLOWED_OPEN_POSITIONS) {
+            return ['status' => true, 'message' => 'Max allowed open positions reached'];
+        }
         $balance = $accountDetails['balance'];
 
         $prices = $this->getCurrentPrices();
@@ -45,7 +51,8 @@ class TradeService
             return ['status' => false, 'message' => 'Could not get current prices'];
         }
 
-        $strategy = $this->strategyFactory->getStrategy($this->selectedStrategy);
+        $strategy = $this->strategyFactory->getStrategy($this->selectedStrategy, $this->strategyParams);
+
         try {
             $order = $strategy->getOrder($prices, $balance);
         } catch(\Throwable $e) {
@@ -97,9 +104,6 @@ class TradeService
                     return [];
                 case !isset($response['body']['account']['openPositionCount']) || empty($response['body']['account']['balance']):
                     trigger_error('Failed to get expected account details in response ' . var_export($response, true), E_USER_NOTICE);
-                    return [];
-                case $response['body']['account']['openPositionCount'] >= self::MAX_ALLOWED_OPEN_POSITIONS:
-                    trigger_error('Max allowed open positions reached', E_USER_NOTICE);
                     return [];
             }
         } catch (\Throwable $e) {
