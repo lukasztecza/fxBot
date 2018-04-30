@@ -20,44 +20,41 @@ class SimulationService
     private const FORCE_INSTRUMENT = 'EUR_USD';
 
     private const STRATEGIES_CLASS_FOR_SIMULATION = [
-//        'TinyApp\Model\Strategy\RigidAverageTrendingStrategy',
-//        'TinyApp\Model\Strategy\RigidFundamentalTrendingStrategyPattern',
-//        'TinyApp\Model\Strategy\RigidTrendingStrategy',
-//        'TinyApp\Model\Strategy\RigidLongAverageDeviationStrategy',
+        'TinyApp\Model\Strategy\RigidAverageTrendingStrategy',
+        'TinyApp\Model\Strategy\RigidFundamentalTrendingStrategyPattern',
+        'TinyApp\Model\Strategy\RigidTrendingStrategy',
+        'TinyApp\Model\Strategy\RigidLongAverageDeviationStrategy',
         'TinyApp\Model\Strategy\RigidAverageDistanceDeviationStrategy',
-//        'TinyApp\Model\Strategy\RigidTrendingDeviationStrategy',
-//        'TinyApp\Model\Strategy\RigidLongAverageTrendingStrategy',
-//        'TinyApp\Model\Strategy\RigidLongAverageTrendingDeviationStrategy',
-//        'TinyApp\Model\Strategy\RigidAverageTrendLongAverageDeviationStrategy',
-//        'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern',
-//        'TinyApp\Model\Strategy\RigidRandomStrategyPattern'
+        'TinyApp\Model\Strategy\RigidTrendingDeviationStrategy',
+        'TinyApp\Model\Strategy\RigidLongAverageTrendingStrategy',
+        'TinyApp\Model\Strategy\RigidLongAverageTrendingDeviationStrategy',
+        'TinyApp\Model\Strategy\RigidAverageTrendLongAverageDeviationStrategy',
+        'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern',
+        'TinyApp\Model\Strategy\RigidRandomStrategyPattern'
     ];
     private const INSTRUMENT_INDEPENDENT_STRATEGIES = [
         'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern',
         'TinyApp\Model\Strategy\RigidFundamentalTrendingStrategyPattern'
     ];
     private const USE_CACHED = false;
-//@TODO add strategy which checks how long the price was above average and if long enough then trade
-//@TODO create hedging simulator for 0.0020/2 on eur/usd
-//@TODO try strategy which simply enters between 100/200 it will be deviation 100/200 strategy
-//@TODO add start/end date flexibility
+
     private const CHANGING_PARAMETERS = [
-        'rigidStopLoss' => [0.0010],
-        'takeProfitMultiplier' => [6],
-        'longFastAverage' => [100, 150],
-        'longSlowAverage' => [200, 300],
-//        'extremumRange' => [24],
-        'signalFastAverage' => [10, 19],
-        'signalSlowAverage' => [21, 40],
-//        'averageTrend' => [1000],
-//        'bankFactor' => [1],
-//        'inflationFactor' => [1],
-//        'tradeFactor' => [1],
-//        'companiesFactor' => [1],
-//        'salesFactor' => [1],
-//        'unemploymentFactor' => [1],
-//        'bankRelativeFactor' => [0.1],
-         'followTrend' => [0]
+        'rigidStopLoss' => [0.0025],
+        'takeProfitMultiplier' => [1,2,3,4,5],
+        'longFastAverage' => [50],
+        'longSlowAverage' => [500],
+        'extremumRange' => [24],
+        'signalFastAverage' => [20],
+        'signalSlowAverage' => [60],
+        'averageTrend' => [1000],
+        'bankFactor' => [1],
+        'inflationFactor' => [1],
+        'tradeFactor' => [1],
+        'companiesFactor' => [1],
+        'salesFactor' => [1],
+        'unemploymentFactor' => [1],
+        'bankRelativeFactor' => [0.1],
+        'followTrend' => [0]
     ];
 
     private $priceInstruments;
