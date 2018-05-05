@@ -5,9 +5,7 @@ class ErrorHandler
 {
     private const CONTENT_TYPE_JSON = 'application/json';
     private const CONTENT_TYPE_HTML = 'text/html';
-
     private const LOGS_PATH = APP_ROOT_DIR . '/tmp/logs';
-
     private const PRODUCTION_ENVIRONMENT = 'prod';
 
     private $defaultContentType;
@@ -31,13 +29,11 @@ class ErrorHandler
         error_reporting(E_ALL);
     }
 
-    private function log(int $type, string $message, string $file, int $line, string $reason, array $context) : void
+    private function log(int $type, string $message, string $file, int $line, string $reason) : void
     {
-//@TODO context spams log with huge data maybe we could ignore it totally    
-        // Sanitize context and message variables to prevent log injections
-        $context = json_encode($context);
+        // Sanitize message variables to prevent log injections
         $message = json_encode($message);
-        list($context, $message) = preg_replace(['/[^a-zA-Z0-9 ]/', '/_{1,}/'], '_', [$context, $message]);
+        $message = preg_replace(['/[^a-zA-Z0-9 ]/', '/_{1,}/'], '_', $message);
 
         // Create separate log file per day
         if (!file_exists(self::LOGS_PATH)) {
@@ -46,7 +42,7 @@ class ErrorHandler
         file_put_contents(
             self::LOGS_PATH . '/' . 'php-' . date('Y-m-d') . '.log',
             date('Y-m-d H:i:s') . ' | ' . $reason .  ' | code: ' . $type . ' | file: ' . $file . ' | line: ' . $line .
-            ' | with message: ' . $message . ' | with context: ' . $context . PHP_EOL . PHP_EOL,
+            ' | with message: ' . $message . PHP_EOL . PHP_EOL,
             FILE_APPEND | LOCK_EX
         );
     }
@@ -55,7 +51,7 @@ class ErrorHandler
     {
         $error = error_get_last();
         if ($error) {
-            $this->log($error["type"], $error["message"], $error["file"], $error["line"], 'Error', ['Got on shutdown']);
+            $this->log($error["type"], $error["message"], $error["file"], $error["line"], 'Shutdown Error');
         }
     }
 
@@ -63,11 +59,11 @@ class ErrorHandler
     {
         if (!(error_reporting() & $type)) {
             // This error code is not included in error_reporting so just log it
-            $this->log($type, $message, $file, $line, 'Ignored', $context);
+            $this->log($type, $message, $file, $line, 'Info');
             return;
         }
 
-        $this->log($type, $message, $file, $line, 'Error', $context);
+        $this->log($type, $message, $file, $line, 'Error');
         $this->displayErorPage($type);
     }
 
@@ -78,8 +74,7 @@ class ErrorHandler
             $exception->getMessage(),
             $exception->getFile(),
             $exception->getLine(),
-            get_class($exception),
-            $exception->getTrace()
+            get_class($exception)
         );
         $this->displayErorPage($exception->getCode());
     }
