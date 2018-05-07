@@ -14,7 +14,6 @@ class Router
 
     public function buildRequest() : Request
     {
-        // Get host and path
         $host = $_SERVER['SERVER_NAME'] ? $_SERVER['SERVER_NAME'] . ':' . $_SERVER['SERVER_PORT'] : $_SERVER['HTTP_HOST'] ?? null;
         $method = $_SERVER['REQUEST_METHOD'];
         $uri = $_SERVER['REQUEST_URI'] ?? null;
@@ -22,7 +21,6 @@ class Router
         $queryStart = strpos($uri, '?');
         $path = $queryStart !== false ? substr($uri, 0, $queryStart) : $uri;
 
-        // Get matching route and build request object
         $routeKey = $this->getMatchingRoute($path, $method);
         $input = file_get_contents('php://input');
         $request = new Request(
@@ -50,12 +48,10 @@ class Router
         $pathElementsCount = count($pathElements);
 
         foreach ($this->routes as $routeKey => $parameters) {
-            $counter = 0;
             $key = 0;
             $routeElements = explode('/', $parameters['path']);
             $routeElementsCount = count($routeElements);
 
-            // Skip if method or elements count does not match
             if ($pathElementsCount !== $routeElementsCount) {
                 continue;
             }
@@ -64,7 +60,6 @@ class Router
             }
 
             foreach ($pathElements as $key => $element) {
-                // Skip if route path attribute does not satisfy regex requirements
                 if (strpos($routeElements[$key], '{') !== false) {
                     $attribute = rtrim(ltrim($routeElements[$key], '{'), '}');
                     if (!isset($parameters['requirements'][$attribute])) {
@@ -74,15 +69,11 @@ class Router
                     if (!preg_match('/^' . $pattern . '$/', $element)) {
                         continue(2);
                     }
-
-                // Skip if route element does not match path element
                 } elseif ($element !== $routeElements[$key]) {
                     continue(2);
                 }
 
-                // This is the last element of the path and path has same count as route (checked in the begining)
                 if ($key === $pathElementsCount - 1) {
-                    // Route has been found break all loops
                     $found = $routeKey;
                     break(2);
                 }
@@ -98,7 +89,6 @@ class Router
 
     private function getRouteAttributes(int $routeKey, string $path) : array
     {
-        // Set attributes based on route attributes names
         $attributes = [];
         $pathElements = explode('/', $path);
         $routeElements = explode('/', $this->routes[$routeKey]['path']);
