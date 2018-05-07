@@ -14,6 +14,6 @@ class ItemsCest
     public function tryToTest(AcceptanceTester $I)
     {
         $I->amOnPage('/');
-        $I->see('Tiny App');
+        $I->see('Fx bot');
     }
 }
