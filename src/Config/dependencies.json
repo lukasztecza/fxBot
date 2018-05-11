@@ -188,15 +188,13 @@
     "priceRepository": {
         "class": "TinyApp\\Model\\Repository\\PriceRepository",
         "inject": [
-            "@writeConnection@",
-            "@redisClient@"
+            "@writeConnection@"
         ]
     },
     "indicatorRepository": {
         "class": "TinyApp\\Model\\Repository\\IndicatorRepository",
         "inject": [
-            "@writeConnection@",
-            "@redisClient@"
+            "@writeConnection@"
         ]
     },
     "tradeRepository": {
