@@ -103,8 +103,10 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
             foreach ($cells as $cell) {
                 $dataChunk[] = $cell->nodeValue;
             }
+
             if (count($dataChunk) > 9) {
-                $instrument = $dataChunk[self::INSTRUMENT_KEY];
+                $instrument = trim($dataChunk[self::INSTRUMENT_KEY]);
+
                 if (!in_array($instrument, $this->instruments)) {
                     continue 1;
                 }
