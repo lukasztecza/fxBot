@@ -92,7 +92,6 @@
         "bankRelativeFactor": "%bankRelativeFactor%",
         "followTrend": "%followTrend%",
         "lastPricesPeriod": "%lastPricesPeriod%",
-        "useCached": "%useCached%",
         "instrument": "%instrument%"
     }
 }
