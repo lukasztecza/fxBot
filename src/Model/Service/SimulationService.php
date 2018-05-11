@@ -9,20 +9,21 @@ use TinyApp\Model\Repository\SimulationRepository;
 class SimulationService
 {
     private const INITIAL_TEST_BALANCE = 100;
-    private const SINGLE_TRANSACTION_RISK = 0.03;
+    private const SINGLE_TRANSACTION_RISK = 0.01;
     private const MAX_SPREAD = 0.0003;
     private const MAX_ITERATIONS_PER_STRATEGY = 4000000;
     private const SIMULATION_STEP = 'PT20M';
 
     private const SIMULATION_PERIODS = [
-        ['start' => '2010-03-01 00:00:00', 'end' => '2018-03-01 00:00:00'],
-        ['start' => '2011-03-01 00:00:00', 'end' => '2018-03-01 00:00:00'],
-        ['start' => '2012-03-01 00:00:00', 'end' => '2018-03-01 00:00:00'],
-        ['start' => '2013-03-01 00:00:00', 'end' => '2018-03-01 00:00:00'],
-        ['start' => '2014-03-01 00:00:00', 'end' => '2018-03-01 00:00:00'],
-        ['start' => '2015-03-01 00:00:00', 'end' => '2018-03-01 00:00:00'],
-        ['start' => '2016-03-01 00:00:00', 'end' => '2018-03-01 00:00:00'],
-        ['start' => '2017-03-01 00:00:00', 'end' => '2018-03-01 00:00:00']
+        ['start' => '2010-03-01 00:00:00', 'end' => '2011-03-01 00:00:00'],
+        ['start' => '2011-03-01 00:00:00', 'end' => '2012-03-01 00:00:00'],
+        ['start' => '2012-03-01 00:00:00', 'end' => '2013-03-01 00:00:00'],
+        ['start' => '2013-03-01 00:00:00', 'end' => '2014-03-01 00:00:00'],
+        ['start' => '2014-03-01 00:00:00', 'end' => '2015-03-01 00:00:00'],
+        ['start' => '2015-03-01 00:00:00', 'end' => '2016-03-01 00:00:00'],
+        ['start' => '2016-03-01 00:00:00', 'end' => '2017-03-01 00:00:00'],
+        ['start' => '2017-03-01 00:00:00', 'end' => '2018-03-01 00:00:00'],
+        ['start' => '2010-03-01 00:00:00', 'end' => '2018-03-01 00:00:00']
     ];
 
     private const FORCE_INSTRUMENT = 'EUR_USD';
@@ -44,25 +45,24 @@ class SimulationService
         'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern',
         'TinyApp\Model\Strategy\RigidFundamentalTrendingStrategyPattern'
     ];
-    private const USE_CACHED = false;
 
     private const CHANGING_PARAMETERS = [
-        'rigidStopLoss' => [0.0010, 0.0020, 0.0030],
-        'takeProfitMultiplier' => [1,2,3],
-        'longFastAverage' => [200, 400],
-        'longSlowAverage' => [500, 1000],
-        'extremumRange' => [24],
-        'signalFastAverage' => [30 ,40],
-        'signalSlowAverage' => [50, 60],
+        'rigidStopLoss' => [0.0010],
+        'takeProfitMultiplier' => [7],
+        'longFastAverage' => [100],
+        'longSlowAverage' => [200],
+        'extremumRange' => [12],
+        'signalFastAverage' => [10],
+        'signalSlowAverage' => [25],
         'averageTrend' => [1000],
-        'bankFactor' => [1, 2],
-        'inflationFactor' => [1, 2],
-        'tradeFactor' => [1, 2],
-        'companiesFactor' => [1, 2],
-        'salesFactor' => [1, 2],
-        'unemploymentFactor' => [1, 2],
-        'bankRelativeFactor' => [1, 2],
-        'followTrend' => [0, 1],
+        'bankFactor' => [1],
+        'inflationFactor' => [1],
+        'tradeFactor' => [1],
+        'companiesFactor' => [1],
+        'salesFactor' => [1],
+        'unemploymentFactor' => [1],
+        'bankRelativeFactor' => [1],
+        'followTrend' => [0],
         'lastPricesPeriod' => ['P20D']
     ];
 
@@ -118,7 +118,7 @@ class SimulationService
                     $currentDate = (new \DateTime($currentDate, new \DateTimeZone('UTC')));
                     $currentDate = $currentDate->add(new \DateInterval(self::SIMULATION_STEP))->format('Y-m-d H:i:s');
 
-                    $prices = $this->priceService->getInitialPrices($this->priceInstruments, $currentDate, self::USE_CACHED);
+                    $prices = $this->priceService->getInitialPrices($this->priceInstruments, $currentDate);
                     $prices = $this->getCurrentPrices($prices);
                     if (empty($prices)) {
                         return [
@@ -224,16 +224,16 @@ class SimulationService
 
         foreach (self::STRATEGIES_CLASS_FOR_SIMULATION as $strategy) {
             if (in_array($strategy, self::INSTRUMENT_INDEPENDENT_STRATEGIES)) {
-                $params = ['instrument' => 'VARIED', 'useCached' => self::USE_CACHED];
+                $params = ['instrument' => 'VARIED'];
                 reset($changingParameters);
                 $this->nestIteration($counter, $strategies, $changingParameters, $lastKey, $params, $strategy);
             } elseif(!is_null(self::FORCE_INSTRUMENT)) {
-                $params = ['instrument' => self::FORCE_INSTRUMENT, 'useCached' => self::USE_CACHED];
+                $params = ['instrument' => self::FORCE_INSTRUMENT];
                 reset($changingParameters);
                 $this->nestIteration($counter, $strategies, $changingParameters, $lastKey, $params, $strategy);
             } else {
                 foreach ($this->priceInstruments as $instrument) {
-                    $params = ['instrument' => $instrument, 'useCached' => self::USE_CACHED];
+                    $params = ['instrument' => $instrument];
                     reset($changingParameters);
                     $this->nestIteration($counter, $strategies, $changingParameters, $lastKey, $params, $strategy);
                 }

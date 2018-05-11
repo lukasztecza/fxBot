@@ -9,14 +9,12 @@ class RigidTrendingStrategy extends RigidStrategyAbstract
 {
     private $priceService;
     private $extremumRange;
-    private $useCached;
     private $lastPricesPeriod;
 
     public function __construct(array $instruments, PriceService $priceService, IndicatorService $indicatorService, $params)
     {
         if (
             !isset($params['extremumRange']) ||
-            !isset($params['useCached']) ||
             !isset($params['lastPricesPeriod']) ||
             !isset($params['rigidStopLoss']) ||
             !isset($params['takeProfitMultiplier']) ||
@@ -27,7 +25,6 @@ class RigidTrendingStrategy extends RigidStrategyAbstract
 
         $this->priceService = $priceService;
         $this->extremumRange = $params['extremumRange'];
-        $this->useCached = $params['useCached'];
         $this->lastPricesPeriod = $params['lastPricesPeriod'];
 
         parent::__construct($params['rigidStopLoss'], $params['takeProfitMultiplier'], $params['instrument']);
@@ -35,7 +32,7 @@ class RigidTrendingStrategy extends RigidStrategyAbstract
 
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
     {
-        $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, $this->lastPricesPeriod, $currentDateTime, $this->useCached);
+        $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, $this->lastPricesPeriod, $currentDateTime);
         return $this->getChannelDirection($lastPrices, $this->extremumRange);
     }
 }
