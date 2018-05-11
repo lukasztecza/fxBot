@@ -12,7 +12,6 @@ class RigidAverageDistanceDeviationStrategy extends RigidStrategyAbstract
     private $longSlowAverage;
     private $signalFastAverage;
     private $signalSlowAverage;
-    private $useCached;
     private $followTrend;
     private $lastPricesPeriod;
 
@@ -23,7 +22,6 @@ class RigidAverageDistanceDeviationStrategy extends RigidStrategyAbstract
             !isset($params['longSlowAverage']) ||
             !isset($params['signalFastAverage']) ||
             !isset($params['signalSlowAverage']) ||
-            !isset($params['useCached']) ||
             !isset($params['followTrend']) ||
             !isset($params['lastPricesPeriod']) ||
             !isset($params['rigidStopLoss']) ||
@@ -38,7 +36,6 @@ class RigidAverageDistanceDeviationStrategy extends RigidStrategyAbstract
         $this->longSlowAverage = $params['longSlowAverage'];
         $this->signalFastAverage = $params['signalFastAverage'];
         $this->signalSlowAverage = $params['signalSlowAverage'];
-        $this->useCached = $params['useCached'];
         $this->followTrend = $params['followTrend'];
         $this->lastPricesPeriod = $params['lastPricesPeriod'];
 
@@ -47,7 +44,7 @@ class RigidAverageDistanceDeviationStrategy extends RigidStrategyAbstract
 
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
     {
-        $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, $this->lastPricesPeriod, $currentDateTime, $this->useCached);
+        $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, $this->lastPricesPeriod, $currentDateTime);
         $longAverageDirection = $this->getLongAverageDirection($lastPrices, $this->longFastAverage, $this->longSlowAverage, $this->followTrend);
         $deviationDirection = $this->getDeviationDirection($lastPrices, $this->signalFastAverage, $this->signalSlowAverage);
 

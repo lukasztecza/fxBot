@@ -11,7 +11,6 @@ class RigidAverageTrendingStrategy extends RigidStrategyAbstract
     private $extremumRange;
     private $longSlowAverage;
     private $followTrend;
-    private $useCached;
     private $lastPricesPeriod;
 
     public function __construct(array $instruments, PriceService $priceService, IndicatorService $indicatorService, $params)
@@ -20,7 +19,6 @@ class RigidAverageTrendingStrategy extends RigidStrategyAbstract
             !isset($params['extremumRange']) ||
             !isset($params['longSlowAverage']) ||
             !isset($params['followTrend']) ||
-            !isset($params['useCached']) ||
             !isset($params['lastPricesPeriod']) ||
             !isset($params['rigidStopLoss']) ||
             !isset($params['takeProfitMultiplier']) ||
@@ -33,7 +31,6 @@ class RigidAverageTrendingStrategy extends RigidStrategyAbstract
         $this->extremumRange = $params['extremumRange'];
         $this->longSlowAverage = $params['longSlowAverage'];
         $this->followTrend = $params['followTrend'];
-        $this->useCached = $params['useCached'];
         $this->lastPricesPeriod = $params['lastPricesPeriod'];
 
         parent::__construct($params['rigidStopLoss'], $params['takeProfitMultiplier'], $params['instrument']);
@@ -41,7 +38,7 @@ class RigidAverageTrendingStrategy extends RigidStrategyAbstract
 
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
     {
-        $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, $this->lastPricesPeriod, $currentDateTime, $this->useCached);
+        $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, $this->lastPricesPeriod, $currentDateTime);
         $average = $this->getAveragesByPeriods($lastPrices, ['current' => 1, 'long' => $this->longSlowAverage]);
         $channelDirection = $this->getChannelDirection($lastPrices, $this->extremumRange);
 

@@ -13,7 +13,6 @@ class RigidLongAverageTrendingDeviationStrategy extends RigidStrategyAbstract
     private $extremumRange;
     private $signalFastAverage;
     private $signalSlowAverage;
-    private $useCached;
     private $lastPricesPeriod;
 
     public function __construct(array $instruments, PriceService $priceService, IndicatorService $indicatorService, $params)
@@ -24,7 +23,6 @@ class RigidLongAverageTrendingDeviationStrategy extends RigidStrategyAbstract
             !isset($params['extremumRange']) ||
             !isset($params['signalFastAverage']) ||
             !isset($params['signalSlowAverage']) ||
-            !isset($params['useCached']) ||
             !isset($params['lastPricesPeriod']) ||
             !isset($params['rigidStopLoss']) ||
             !isset($params['takeProfitMultiplier']) ||
@@ -39,7 +37,6 @@ class RigidLongAverageTrendingDeviationStrategy extends RigidStrategyAbstract
         $this->extremumRange = $params['extremumRange'];
         $this->signalFastAverage = $params['signalFastAverage'];
         $this->signalSlowAverage = $params['signalSlowAverage'];
-        $this->useCached = $params['useCached'];
         $this->lastPricesPeriod = $params['lastPricesPeriod'];
 
         parent::__construct($params['rigidStopLoss'], $params['takeProfitMultiplier'], $params['instrument']);
@@ -47,7 +44,7 @@ class RigidLongAverageTrendingDeviationStrategy extends RigidStrategyAbstract
 
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
     {
-        $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, $this->lastPricesPeriod, $currentDateTime, $this->useCached);
+        $lastPrices = $this->priceService->getLastPricesByPeriod($selectedInstrument, $this->lastPricesPeriod, $currentDateTime);
         $longAverageDirection = $this->getLongAverageDirection($lastPrices, $this->longFastAverage, $this->longSlowAverage, false);
         $channelDirection = $this->getChannelDirection($lastPrices, $this->extremumRange);
         $deviationDirection = $this->getDeviationDirection($lastPrices, $this->signalFastAverage, $this->signalSlowAverage);
