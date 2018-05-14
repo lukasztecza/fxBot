@@ -122,7 +122,7 @@ fi
 
 cd /vagrant
 
-# Create tables needed by tinyCms
+# Create tables needed by app
 mysql -u "$MYSQL_USER" -p"$MYSQL_USER_PASSWORD" -h $MYSQL_HOST $MYSQL_DATABASE < db.sql
 
 # Restart apache
