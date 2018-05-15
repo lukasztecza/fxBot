@@ -82,6 +82,10 @@ class Project
 
     private function getParameters() : array
     {
+        if (!file_exists(self::CONFIG_PATH . 'parameters.json')) {
+            throw new \Exception('Could not find parameters.json file in ' . self::CONFIG_PATH);
+        }
+
         $parameters = json_decode(file_get_contents(self::CONFIG_PATH . 'parameters.json'), true);
         $settings = file_get_contents(self::CONFIG_PATH . 'settings.json');
 
