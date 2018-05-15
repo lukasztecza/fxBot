@@ -10,7 +10,7 @@ MYSQL_USER=user
 MYSQL_USER_PASSWORD=pass
 MYSQL_HOST=localhost
 MYSQL_DATABASE=fx_bot
-PHP_VERSION=7.1
+PHP_VERSION=7.2
 
 # Export variable to fix "dpkg-preconfigure: unable to re-open..." error
 export DEBIAN_FRONTEND=noninteractive
