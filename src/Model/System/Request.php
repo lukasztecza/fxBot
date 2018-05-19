@@ -158,7 +158,7 @@ class Request
         return $this->routedAction;
     }
 
-    private function getFromArray(array $combinedKeys, array $arrayToFilter)
+    private function getFromArray(array $combinedKeys, array $arrayToFilter) : array
     {
         $return = [];
         foreach ($combinedKeys as $combinedKey) {
