@@ -138,6 +138,12 @@
             "@simulationRepository@"
         ]
     },
+    "learningService": {
+        "class": "TinyApp\\Model\\Service\\LearningService",
+        "inject": [
+            "@simulationService@"
+        ]
+    },
     "strategyFactory": {
         "class": "TinyApp\\Model\\Strategy\\StrategyFactory",
         "inject": [
@@ -250,6 +256,12 @@
         "class": "TinyApp\\Model\\Command\\SimulationCommand",
         "inject": [
             "@simulationService@"
+        ]
+    },
+    "learningCommand": {
+        "class": "TinyApp\\Model\\Command\\LearningCommand",
+        "inject": [
+            "@learningService@"
         ]
     }
 }
