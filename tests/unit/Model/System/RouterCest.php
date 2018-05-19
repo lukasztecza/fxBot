@@ -56,7 +56,7 @@ class RouterCest
         $I->assertEquals($example[2], $result);
     }
 
-    public function keyPathDataProvider()
+    private function keyPathDataProvider()
     {
         return [
             [0, '/items/5', ['id' => 5]],
@@ -74,7 +74,7 @@ class RouterCest
         $I->assertEquals($example[2], $result);
     }
 
-    public function pathMethodDataProvider()
+    private function pathMethodDataProvider()
     {
         return [
             ['/items/5', 'GET', 0],
