@@ -3,6 +3,8 @@ namespace TinyApp\Model\Service;
 
 use TinyApp\Model\Service\PriceService;
 use TinyApp\Model\Strategy\StrategyFactory;
+use TinyApp\Model\Strategy\Order;
+use TinyApp\Model\Strategy\StrategyInterface;
 use TinyApp\Model\Repository\TradeRepository;
 use TinyApp\Model\Repository\SimulationRepository;
 
@@ -47,23 +49,23 @@ class SimulationService
     ];
 
     private const CHANGING_PARAMETERS = [
-        'rigidStopLoss' => [0.0010],
-        'takeProfitMultiplier' => [7],
-        'longFastAverage' => [100],
-        'longSlowAverage' => [200],
-        'extremumRange' => [12],
-        'signalFastAverage' => [10],
-        'signalSlowAverage' => [25],
-        'averageTrend' => [1000],
-        'bankFactor' => [1],
-        'inflationFactor' => [1],
-        'tradeFactor' => [1],
-        'companiesFactor' => [1],
-        'salesFactor' => [1],
-        'unemploymentFactor' => [1],
-        'bankRelativeFactor' => [1],
-        'followTrend' => [0],
-        'lastPricesPeriod' => ['P20D']
+        'rigidStopLoss' => [0.0010, 0.0020, 0.040],
+        'takeProfitMultiplier' => [1,2,3],
+        'longFastAverage' => [50, 100, 150],
+        'longSlowAverage' => [200, 300, 400],
+        'extremumRange' => [12, 15, 20],
+        'signalFastAverage' => [25, 50, 75],
+        'signalSlowAverage' => [100, 125, 150],
+        'averageTrend' => [100, 500, 1000],
+        'bankFactor' => [1,2,3],
+        'inflationFactor' => [1,2,3],
+        'tradeFactor' => [1,2,3],
+        'companiesFactor' => [1,2,3],
+        'salesFactor' => [1,2,3],
+        'unemploymentFactor' => [1,2,3],
+        'bankRelativeFactor' => [1,2,3],
+        'followTrend' => [0,1],
+        'lastPricesPeriod' => ['P60D']
     ];
 
     private $priceInstruments;
@@ -71,6 +73,7 @@ class SimulationService
     private $strategyFactory;
     private $tradeRepository;
     private $simulationRepository;
+    private $strategiesForTest;
 
     public function __construct(
         array $priceInstruments,
@@ -84,11 +87,13 @@ class SimulationService
         $this->strategyFactory = $strategyFactory;
         $this->tradeRepository = $tradeRepository;
         $this->simulationRepository = $simulationRepository;
+        $this->strategiesForTest = $this->buildStrategiesForTest();
     }
 
     public function run() : array
     {
-       foreach (self::SIMULATION_PERIODS as $simulationPeriod) {
+        $simulationIds = [];
+        foreach (self::SIMULATION_PERIODS as $simulationPeriod) {
             foreach ($this->getStrategiesForTest() as $settings) {
                 echo PHP_EOL . '=========================================================================================================' . PHP_EOL;
                 echo 'Simulation for ' . $settings['className'] . (
@@ -123,52 +128,17 @@ class SimulationService
                     if (empty($prices)) {
                         return [
                             'status' => false,
-                            'message' => 'Could not get current prices for ' . var_export($settings['className'], true)
+                            'message' => 'Could not get current prices'
                         ];
                     }
 
-                    if (is_null($activeOrder)) {
-                        try {
-                            $activeOrder = $strategy->getOrder($prices, $balance, $currentDate);
-                            if (!empty($activeOrder)) {
-                                echo $currentDate . ' balance ' . str_pad($this->formatBalance($balance), 10) .
-                                    ($activeOrder->getUnits() > 0 ? 'Buy ' : 'Sell') . ' at price on ' . $activeOrder->getInstrument() .
-                                    ' ' . str_pad($activeOrder->getPrice(), 10)
-                                ;
-                                $executedTrades++;
-                            }
-                        } catch(\Throwable $e) {
-                            return [
-                                'status' => false,
-                                'message' => 'Could not create order due to ' . $e->getMessage()
-                            ];
-                        }
-                    } elseif (
-                        ($activeOrder->getUnits() > 0 && $activeOrder->getTakeProfit() < $prices[$activeOrder->getInstrument()]['bid']) ||
-                        ($activeOrder->getUnits() < 0 && $activeOrder->getTakeProfit() > $prices[$activeOrder->getInstrument()]['ask'])
-                    ) {
-                        $balance = $balance + ($balance * self::SINGLE_TRANSACTION_RISK * (
-                            abs($activeOrder->getPrice() - $activeOrder->getTakeProfit()) / abs($activeOrder->getPrice() - $activeOrder->getStopLoss())
-                        ));
-                        echo
-                            'PROFIT ' . str_pad($this->formatBalance($balance), 10) . ' on ' . $currentDate .
-                            ' due to ask ' . str_pad($prices[$activeOrder->getInstrument()]['ask'], 10) .
-                            ' bid ' . str_pad($prices[$activeOrder->getInstrument()]['bid'], 10) . PHP_EOL
-                        ;
-                        $profits++;
-                        $activeOrder = null;
-                    } elseif (
-                        ($activeOrder->getUnits() > 0 && $activeOrder->getStopLoss() > $prices[$activeOrder->getInstrument()]['bid']) ||
-                        ($activeOrder->getUnits() < 0 && $activeOrder->getStopLoss() < $prices[$activeOrder->getInstrument()]['ask'])
-                    ) {
-                        $balance = $balance - ($balance * self::SINGLE_TRANSACTION_RISK);
-                        echo
-                            'LOSS   ' . str_pad($this->formatBalance($balance), 10) . ' on ' . $currentDate .
-                            ' due to ask ' . str_pad($prices[$activeOrder->getInstrument()]['ask'], 10) .
-                            ' bid ' . str_pad($prices[$activeOrder->getInstrument()]['bid'], 10) . PHP_EOL
-                        ;
-                        $losses++;
-                        $activeOrder = null;
+                    if (!$this->handleOrder(
+                        $activeOrder, $strategy, $prices, $balance, $currentDate, $executedTrades, $profits, $losses
+                    )) {
+                        return [
+                            'status' => false,
+                            'message' => 'Could not create order'
+                        ];
                     }
 
                     if ($minBalance > $balance) {
@@ -180,29 +150,9 @@ class SimulationService
                 }
                 echo PHP_EOL;
 
-                try {
-                    $parameters = $settings['params'];
-                    $parameters['strategy'] = substr($settings['className'], strrpos($settings['className'], '\\') + 1);
-                    $parameters['singleTransactionRisk'] = self::SINGLE_TRANSACTION_RISK;
-                    $instrument = $settings['params']['instrument'];
-                    if (in_array($settings['className'], self::INSTRUMENT_INDEPENDENT_STRATEGIES)) {
-                        $instrument = 'VARIED';
-                    }
-                    $this->simulationRepository->saveSimulation([
-                        'instrument' => $instrument,
-                        'parameters' => $parameters,
-                        'finalBalance' => $balance,
-                        'minBalance' => $minBalance,
-                        'maxBalance' => $maxBalance,
-                        'profits' => $profits,
-                        'losses' => $losses,
-                        'simulationStart' => $simulationPeriod['start'],
-                        'simulationEnd' => $currentDate,
-                        'datetime' => (new \DateTime(null, new \DateTimeZone('UTC')))->format('Y-m-d H:i:s'),
-                    ]);
-                } catch (\Throwable $e) {
-                    trigger_error('Failed to save simulation result with message ' . $e->getMessage(), E_USER_NOTICE);
-
+                if (!$this->saveSimulationResult(
+                    $settings, $balance, $minBalance, $maxBalance, $profits, $losses, $simulationPeriod['start'], $currentDate, $simulationIds
+                )) {
                     return [
                         'status' => false,
                         'message' => 'Could not save simulation result'
@@ -211,10 +161,25 @@ class SimulationService
             }
         }
 
-        return ['status' => true, 'message' => 'simulation finished'];
+        return ['status' => true, 'message' => 'simulation finished', 'simulationIds' => $simulationIds];
+    }
+
+    public function setStrategiesForTest(array $strategiesForTest) : void
+    {
+        foreach ($strategiesForTest as $strategy) {
+            if (empty($strategy['className']) || empty($strategy['params']['instrument'])) {
+                throw new \Exception('Wrong strategies for test');
+            }
+        }
+        $this->strategiesForTest = $strategiesForTest;
     }
 
     private function getStrategiesForTest() : array
+    {
+        return $this->strategiesForTest;
+    }
+
+    private function buildStrategiesForTest() : array
     {
         $strategies = [];
         $counter = 0;
@@ -299,5 +264,101 @@ class SimulationService
     private function formatBalance(float $balance) : string
     {
         return substr($balance, 0, strpos($balance, '.') + 3) . (strpos($balance, '.') === false ? '.00' : '');
+    }
+
+    private function handleOrder(
+        Order &$activeOrder = null,
+        StrategyInterface $strategy,
+        array $prices,
+        float &$balance,
+        string $currentDate,
+        int &$executedTrades,
+        int &$profits,
+        int &$losses
+    ) : bool {
+        if (is_null($activeOrder)) {
+            try {
+                $activeOrder = $strategy->getOrder($prices, $balance, $currentDate);
+                if (!empty($activeOrder)) {
+                    echo $currentDate . ' balance ' . str_pad($this->formatBalance($balance), 10) .
+                        ($activeOrder->getUnits() > 0 ? 'Buy ' : 'Sell') . ' at price on ' . $activeOrder->getInstrument() .
+                        ' ' . str_pad($activeOrder->getPrice(), 10)
+                    ;
+                    $executedTrades++;
+                }
+            } catch(\Throwable $e) {
+                trigger_error('Could not create order due to ' . $e->getMessage(), E_USER_NOTICE);
+
+                return false;
+            }
+        } elseif (
+            ($activeOrder->getUnits() > 0 && $activeOrder->getTakeProfit() < $prices[$activeOrder->getInstrument()]['bid']) ||
+            ($activeOrder->getUnits() < 0 && $activeOrder->getTakeProfit() > $prices[$activeOrder->getInstrument()]['ask'])
+        ) {
+            $balance = $balance + ($balance * self::SINGLE_TRANSACTION_RISK * (
+                abs($activeOrder->getPrice() - $activeOrder->getTakeProfit()) / abs($activeOrder->getPrice() - $activeOrder->getStopLoss())
+            ));
+            echo
+                'PROFIT ' . str_pad($this->formatBalance($balance), 10) . ' on ' . $currentDate .
+                ' due to ask ' . str_pad($prices[$activeOrder->getInstrument()]['ask'], 10) .
+                ' bid ' . str_pad($prices[$activeOrder->getInstrument()]['bid'], 10) . PHP_EOL
+            ;
+            $profits++;
+            $activeOrder = null;
+        } elseif (
+            ($activeOrder->getUnits() > 0 && $activeOrder->getStopLoss() > $prices[$activeOrder->getInstrument()]['bid']) ||
+            ($activeOrder->getUnits() < 0 && $activeOrder->getStopLoss() < $prices[$activeOrder->getInstrument()]['ask'])
+        ) {
+            $balance = $balance - ($balance * self::SINGLE_TRANSACTION_RISK);
+            echo
+                'LOSS   ' . str_pad($this->formatBalance($balance), 10) . ' on ' . $currentDate .
+                ' due to ask ' . str_pad($prices[$activeOrder->getInstrument()]['ask'], 10) .
+                ' bid ' . str_pad($prices[$activeOrder->getInstrument()]['bid'], 10) . PHP_EOL
+            ;
+            $losses++;
+            $activeOrder = null;
+        }
+
+        return true;
+    }
+
+    private function saveSimulationResult(
+        array $settings,
+        float $balance,
+        float $minBalance,
+        float $maxBalance,
+        int $profits,
+        int $losses,
+        string $simulationStart,
+        string $simulationEnd,
+        array &$simulationIds
+    ) : bool {
+        try {
+            $parameters = $settings['params'];
+            $parameters['strategy'] = substr($settings['className'], strrpos($settings['className'], '\\') + 1);
+            $parameters['singleTransactionRisk'] = self::SINGLE_TRANSACTION_RISK;
+            $instrument = $settings['params']['instrument'];
+            if (in_array($settings['className'], self::INSTRUMENT_INDEPENDENT_STRATEGIES)) {
+                $instrument = 'VARIED';
+            }
+            $simulationIds[] = $this->simulationRepository->saveSimulation([
+                'instrument' => $instrument,
+                'parameters' => $parameters,
+                'finalBalance' => $balance,
+                'minBalance' => $minBalance,
+                'maxBalance' => $maxBalance,
+                'profits' => $profits,
+                'losses' => $losses,
+                'simulationStart' => $simulationStart,
+                'simulationEnd' => $simulationEnd,
+                'datetime' => (new \DateTime(null, new \DateTimeZone('UTC')))->format('Y-m-d H:i:s'),
+            ]);
+        } catch (\Throwable $e) {
+            trigger_error('Failed to save simulation result with message ' . $e->getMessage(), E_USER_NOTICE);
+
+            return false;
+        }
+
+        return true;
     }
 }
