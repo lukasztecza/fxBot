@@ -35,9 +35,8 @@ class StoreInMemoryCommand implements CommandInterface
     public function execute() : CommandResult
     {
         $currentDate = self::START_DATE;
-        $counter = 0;
-        while ($counter < self::MAX_ITERATIONS_PER_STRATEGY && $currentDate < self::END_DATE) {
-            $counter++;
+        $counter = 1;
+        while ($counter++ < self::MAX_ITERATIONS_PER_STRATEGY && $currentDate < self::END_DATE) {
             $currentDate = (new \DateTime($currentDate, new \DateTimeZone('UTC')));
             if ($currentDate->format('d H:i:s') === '01 00:00:00') {
                 echo $currentDate->format('Y-m-d') . PHP_EOL;

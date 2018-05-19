@@ -12,7 +12,7 @@ class SimulationService
 {
     private const INITIAL_TEST_BALANCE = 100;
     private const SINGLE_TRANSACTION_RISK = 0.01;
-    private const MAX_SPREAD = 0.0003;
+    private const MAX_SPREAD = 0.0004;
     private const MAX_ITERATIONS_PER_STRATEGY = 4000000;
     private const SIMULATION_STEP = 'PT20M';
 
@@ -49,21 +49,21 @@ class SimulationService
     ];
 
     private const CHANGING_PARAMETERS = [
-        'rigidStopLoss' => [0.0010, 0.0020, 0.040],
-        'takeProfitMultiplier' => [1,2,3],
-        'longFastAverage' => [50, 100, 150],
-        'longSlowAverage' => [200, 300, 400],
-        'extremumRange' => [12, 15, 20],
-        'signalFastAverage' => [25, 50, 75],
-        'signalSlowAverage' => [100, 125, 150],
-        'averageTrend' => [100, 500, 1000],
-        'bankFactor' => [1,2,3],
-        'inflationFactor' => [1,2,3],
-        'tradeFactor' => [1,2,3],
-        'companiesFactor' => [1,2,3],
-        'salesFactor' => [1,2,3],
-        'unemploymentFactor' => [1,2,3],
-        'bankRelativeFactor' => [1,2,3],
+        'rigidStopLoss' => [0.0010, 0.0020],
+        'takeProfitMultiplier' => [1,2],
+        'longFastAverage' => [50, 100],
+        'longSlowAverage' => [200, 300],
+        'extremumRange' => [12, 15],
+        'signalFastAverage' => [25, 50],
+        'signalSlowAverage' => [100, 125],
+        'averageTrend' => [100, 500],
+        'bankFactor' => [1],
+        'inflationFactor' => [1],
+        'tradeFactor' => [1],
+        'companiesFactor' => [1],
+        'salesFactor' => [1],
+        'unemploymentFactor' => [1],
+        'bankRelativeFactor' => [1,2],
         'followTrend' => [0,1],
         'lastPricesPeriod' => ['P60D']
     ];
@@ -87,7 +87,7 @@ class SimulationService
         $this->strategyFactory = $strategyFactory;
         $this->tradeRepository = $tradeRepository;
         $this->simulationRepository = $simulationRepository;
-        $this->strategiesForTest = $this->buildStrategiesForTest();
+//        $this->strategiesForTest = $this->buildStrategiesForTest();
     }
 
     public function run() : array
@@ -104,15 +104,14 @@ class SimulationService
 
                 $balance = self::INITIAL_TEST_BALANCE;
                 $currentDate = $simulationPeriod['start'];
-                $counter = 0;
+                $counter = 1;
                 $executedTrades = 0;
                 $minBalance = self::INITIAL_TEST_BALANCE;
                 $maxBalance = 0;
                 $profits = 0;
                 $losses = 0;
                 $activeOrder = null;
-                while ($counter < self::MAX_ITERATIONS_PER_STRATEGY && $currentDate < $simulationPeriod['end']) {
-                    $counter++;
+                while ($counter++ < self::MAX_ITERATIONS_PER_STRATEGY && $currentDate < $simulationPeriod['end']) {
                     if ($balance < self::INITIAL_TEST_BALANCE / 5) {
                         $balance = 0;
                         break 1;
@@ -162,6 +161,28 @@ class SimulationService
         }
 
         return ['status' => true, 'message' => 'simulation finished', 'simulationIds' => $simulationIds];
+    }
+
+    public function getInitialTestBalance() : float
+    {
+        return self::INITIAL_TEST_BALANCE;
+    }
+
+    public function getSimulationsSummaryByIds(array $ids) : array
+    {
+        try {
+            $result = $this->simulationRepository->getSimulationsSummaryByIds($ids);
+            $summary = array_pop($result);
+            if (empty($summary)) {
+                return [];
+            }
+
+            return $summary;
+        } catch (\Throwable $e) {
+            trigger_error('Failed to get simulations summary with message ' . $e->getMessage(), E_USER_NOTICE);
+
+            return [];
+        }
     }
 
     public function setStrategiesForTest(array $strategiesForTest) : void
