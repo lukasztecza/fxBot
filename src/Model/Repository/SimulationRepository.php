@@ -59,4 +59,30 @@ class SimulationRepository extends RepositoryAbstract
 
         return (int)$affectedId;
     }
+
+    public function getSimulationsSummaryByIds(array $ids) : array
+    {
+        $params = [];
+        $placeholders = $this->getInPlaceholdersIncludingParams($ids, $params);
+
+        return $this->getRead()->fetch(
+            "SELECT
+                dummy.`params`,
+                SUM(dummy.`final_balance`) total,
+                MAX(dummy.`final_balance`) max_balance,
+                MIN(dummy.`final_balance`) min_balance,
+                GROUP_CONCAT(dummy.id SEPARATOR ',') ids
+            FROM (
+                SELECT s.`id`, s.`final_balance`, s.`simulation_start`, s.`simulation_end`, GROUP_CONCAT(sp.`value` SEPARATOR ',') params
+                FROM `simulation` s
+                JOIN `simulation_parameter` sp ON sp.`simulation_id` = s.`id`
+                WHERE s.`id` IN (" . $placeholders . ")
+                GROUP BY s.`id`
+                ORDER BY s.`simulation_start`
+            ) dummy
+            GROUP BY params
+            ORDER BY total",
+            $params
+        );
+    }
 }
