@@ -2,98 +2,125 @@
 namespace TinyApp\Model\Service;
 
 use TinyApp\Model\Service\SimulationService;
+use TinyApp\Model\Repository\LearningRepository;
 
 class LearningService
 {
     private const MAX_LEARNING_ITERATIONS = 20;
-    private const EXPERT_LEVEL = 12;
 
     private const STRATEGY_TO_LEARN = 'TinyApp\Model\Strategy\RigidAverageDistanceDeviationStrategy';
     private const INITIAL_PARAMS = [
-        'rigidStopLoss' => 0.003,
+        'rigidStopLoss' => 0.0020,
         'takeProfitMultiplier' => 1,
-        'signalFastAverage' => 20,
+        'signalFastAverage' => 10,
         'signalSlowAverage' => 50,
-        'longFastAverage' => 400,
+        'longFastAverage' => 100,
         'longSlowAverage' => 500
     ];
     private const INSTRUMENT = 'EUR_USD';
 
     private const PARAM_MODIFICATION_FACTOR = 1.1;
+    private const PARAM_MODIFICATION_FACTOR_CHANGE = 0.1;
+    private const PARAM_MODIFICATION_FACTOR_LIMIT = 2;
 
     private $simulationService;
+    private $learningRepository;
 
-    public function __construct(SimulationService $simulationService)
+    public function __construct(SimulationService $simulationService, LearningRepository $learningRepository)
     {
         $this->simulationService = $simulationService;
+        $this->learningRepository = $learningRepository;
     }
 
     public function learn() : array
     {
+        $pack = (new \DateTime(null, new \DateTimeZone('UTC')))->format('YmdHis') . bin2hex(random_bytes(8));
         $counter = 1;
         $params = self::INITIAL_PARAMS;
+        $noImprovementLimit = count($params) * 2;
         end($params);
         $lastParam = key($params);
         reset($params);
         $currentParam = key($params);
-        $lastSimulationIds = [];
+        $bestSimulationIds = [];
         $currentSimulationIds = [];
-        $lastSummary = [];
+        $bestSummary = [];
         $currentSummary = [];
         $increase = 1;
-        $noChangeCounter = 0;
+        $noImprovementCounter = 0;
+        $paramModificationFactor = self::PARAM_MODIFICATION_FACTOR;
 
         while ($counter++ <= self::MAX_LEARNING_ITERATIONS) {
             $this->simulationService->setStrategiesForTest($this->getStrategiesForTest($params));
             $result = $this->simulationService->run();
 
             if (empty($currentSimulationIds)) {
-                $lastSimulationIds = $result['simulationIds'];
-            } else {
-                $lastSimulationIds = $currentSimulationIds;
+                $bestSimulationIds = $result['simulationIds'];
             }
             $currentSimulationIds = $result['simulationIds'];
 
-            $lastSummary = $this->simulationService->getSimulationsSummaryByIds($lastSimulationIds);
+            $bestSummary = $this->simulationService->getSimulationsSummaryByIds($bestSimulationIds);
             $currentSummary = $this->simulationService->getSimulationsSummaryByIds($currentSimulationIds);
 
+            echo PHP_EOL;
             switch (true) {
                 case (
-                    $lastSummary['total'] < $currentSummary['total'] &&
-                    $currentSummary['min_balance'] > $this->simulationService->getInitialTestBalance()
+                    $bestSummary['total'] < $currentSummary['total'] &&
+                    $currentSummary['minBalance'] > $this->simulationService->getInitialTestBalance()
                 ):
-                    echo 'IMPROVEMENT' . PHP_EOL;
-                    $this->modifyParamsForStrategy($params, $currentParam, self::PARAM_MODIFICATION_FACTOR, $increase);
-                    $noChangeCounter = 0;
-                    break 1;
-                case (
-                    $lastSummary['total'] > $currentSummary['total'] ||
-                    $currentSummary['min_balance'] < $this->simulationService->getInitialTestBalance()
-                ):
-                    echo 'DETERIORATION' . PHP_EOL;
-                    $this->modifyParamsForStrategy($params, $currentParam, self::PARAM_MODIFICATION_FACTOR, -$increase);
-                    $this->selectNextParam($currentParam, $lastParam, $params, $increase);
-                    $this->modifyParamsForStrategy($params, $currentParam, self::PARAM_MODIFICATION_FACTOR, $increase);
-                    $noChangeCounter = 0;
-                    break 1;
-                default;
-                    echo 'NO CHANGE' . PHP_EOL;
-                    $this->selectNextParam($currentParam, $lastParam, $params, $increase);
-                    $this->modifyParamsForStrategy($params, $currentParam, self::PARAM_MODIFICATION_FACTOR, $increase);
-                    $noChangeCounter++;
-                    if ($noChangeCounter > self::EXPERT_LEVEL) {
-                        return [
-                            'status' => 'success',
-                            'message' => 'Reached expert level with params ' . var_export($params, true)
-                        ];
+                    echo 'IMPROVEMENT' . ' best: ' . $bestSummary['total'] . ' current: ' . $currentSummary['total'] . PHP_EOL;
+                    $bestSummary = $currentSummary;
+                    $this->modifyParamsForStrategy($params, $currentParam, $paramModificationFactor, $increase);
+                    $bestSimulationIds = $currentSimulationIds;
+                    $noImprovementCounter = 0;
+                    $learning = [
+                        'total' => $bestSummary['total'],
+                        'maxBalance' => $bestSummary['maxBalance'],
+                        'minBalance' => $bestSummary['minBalance'],
+                        'pack' => $pack,
+                        'simulationIds' => $bestSimulationIds
+                    ];
+                    try {
+                        $this->learningRepository->saveLearning($learning);
+                    } catch (\Throwable $e) {
+                        trigger_error('Failed to save learning ' . var_export($learning, E_USER_NOTICE));
                     }
                     break 1;
+                case (
+                    $bestSummary['total'] > $currentSummary['total'] ||
+                    $currentSummary['minBalance'] < $this->simulationService->getInitialTestBalance()
+                ):
+                    echo 'DETERIORATION' . ' best: ' . $bestSummary['total'] . ' current: ' . $currentSummary['total'] . PHP_EOL;
+                    $this->modifyParamsForStrategy($params, $currentParam, $paramModificationFactor, -$increase);
+                    $this->selectNextParam($currentParam, $lastParam, $params, $increase);
+                    $this->modifyParamsForStrategy($params, $currentParam, $paramModificationFactor, $increase);
+                    $noImprovementCounter++;
+                    break 1;
+                default;
+                    echo 'NO CHANGE' . ' best: ' . $bestSummary['total'] . ' current: ' . $currentSummary['total'] . PHP_EOL;
+                    $this->selectNextParam($currentParam, $lastParam, $params, $increase);
+                    $this->modifyParamsForStrategy($params, $currentParam, $paramModificationFactor, $increase);
+                    $noImprovementCounter++;
+                    break 1;
+            }
+            echo 'Learn changing param: ' . $currentParam . ' with factor of ' . ($increase * $paramModificationFactor) . PHP_EOL;
+
+            if ($noImprovementCounter > $noImprovementLimit) {
+                if ($paramModificationFactor < self::PARAM_MODIFICATION_FACTOR_LIMIT) {
+                    $paramModificationFactor += self::PARAM_MODIFICATION_FACTOR_CHANGE;
+                    $noImprovementCounter = 0;
+                } else {
+                    return [
+                        'status' => 'success',
+                        'message' => 'Finished reaching limit of param modification factor with summary ' . var_export($bestSummary, true)
+                    ];
+                }
             }
         }
 
         return [
             'status' => 'success',
-            'message' => 'Finished learnig with params ' . var_export($params, true)
+            'message' => 'Finished reaching max learning iterations with summary ' . var_export($bestSummary, true)
         ];
     }
 

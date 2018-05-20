@@ -12,7 +12,7 @@ class SimulationService
 {
     private const INITIAL_TEST_BALANCE = 100;
     private const SINGLE_TRANSACTION_RISK = 0.01;
-    private const MAX_SPREAD = 0.0004;
+    private const MAX_SPREAD = 0.0003;
     private const MAX_ITERATIONS_PER_STRATEGY = 4000000;
     private const SIMULATION_STEP = 'PT20M';
 
@@ -87,7 +87,7 @@ class SimulationService
         $this->strategyFactory = $strategyFactory;
         $this->tradeRepository = $tradeRepository;
         $this->simulationRepository = $simulationRepository;
-//        $this->strategiesForTest = $this->buildStrategiesForTest();
+        $this->strategiesForTest = $this->buildStrategiesForTest();
     }
 
     public function run() : array

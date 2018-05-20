@@ -48,7 +48,7 @@ class IndicatorRepository extends RepositoryAbstract
     public function getLatestIndicator() : array
     {
         $records = $this->getRead()->fetch(
-            'SELECT * FROM `indicator` ORDER BY `datetime` DESC LIMIT 1'
+            'SELECT instrument, datetime, name, type, forecast, actual FROM `indicator` ORDER BY `datetime` DESC LIMIT 1'
         );
 
         return !empty($records) ? array_pop($records) : [];
@@ -58,12 +58,12 @@ class IndicatorRepository extends RepositoryAbstract
     {
         $params = [];
         $placeholders = $this->getInPlaceholdersIncludingParams($instruments, $params);
-        $params['startdatetime'] = $startDateTime;
-        $params['enddatetime'] = $endDateTime;
+        $params['startDateTime'] = $startDateTime;
+        $params['endDateTime'] = $endDateTime;
 
         return $this->getRead()->fetch(
-            'SELECT * FROM `indicator`
-            WHERE `instrument` IN (' . $placeholders . ') AND `datetime` > :startdatetime AND `datetime` <= :enddatetime
+            'SELECT instrument, datetime, name, type, forecast, actual FROM `indicator`
+            WHERE `instrument` IN (' . $placeholders . ') AND `datetime` > :startDateTime AND `datetime` <= :endDateTime
             ORDER BY `datetime` DESC',
             $params
         );
