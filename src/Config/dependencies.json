@@ -141,7 +141,8 @@
     "learningService": {
         "class": "TinyApp\\Model\\Service\\LearningService",
         "inject": [
-            "@simulationService@"
+            "@simulationService@",
+            "@learningRepository@"
         ]
     },
     "strategyFactory": {
@@ -211,6 +212,12 @@
     },
     "simulationRepository": {
         "class": "TinyApp\\Model\\Repository\\SimulationRepository",
+        "inject": [
+            "@writeConnection@"
+        ]
+    },
+    "learningRepository": {
+        "class": "TinyApp\\Model\\Repository\\LearningRepository",
         "inject": [
             "@writeConnection@"
         ]
