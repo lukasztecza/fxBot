@@ -49,7 +49,10 @@ class PriceRepository extends RepositoryAbstract
     public function getLatestPriceByInstrument(string $instrument) : array
     {
         $records = $this->getRead()->fetch(
-            'SELECT * FROM `price` WHERE `instrument` = :instrument ORDER BY `datetime` DESC LIMIT 1',
+            'SELECT instrument, datetime, open, high, low, close
+            FROM `price`
+            WHERE `instrument` = :instrument
+            ORDER BY `datetime` DESC LIMIT 1',
             ['instrument' => $instrument]
         );
 
@@ -59,7 +62,9 @@ class PriceRepository extends RepositoryAbstract
     public function getInitialPrices(array $priceInstruments, string $initialDateTime) : array
     {
         $this->getRead()->prepare(
-            'SELECT * FROM `price` WHERE `instrument` = :instrument AND `datetime` >= :datetime ORDER BY `datetime` ASC LIMIT 1'
+            'SELECT instrument, datetime, open, high, low, close
+            FROM `price`
+            WHERE `instrument` = :instrument AND `datetime` >= :datetime ORDER BY `datetime` ASC LIMIT 1'
         );
         $initialPrices = [];
         foreach ($priceInstruments as $priceInstrument) {
@@ -76,7 +81,8 @@ class PriceRepository extends RepositoryAbstract
     public function getPricesForDates(string $instrument, string $startDateTime, string $endDateTime) : array
     {
         return $this->getRead()->fetch(
-            'SELECT * FROM `price`
+            'SELECT instrument, datetime, open, high, low, close
+            FROM `price`
             WHERE `instrument` = :instrument AND `datetime` > :startdatetime AND `datetime` <= :enddatetime
             ORDER BY `datetime` DESC',
             ['instrument' => $instrument, 'startdatetime' => $startDateTime, 'enddatetime' => $endDateTime]

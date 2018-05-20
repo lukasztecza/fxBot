@@ -74,3 +74,22 @@ CREATE TABLE IF NOT EXISTS `simulation_parameter` (
     FOREIGN KEY (`parameter_id`) REFERENCES `parameter`(`id`) ON DELETE CASCADE,
     CONSTRAINT simulation_id_parameter_id UNIQUE (`simulation_id`, `parameter_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+CREATE TABLE IF NOT EXISTS `learning` (
+    `id` INT(11) NOT NULL AUTO_INCREMENT,
+    `total` DECIMAL(10,5) NOT NULL,
+    `max_balance` DECIMAL(10,5) NOT NULL,
+    `min_balance` DECIMAL(10,5) NOT NULL,
+    `pack` VARCHAR(32) COLLATE utf8_general_ci NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY (`pack`),
+    KEY (`total`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+CREATE TABLE IF NOT EXISTS `learning_simulation` (
+    `learning_id` INT(11) NOT NULL,
+    `simulation_id` INT(11) NOT NULL,
+    FOREIGN KEY (`learning_id`) REFERENCES `learning`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`simulation_id`) REFERENCES `simulation`(`id`) ON DELETE CASCADE,
+    CONSTRAINT simulation_id_learning_id UNIQUE (`simulation_id`, `learning_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
