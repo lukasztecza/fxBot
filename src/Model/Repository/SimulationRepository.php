@@ -11,15 +11,15 @@ class SimulationRepository extends RepositoryAbstract
                 'INSERT INTO `simulation`
                 (`instrument`, `final_balance`, `max_balance`, `min_balance`, `profits`, `losses`, `simulation_start`, `simulation_end`, `datetime`)
                 VALUES
-                (:instrument, :final_balance, :max_balance, :min_balance, :profits, :losses, :simulation_start, :simulation_end, :datetime)', [
+                (:instrument, :finalBalance, :maxBalance, :minBalance, :profits, :losses, :simulationStart, :simulationEnd, :datetime)', [
                     'instrument' => $simulation['instrument'],
-                    'final_balance' => $simulation['finalBalance'],
-                    'max_balance' => $simulation['maxBalance'],
-                    'min_balance' => $simulation['minBalance'],
+                    'finalBalance' => $simulation['finalBalance'],
+                    'maxBalance' => $simulation['maxBalance'],
+                    'minBalance' => $simulation['minBalance'],
                     'profits' => $simulation['profits'],
                     'losses' => $simulation['losses'],
-                    'simulation_start' => $simulation['simulationStart'],
-                    'simulation_end' => $simulation['simulationEnd'],
+                    'simulationStart' => $simulation['simulationStart'],
+                    'simulationEnd' => $simulation['simulationEnd'],
                     'datetime' => $simulation['datetime']
                 ]
             );
@@ -69,8 +69,8 @@ class SimulationRepository extends RepositoryAbstract
             "SELECT
                 dummy.`params`,
                 SUM(dummy.`final_balance`) total,
-                MAX(dummy.`final_balance`) max_balance,
-                MIN(dummy.`final_balance`) min_balance,
+                MAX(dummy.`final_balance`) maxBalance,
+                MIN(dummy.`final_balance`) minBalance,
                 GROUP_CONCAT(dummy.id SEPARATOR ',') ids
             FROM (
                 SELECT s.`id`, s.`final_balance`, s.`simulation_start`, s.`simulation_end`, GROUP_CONCAT(sp.`value` SEPARATOR ',') params
