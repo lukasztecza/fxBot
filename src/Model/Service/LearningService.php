@@ -12,16 +12,16 @@ class LearningService
     private const INITIAL_PARAMS = [
         'rigidStopLoss' => 0.0020,
         'takeProfitMultiplier' => 1,
-        'signalFastAverage' => 10,
-        'signalSlowAverage' => 50,
-        'longFastAverage' => 100,
-        'longSlowAverage' => 500
+        'signalFastAverage' => 20,
+        'signalSlowAverage' => 60,
+        'longFastAverage' => 230,
+        'longSlowAverage' => 550
     ];
     private const INSTRUMENT = 'EUR_USD';
 
-    private const PARAM_MODIFICATION_FACTOR = 1.1;
-    private const PARAM_MODIFICATION_FACTOR_CHANGE = 0.1;
-    private const PARAM_MODIFICATION_FACTOR_LIMIT = 2;
+    private const PARAM_MODIFICATION_FACTOR = 1;
+    private const PARAM_MODIFICATION_FACTOR_CHANGE = 0.35;
+    private const PARAM_MODIFICATION_FACTOR_LIMIT = 10;
 
     private $simulationService;
     private $learningRepository;
@@ -51,6 +51,12 @@ class LearningService
         $paramModificationFactor = self::PARAM_MODIFICATION_FACTOR;
 
         while ($counter++ <= self::MAX_LEARNING_ITERATIONS) {
+            if ($counter - 2 && !$this->modifyParamsForStrategy($params, $currentParam, $paramModificationFactor, $increase)) {
+                $this->selectNextParam($currentParam, $lastParam, $params, $increase);
+                trigger_error('Pushing change to the next param ' . var_export($currentParam, true), E_USER_NOTICE);
+                continue;
+            }
+
             $this->simulationService->setStrategiesForTest($this->getStrategiesForTest($params));
             $result = $this->simulationService->run();
 
@@ -61,16 +67,15 @@ class LearningService
 
             $bestSummary = $this->simulationService->getSimulationsSummaryByIds($bestSimulationIds);
             $currentSummary = $this->simulationService->getSimulationsSummaryByIds($currentSimulationIds);
+            $bestSummaryProfitability = $this->calculateProfitability($bestSummary);
+            $currentSummaryProfitability = $this->calculateProfitability($currentSummary);
 
             echo PHP_EOL;
             switch (true) {
-                case (
-                    $bestSummary['total'] < $currentSummary['total'] &&
-                    $currentSummary['minBalance'] > $this->simulationService->getInitialTestBalance()
-                ):
-                    echo 'IMPROVEMENT' . ' best: ' . $bestSummary['total'] . ' current: ' . $currentSummary['total'] . PHP_EOL;
+                case $bestSummaryProfitability < $currentSummaryProfitability:
+                    echo 'IMPROVEMENT' . ' best total: ' . $bestSummary['total'] . ' current total: ' . $currentSummary['total'];
+                    echo ' best profitability: ' . $bestSummaryProfitability . ' current profitability: ' . $currentSummaryProfitability . PHP_EOL;
                     $bestSummary = $currentSummary;
-                    $this->modifyParamsForStrategy($params, $currentParam, $paramModificationFactor, $increase);
                     $bestSimulationIds = $currentSimulationIds;
                     $noImprovementCounter = 0;
                     $learning = [
@@ -86,20 +91,17 @@ class LearningService
                         trigger_error('Failed to save learning ' . var_export($learning, E_USER_NOTICE));
                     }
                     break 1;
-                case (
-                    $bestSummary['total'] > $currentSummary['total'] ||
-                    $currentSummary['minBalance'] < $this->simulationService->getInitialTestBalance()
-                ):
-                    echo 'DETERIORATION' . ' best: ' . $bestSummary['total'] . ' current: ' . $currentSummary['total'] . PHP_EOL;
+                case $bestSummaryProfitability > $currentSummaryProfitability:
+                    echo 'DETERIORATION' . ' best total: ' . $bestSummary['total'] . ' current total: ' . $currentSummary['total'];
+                    echo ' best profitability: ' . $bestSummaryProfitability . ' current profitability: ' . $currentSummaryProfitability . PHP_EOL;
                     $this->modifyParamsForStrategy($params, $currentParam, $paramModificationFactor, -$increase);
                     $this->selectNextParam($currentParam, $lastParam, $params, $increase);
-                    $this->modifyParamsForStrategy($params, $currentParam, $paramModificationFactor, $increase);
                     $noImprovementCounter++;
                     break 1;
                 default;
-                    echo 'NO CHANGE' . ' best: ' . $bestSummary['total'] . ' current: ' . $currentSummary['total'] . PHP_EOL;
+                    echo 'NO CHANGE' . ' best total: ' . $bestSummary['total'] . ' current total: ' . $currentSummary['total'];
+                    echo ' best profitability: ' . $bestSummaryProfitability . ' current profitability: ' . $currentSummaryProfitability . PHP_EOL;
                     $this->selectNextParam($currentParam, $lastParam, $params, $increase);
-                    $this->modifyParamsForStrategy($params, $currentParam, $paramModificationFactor, $increase);
                     $noImprovementCounter++;
                     break 1;
             }
@@ -136,14 +138,39 @@ class LearningService
         ]];
     }
 
-    private function modifyParamsForStrategy(array &$params, string $paramName, float $paramModificationFactor, int $increase) : void
+    private function calculateProfitability(array $summary) : float
+    {
+        return $summary['total'] - ($summary['maxBalance'] - $summary['minBalance']);
+    }
+
+    private function modifyParamsForStrategy(array &$params, string $paramName, float $paramModificationFactor, int $increase) : bool
     {
         $newValue = $params[$paramName] * ($increase > 0 ? $paramModificationFactor : (1/$paramModificationFactor));
-        if ($newValue > 0) {
-            $params[$paramName] = $newValue;
-        } else {
-            throw new \Exception('Learning ended up with negative parameter value ' . var_export($newValue, true));
+        switch (true) {
+            case $newValue < 0:
+                trigger_error('Learning tried to set negative parameter value ' . var_export($newValue, true), E_USER_NOTICE);
+                break;
+            case $paramName === 'rigidStopLoss' && $newValue < 0.001:
+                trigger_error('Learnin tried to set too low stop loss' . var_export(['rigidStopLoss' => $newValue], true), E_USER_NOTICE);
+                break;
+            case $paramName === 'signalFastAverage' && $newValue >= $params['signalSlowAverage']:
+                trigger_error('Learnin tried to set too high signalFastAverage' . var_export(['signalFastAverage' => $newValue], true), E_USER_NOTICE);
+                break;
+            case $paramName === 'longFastAverage' && $newValue >= $params['longSlowAverage']:
+                trigger_error('Learnin tried to set too high longFastAverage' . var_export(['longFastAverage' => $newValue], true), E_USER_NOTICE);
+                break;
+            case $paramName === 'signalSlowAverage' && $newValue <= $params['signalFastAverage']:
+                trigger_error('Learnin tried to set too low signalSlowAverage' . var_export(['signalSlowAverage' => $newValue], true), E_USER_NOTICE);
+                break;
+            case $paramName === 'longSlowAverage' && $newValue <= $params['longFastAverage']:
+                trigger_error('Learnin tried to set too low longSlowAverage' . var_export(['longSlowAverage' => $newValue], true), E_USER_NOTICE);
+                break;
+            default:
+                $params[$paramName] = $newValue;
+                return true;
         }
+
+        return false;
     }
 
     private function selectNextParam(string &$currentParam, string $lastParam, array &$params, int &$increase) : void

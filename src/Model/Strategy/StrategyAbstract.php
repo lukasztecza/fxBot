@@ -99,7 +99,7 @@ abstract class StrategyAbstract implements StrategyInterface
             $sum += ($price['high'] + $price['low']) / 2;
             $counter++;
             foreach ($averages as $name => $period) {
-                if ($period - $counter === 0) {
+                if ((int)($period - $counter) === 0) {
                     $return[$name] = $sum / $counter;
                     if ($lastName === $name) {
                         break 2;
@@ -156,7 +156,7 @@ abstract class StrategyAbstract implements StrategyInterface
         $averages['current'] = ($lastPrices[0]['high'] + $lastPrices[0]['low']) / 2;
 
         switch (true) {
-            case !isset($averages['current']) || !isset($averages['fast']):
+            case !isset($averages['current']) || !isset($averages['fast']) || !isset($averages['slow']):
                 return 0;
             case $averages['current'] < $averages['fast'] && $averages['current'] > $averages['slow']:
                 return -1;
