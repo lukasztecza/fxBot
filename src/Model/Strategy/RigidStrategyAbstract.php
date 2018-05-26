@@ -8,12 +8,14 @@ abstract class RigidStrategyAbstract extends StrategyAbstract
 {
     protected $rigidStopLoss;
     protected $takeProfitMultiplier;
+    protected $lossLockerFactor;
     protected $instrument;
 
-    public function __construct(float $rigidStopLoss, float $takeProfitMultiplier, string $instrument)
+    public function __construct(float $rigidStopLoss, float $takeProfitMultiplier, float $lossLockerFactor, string $instrument)
     {
         $this->rigidStopLoss = $rigidStopLoss;
         $this->takeProfitMultiplier = $takeProfitMultiplier;
+        $this->lossLockerFactor = $lossLockerFactor;
         $this->instrument = $instrument;
     }
 
@@ -52,17 +54,22 @@ abstract class RigidStrategyAbstract extends StrategyAbstract
         return new Order($this->getInstrument(), $units, $tradePrice, $takeProfit, $stopLoss);
     }
 
-    protected function getRigidStopLoss() : float
+    public function getRigidStopLoss() : float
     {
         return $this->rigidStopLoss;
     }
 
-    protected function getTakeProfitMultiplier() : float
+    public function getTakeProfitMultiplier() : float
     {
         return $this->takeProfitMultiplier;
     }
 
-    protected function getInstrument() : string
+    public function getLossLockerFactor() : float
+    {
+        return $this->lossLockerFactor;
+    }
+
+    public function getInstrument() : string
     {
         return $this->instrument;
     }
