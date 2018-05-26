@@ -25,7 +25,7 @@ class SimulationService
         ['start' => '2015-03-01 00:00:00', 'end' => '2016-03-01 00:00:00'],
         ['start' => '2016-03-01 00:00:00', 'end' => '2017-03-01 00:00:00'],
         ['start' => '2017-03-01 00:00:00', 'end' => '2018-03-01 00:00:00'],
-        ['start' => '2010-03-01 00:00:00', 'end' => '2018-03-01 00:00:00']
+//        ['start' => '2010-03-01 00:00:00', 'end' => '2018-03-01 00:00:00']
     ];
 
     private const FORCE_INSTRUMENT = 'EUR_USD';
@@ -49,8 +49,8 @@ class SimulationService
     ];
 
     private const CHANGING_PARAMETERS = [
-        'rigidStopLoss' => [0.0010, 0.0020],
-        'takeProfitMultiplier' => [1,2],
+        'rigidStopLoss' => [0.002],
+        'takeProfitMultiplier' => [10],
         'longFastAverage' => [50, 100],
         'longSlowAverage' => [200, 300],
         'extremumRange' => [12, 15],
@@ -63,7 +63,7 @@ class SimulationService
         'companiesFactor' => [1],
         'salesFactor' => [1],
         'unemploymentFactor' => [1],
-        'bankRelativeFactor' => [1,2],
+        'bankRelativeFactor' => [1],
         'followTrend' => [0,1],
         'lastPricesPeriod' => ['P60D']
     ];
@@ -111,6 +111,9 @@ class SimulationService
                 $profits = 0;
                 $losses = 0;
                 $activeOrder = null;
+                $stopLossShifted = false;
+                $takeProfitMultiplier = $strategy->getTakeProfitMultiplier();
+                $lossLockerFactor = $strategy->getLossLockerFactor();
                 while ($counter++ < self::MAX_ITERATIONS_PER_STRATEGY && $currentDate < $simulationPeriod['end']) {
                     if ($balance < self::INITIAL_TEST_BALANCE / 5) {
                         $balance = 0;
@@ -132,7 +135,17 @@ class SimulationService
                     }
 
                     if (!$this->handleOrder(
-                        $activeOrder, $strategy, $prices, $balance, $currentDate, $executedTrades, $profits, $losses
+                        $activeOrder,
+                        $strategy,
+                        $prices,
+                        $balance,
+                        $currentDate,
+                        $executedTrades,
+                        $profits,
+                        $losses,
+                        $takeProfitMultiplier,
+                        $lossLockerFactor,
+                        $stopLossShifted
                     )) {
                         return [
                             'status' => false,
@@ -295,7 +308,10 @@ class SimulationService
         string $currentDate,
         int &$executedTrades,
         int &$profits,
-        int &$losses
+        int &$losses,
+        float $takeProfitMultiplier,
+        float $lossLockerFactor,
+        bool &$stopLossShifted
     ) : bool {
         if (is_null($activeOrder)) {
             try {
@@ -316,9 +332,7 @@ class SimulationService
             ($activeOrder->getUnits() > 0 && $activeOrder->getTakeProfit() < $prices[$activeOrder->getInstrument()]['bid']) ||
             ($activeOrder->getUnits() < 0 && $activeOrder->getTakeProfit() > $prices[$activeOrder->getInstrument()]['ask'])
         ) {
-            $balance = $balance + ($balance * self::SINGLE_TRANSACTION_RISK * (
-                abs($activeOrder->getPrice() - $activeOrder->getTakeProfit()) / abs($activeOrder->getPrice() - $activeOrder->getStopLoss())
-            ));
+            $balance = $balance + ($balance * self::SINGLE_TRANSACTION_RISK * $takeProfitMultiplier);
             echo
                 'PROFIT ' . str_pad($this->formatBalance($balance), 10) . ' on ' . $currentDate .
                 ' due to ask ' . str_pad($prices[$activeOrder->getInstrument()]['ask'], 10) .
@@ -326,18 +340,41 @@ class SimulationService
             ;
             $profits++;
             $activeOrder = null;
+            $stopLossShifted = false;
         } elseif (
             ($activeOrder->getUnits() > 0 && $activeOrder->getStopLoss() > $prices[$activeOrder->getInstrument()]['bid']) ||
             ($activeOrder->getUnits() < 0 && $activeOrder->getStopLoss() < $prices[$activeOrder->getInstrument()]['ask'])
         ) {
-            $balance = $balance - ($balance * self::SINGLE_TRANSACTION_RISK);
+            if (!$stopLossShifted) {
+                $balance = $balance - ($balance * self::SINGLE_TRANSACTION_RISK);
+            }
             echo
-                'LOSS   ' . str_pad($this->formatBalance($balance), 10) . ' on ' . $currentDate .
+                (!$stopLossShifted ? 'LOSS   ' : 'LOCKED ') . str_pad($this->formatBalance($balance), 10) . ' on ' . $currentDate .
                 ' due to ask ' . str_pad($prices[$activeOrder->getInstrument()]['ask'], 10) .
                 ' bid ' . str_pad($prices[$activeOrder->getInstrument()]['bid'], 10) . PHP_EOL
             ;
-            $losses++;
+            if (!$stopLossShifted) {
+                $losses++;
+            }
             $activeOrder = null;
+            $stopLossShifted = false;
+        } elseif (
+            !$stopLossShifted && ((
+                $activeOrder->getUnits() > 0 && ((
+                    $activeOrder->getStopLoss() + (
+                        $lossLockerFactor * ($activeOrder->getTakeProfit() - $activeOrder->getStopLoss())
+                    ) / ($takeProfitMultiplier + 1)
+                ) < $prices[$activeOrder->getInstrument()]['bid'])
+            ) || (
+                $activeOrder->getUnits() < 0 && ((
+                    $activeOrder->getStopLoss() - (
+                        $lossLockerFactor * ($activeOrder->getStopLoss() - $activeOrder->getTakeProfit())
+                    ) / ($takeProfitMultiplier + 1)
+                ) > $prices[$activeOrder->getInstrument()]['ask'])
+            ))
+        ) {
+            $stopLossShifted = true;
+            (function () {$this->stopLoss = $this->price;})->bindTo($activeOrder, $activeOrder)();
         }
 
         return true;

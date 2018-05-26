@@ -6,22 +6,23 @@ use TinyApp\Model\Repository\LearningRepository;
 
 class LearningService
 {
-    private const MAX_LEARNING_ITERATIONS = 20;
+    private const MAX_LEARNING_ITERATIONS = 100;
 
     private const STRATEGY_TO_LEARN = 'TinyApp\Model\Strategy\RigidAverageDistanceDeviationStrategy';
     private const INITIAL_PARAMS = [
-        'rigidStopLoss' => 0.0020,
-        'takeProfitMultiplier' => 1,
-        'signalFastAverage' => 20,
-        'signalSlowAverage' => 60,
-        'longFastAverage' => 230,
-        'longSlowAverage' => 550
+        'rigidStopLoss' => 0.002,
+        'takeProfitMultiplier' => 2,
+        'lossLockerFactor' => 1,
+        'signalFastAverage' => 50,
+        'signalSlowAverage' => 100,
+        'longFastAverage' => 100,
+        'longSlowAverage' => 500
     ];
     private const INSTRUMENT = 'EUR_USD';
 
-    private const PARAM_MODIFICATION_FACTOR = 1;
-    private const PARAM_MODIFICATION_FACTOR_CHANGE = 0.35;
-    private const PARAM_MODIFICATION_FACTOR_LIMIT = 10;
+    private const PARAM_MODIFICATION_FACTOR = 1.1;
+    private const PARAM_MODIFICATION_FACTOR_CHANGE = 0.1;
+    private const PARAM_MODIFICATION_FACTOR_LIMIT = 5;
 
     private $simulationService;
     private $learningRepository;

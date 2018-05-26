@@ -26,6 +26,7 @@ class RigidAverageDistanceDeviationStrategy extends RigidStrategyAbstract
             !isset($params['lastPricesPeriod']) ||
             !isset($params['rigidStopLoss']) ||
             !isset($params['takeProfitMultiplier']) ||
+            !isset($params['lossLockerFactor']) ||
             !isset($params['instrument'])
         ) {
             throw new \Exception('Could not create strategy due to missing params');
@@ -39,7 +40,7 @@ class RigidAverageDistanceDeviationStrategy extends RigidStrategyAbstract
         $this->followTrend = $params['followTrend'];
         $this->lastPricesPeriod = $params['lastPricesPeriod'];
 
-        parent::__construct($params['rigidStopLoss'], $params['takeProfitMultiplier'], $params['instrument']);
+        parent::__construct($params['rigidStopLoss'], $params['takeProfitMultiplier'], $params['lossLockerFactor'], $params['instrument']);
     }
 
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int
