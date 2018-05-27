@@ -11,7 +11,7 @@ use TinyApp\Model\Repository\SimulationRepository;
 class SimulationService
 {
     private const INITIAL_TEST_BALANCE = 100;
-    private const SINGLE_TRANSACTION_RISK = 0.01;
+    private const SINGLE_TRANSACTION_RISK = 0.005;
     private const MAX_SPREAD = 0.0003;
     private const MAX_ITERATIONS_PER_STRATEGY = 4000000;
     private const SIMULATION_STEP = 'PT20M';
@@ -349,7 +349,7 @@ class SimulationService
                 $balance = $balance - ($balance * self::SINGLE_TRANSACTION_RISK);
             }
             echo
-                (!$stopLossShifted ? 'LOSS   ' : 'LOCKED ') . str_pad($this->formatBalance($balance), 10) . ' on ' . $currentDate .
+                (!$stopLossShifted ? 'LOSS   ' : 'BLOCK  ') . str_pad($this->formatBalance($balance), 10) . ' on ' . $currentDate .
                 ' due to ask ' . str_pad($prices[$activeOrder->getInstrument()]['ask'], 10) .
                 ' bid ' . str_pad($prices[$activeOrder->getInstrument()]['bid'], 10) . PHP_EOL
             ;
