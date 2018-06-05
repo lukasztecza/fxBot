@@ -1,8 +1,8 @@
 <?php
-namespace TinyApp\Model\Service;
+namespace FxBot\Model\Service;
 
-use TinyApp\Model\Service\SimulationService;
-use TinyApp\Model\Repository\LearningRepository;
+use FxBot\Model\Service\SimulationService;
+use FxBot\Model\Repository\LearningRepository;
 
 class LearningService
 {

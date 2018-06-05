@@ -1,14 +1,20 @@
 <?php
-namespace TinyApp\Controller;
+namespace FxBot\Controller;
 
-use TinyApp\Controller\ControllerInterface;
-use TinyApp\Model\System\Request;
-use TinyApp\Model\System\Response;
+use LightApp\Controller\ControllerAbstract;
+use LightApp\Model\System\Request;
+use LightApp\Model\System\Response;
 
-class ForexController implements ControllerInterface
+class ForexController extends ControllerAbstract
 {
     public function home(Request $request) : Response
     {
-        return new Response('home.php');
+        return $this->htmlResponse('home.php');
     }
+
+    public function stats(Request $request) : Response
+    {
+        return $this->htmlResponse('stats.php');
+    }
+
 }

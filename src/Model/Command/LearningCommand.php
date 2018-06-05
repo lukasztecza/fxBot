@@ -1,8 +1,9 @@
 <?php
-namespace TinyApp\Model\Command;
+namespace FxBot\Model\Command;
 
-use TinyApp\Model\Service\LearningService;
-use TinyApp\Model\Command\CommandResult;
+use LightApp\Model\Command\CommandInterface;
+use FxBot\Model\Service\LearningService;
+use LightApp\Model\Command\CommandResult;
 
 class LearningCommand implements CommandInterface
 {

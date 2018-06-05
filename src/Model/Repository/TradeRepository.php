@@ -1,5 +1,5 @@
 <?php
-namespace TinyApp\Model\Repository;
+namespace FxBot\Model\Repository;
 
 class TradeRepository extends RepositoryAbstract
 {

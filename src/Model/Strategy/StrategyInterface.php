@@ -1,7 +1,7 @@
 <?php
-namespace TinyApp\Model\Strategy;
+namespace FxBot\Model\Strategy;
 
-use TinyApp\Model\Strategy\Order;
+use FxBot\Model\Strategy\Order;
 
 interface StrategyInterface
 {

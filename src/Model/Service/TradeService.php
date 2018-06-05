@@ -1,9 +1,9 @@
 <?php
-namespace TinyApp\Model\Service;
+namespace FxBot\Model\Service;
 
 use HttpClient\ClientFactory;
-use TinyApp\Model\Strategy\StrategyFactory;
-use TinyApp\Model\Repository\TradeRepository;
+use FxBot\Model\Strategy\StrategyFactory;
+use FxBot\Model\Repository\TradeRepository;
 
 class TradeService
 {

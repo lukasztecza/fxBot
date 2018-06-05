@@ -1,8 +1,8 @@
 <?php
-namespace TinyApp\Model\Strategy;
+namespace FxBot\Model\Strategy;
 
-use TinyApp\Model\Strategy\StrategyAbstract;
-use TinyApp\Model\Strategy\Order;
+use FxBot\Model\Strategy\StrategyAbstract;
+use FxBot\Model\Strategy\Order;
 
 abstract class RigidStrategyAbstract extends StrategyAbstract
 {

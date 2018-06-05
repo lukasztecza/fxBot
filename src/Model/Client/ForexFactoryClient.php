@@ -1,5 +1,5 @@
 <?php
-namespace TinyApp\Model\Client;
+namespace FxBot\Model\Client;
 
 use HttpClient\Client\ClientAbstract;
 

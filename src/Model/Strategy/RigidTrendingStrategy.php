@@ -1,9 +1,9 @@
 <?php
-namespace TinyApp\Model\Strategy;
+namespace FxBot\Model\Strategy;
 
-use TinyApp\Model\Strategy\RigidStrategyAbstract;
-use TinyApp\Model\Service\PriceService;
-use TinyApp\Model\Service\IndicatorService;
+use FxBot\Model\Strategy\RigidStrategyAbstract;
+use FxBot\Model\Service\PriceService;
+use FxBot\Model\Service\IndicatorService;
 
 class RigidTrendingStrategy extends RigidStrategyAbstract
 {
