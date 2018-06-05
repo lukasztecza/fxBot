@@ -25,7 +25,7 @@ class OutputMiddleware extends SimpleOutputMiddleware
     {
         $variables['loggedIn'] = $this->sessionService->get(['user'])['user'];
         $variables['assetsVersioning'] = '?v=' . $this->assetsVersion;
-       
+
         parent::buildHtmlResponse($template, $variables, $headers, $cookies);
     }
 }
