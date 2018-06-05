@@ -1,4 +1,3 @@
 <?php include('common/head.php'); ?>
-<h3>403</h3>
-<p>You do not have access to this content</p>
+<h1>Stats</h1>
 <?php include('common/foot.php'); ?>

@@ -1,12 +1,12 @@
 <?php
-namespace TinyApp\Model\Service;
+namespace FxBot\Model\Service;
 
-use TinyApp\Model\Service\PriceService;
-use TinyApp\Model\Strategy\StrategyFactory;
-use TinyApp\Model\Strategy\Order;
-use TinyApp\Model\Strategy\StrategyInterface;
-use TinyApp\Model\Repository\TradeRepository;
-use TinyApp\Model\Repository\SimulationRepository;
+use FxBot\Model\Service\PriceService;
+use FxBot\Model\Strategy\StrategyFactory;
+use FxBot\Model\Repository\TradeRepository;
+use FxBot\Model\Repository\SimulationRepository;
+use FxBot\Model\Strategy\Order;
+use FxBot\Model\Strategy\StrategyInterface;
 
 class SimulationService
 {

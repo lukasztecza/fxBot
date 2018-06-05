@@ -1,15 +1,10 @@
 <?php
-namespace TinyApp\Model\Repository;
+namespace FxBot\Model\Repository;
 
-use TinyApp\Model\Repository\DatabaseConnectionInterface;
+use LightApp\Model\Repository\RepositoryAbstract;
 
 class PriceRepository extends RepositoryAbstract
 {
-    public function __construct(DatabaseConnectionInterface $write)
-    {
-        parent::__construct($write);
-    }
-
     public function savePrices(array $prices) : array
     {
         $this->getWrite()->begin();

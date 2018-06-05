@@ -1,5 +1,5 @@
 <?php
-namespace TinyApp\Model\Strategy;
+namespace FxBot\Model\Strategy;
 
 class Order
 {

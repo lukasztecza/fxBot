@@ -1,8 +1,8 @@
 <?php
-namespace TinyApp\Model\Validator;
+namespace FxBot\Model\Validator;
 
-use TinyApp\Model\System\Request;
-use TinyApp\Model\Validator\RequestValidatorAbstract;
+use LightApp\Model\Validator\RequestValidatorAbstract;
+use LightApp\Model\System\Request;
 
 class LoginValidator extends RequestValidatorAbstract
 {

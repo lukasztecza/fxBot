@@ -1,5 +1,7 @@
 <?php
-namespace TinyApp\Model\Repository;
+namespace FxBot\Model\Repository;
+
+use LightApp\Model\Repository\RepositoryAbstract; 
 
 class SimulationRepository extends RepositoryAbstract
 {

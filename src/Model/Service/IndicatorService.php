@@ -1,7 +1,7 @@
 <?php
-namespace TinyApp\Model\Service;
+namespace FxBot\Model\Service;
 
-use TinyApp\Model\Repository\IndicatorRepository;
+use FxBot\Model\Repository\IndicatorRepository;
 
 class IndicatorService
 {

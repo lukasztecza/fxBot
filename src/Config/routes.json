@@ -6,6 +6,12 @@
         "action": "home"
     },
     {
+        "path": "/stats",
+        "methods": ["GET"],
+        "controller": "forexController",
+        "action": "stats"
+    },
+    {
         "path": "/login",
         "controller": "authenticationController",
         "action": "login"
@@ -14,31 +20,5 @@
         "path": "/logout",
         "controller": "authenticationController",
         "action": "logout"
-    },
-    {
-        "path": "/file/add",
-        "methods": ["GET", "POST"],
-        "controller": "fileController",
-        "action": "upload"
-    },
-    {
-        "path": "/file",
-        "methods": ["GET", "POST"],
-        "controller": "fileController",
-        "action": "list"
-    },
-    {
-        "path": "/file/list/{type}/{page}",
-        "methods": ["GET", "POST"],
-        "requirements": {"type": "\\d+", "page": "\\d+"},
-        "controller": "fileController",
-        "action": "listPaginated"
-    },
-    {
-        "path": "/private/upload/{directory}/{file}",
-        "methods": ["GET"],
-        "requirements": {"directory": "(images|files)", "file": "[a-z0-9]{1,}\\.[a-z]{3,4}"},
-        "controller": "privateContentController",
-        "action": "serve"
     }
 ]

@@ -1,15 +1,10 @@
 <?php
-namespace TinyApp\Model\Repository;
+namespace FxBot\Model\Repository;
 
-use TinyApp\Model\Repository\DatabaseConnectionInterface;
+use LightApp\Model\Repository\RepositoryAbstract;
 
 class IndicatorRepository extends RepositoryAbstract
 {
-    public function __construct(DatabaseConnectionInterface $write)
-    {
-        parent::__construct($write);
-    }
-
     public function saveIndicators(array $indicators) : array
     {
         $this->getWrite()->begin();
