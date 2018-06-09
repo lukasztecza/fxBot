@@ -64,12 +64,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/lukasztecza/lightApp.git",
-                "reference": "98d24e7e88f3dec588cbf48948856459b77622ac"
+                "reference": "29b0cd520e03a9f415f70ed7833bc8f0a6177aa9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lukasztecza/lightApp/zipball/98d24e7e88f3dec588cbf48948856459b77622ac",
-                "reference": "98d24e7e88f3dec588cbf48948856459b77622ac",
+                "url": "https://api.github.com/repos/lukasztecza/lightApp/zipball/29b0cd520e03a9f415f70ed7833bc8f0a6177aa9",
+                "reference": "29b0cd520e03a9f415f70ed7833bc8f0a6177aa9",
                 "shasum": ""
             },
             "require": {
@@ -106,7 +106,7 @@
                 "source": "https://github.com/lukasztecza/lightApp/tree/master",
                 "issues": "https://github.com/lukasztecza/lightApp/issues"
             },
-            "time": "2018-06-05 01:08:00"
+            "time": "2018-06-09 15:59:53"
         }
     ],
     "packages-dev": [
