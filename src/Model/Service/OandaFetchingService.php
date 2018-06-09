@@ -1,9 +1,9 @@
 <?php
-namespace TinyApp\Model\Service;
+namespace FxBot\Model\Service;
 
-use TinyApp\Model\Service\FetchingServiceInterface;
-use TinyApp\Model\Service\PriceService;
-use TinyApp\Model\Service\MarketService;
+use FxBot\Model\Service\FetchingServiceInterface;
+use FxBot\Model\Service\PriceService;
+use FxBot\Model\Service\IndicatorService;
 use HttpClient\ClientFactory;
 
 class OandaFetchingService implements FetchingServiceInterface

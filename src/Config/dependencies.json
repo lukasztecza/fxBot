@@ -1,31 +1,23 @@
 {
     "outputMiddleware": {
-        "class": "TinyApp\\Model\\Middleware\\OutputMiddleware",
+        "class": "FxBot\\Model\\Middleware\\OutputMiddleware",
         "inject": [
             "@securityMiddleware@",
             "%defaultContentType%",
             "%assetsVersion%",
-            "@fileService@",
             "@sessionService@"
         ]
     },
     "securityMiddleware": {
-        "class": "TinyApp\\Model\\Middleware\\SecurityMiddleware",
+        "class": "LightApp\\Model\\Middleware\\SecurityMiddleware",
         "inject": [
-            "@responseCacheMiddleware@",
+            "@controllerMiddleware@",
             "%securityList%",
             "@sessionService@"
         ]
     },
-    "responseCacheMiddleware": {
-        "class": "TinyApp\\Model\\Middleware\\ResponseCacheMiddleware",
-        "inject": [
-            "@controllerMiddleware@",
-            "%cacheList%"
-        ]
-    },
     "controllerMiddleware": {
-        "class": "TinyApp\\Model\\Middleware\\ControllerMiddleware",
+        "class": "LightApp\\Model\\Middleware\\ControllerMiddleware",
         "inject": [
             "%routedController%",
             "%routedAction%"
@@ -35,16 +27,8 @@
 
 
 
-    "fileController": {
-        "class": "TinyApp\\Controller\\FileController",
-        "inject": [
-            "@fileService@",
-            "@validatorFactory@",
-            "@sessionService@"
-        ]
-    },
     "authenticationController": {
-        "class": "TinyApp\\Controller\\AuthenticationController",
+        "class": "FxBot\\Controller\\AuthenticationController",
         "inject": [
             "@sessionService@",
             "@validatorFactory@",
@@ -52,31 +36,21 @@
             "%inMemoryPasswordHash%"
         ]
     },
-    "privateContentController": {
-        "class": "TinyApp\\Controller\\PrivateContentController",
-        "inject": [
-            "@sessionService@",
-            "@fileService@"
-        ]
-    },
     "forexController": {
-        "class": "TinyApp\\Controller\\ForexController"
+        "class": "FxBot\\Controller\\ForexController",
+        "inject": [
+            "@tradeService@"
+        ]
     },
 
 
 
 
     "sessionService": {
-        "class": "TinyApp\\Model\\Service\\SessionService"
-    },
-    "fileService": {
-        "class": "TinyApp\\Model\\Service\\FileService",
-        "inject": [
-            "@fileRepository@"
-        ]
+        "class": "LightApp\\Model\\Service\\SessionService"
     },
     "validatorFactory": {
-        "class": "TinyApp\\Model\\Validator\\ValidatorFactory",
+        "class": "LightApp\\Model\\Validator\\ValidatorFactory",
         "inject": [
             "@sessionService@"
         ]
@@ -88,7 +62,7 @@
         ]
     },
     "oandaFetchingService": {
-        "class": "TinyApp\\Model\\Service\\OandaFetchingService",
+        "class": "FxBot\\Model\\Service\\OandaFetchingService",
         "inject": [
             "%priceInstruments%",
             "@priceService@",
@@ -97,7 +71,7 @@
         ]
     },
     "forexFactoryFetchingService": {
-        "class": "TinyApp\\Model\\Service\\ForexFactoryFetchingService",
+        "class": "FxBot\\Model\\Service\\ForexFactoryFetchingService",
         "inject": [
             "%priceInstruments%",
             "@indicatorService@",
@@ -105,19 +79,19 @@
         ]
     },
     "priceService": {
-        "class": "TinyApp\\Model\\Service\\PriceService",
+        "class": "FxBot\\Model\\Service\\PriceService",
         "inject": [
             "@priceRepository@"
         ]
     },
     "indicatorService": {
-        "class": "TinyApp\\Model\\Service\\IndicatorService",
+        "class": "FxBot\\Model\\Service\\IndicatorService",
         "inject": [
             "@indicatorRepository@"
         ]
     },
     "tradeService": {
-        "class": "TinyApp\\Model\\Service\\TradeService",
+        "class": "FxBot\\Model\\Service\\TradeService",
         "inject": [
             "%priceInstruments%",
             "@clientFactory@",
@@ -129,7 +103,7 @@
         ]
     },
     "simulationService": {
-        "class": "TinyApp\\Model\\Service\\SimulationService",
+        "class": "FxBot\\Model\\Service\\SimulationService",
         "inject": [
             "%priceInstruments%",
             "@priceService@",
@@ -139,14 +113,14 @@
         ]
     },
     "learningService": {
-        "class": "TinyApp\\Model\\Service\\LearningService",
+        "class": "FxBot\\Model\\Service\\LearningService",
         "inject": [
             "@simulationService@",
             "@learningRepository@"
         ]
     },
     "strategyFactory": {
-        "class": "TinyApp\\Model\\Strategy\\StrategyFactory",
+        "class": "FxBot\\Model\\Strategy\\StrategyFactory",
         "inject": [
             "%priceInstruments%",
             "@priceService@",
@@ -156,9 +130,8 @@
 
 
 
-
-    "writeConnection": {
-        "class": "TinyApp\\Model\\Repository\\PdoDatabaseConnection",
+    "readConnection": {
+        "class": "LightApp\\Model\\Repository\\PdoDatabaseConnection",
         "inject": [
             "%databaseEngine%",
             "%databaseHost%",
@@ -168,57 +141,49 @@
             "%databasePassword%"
         ]
     },
-    "redisClient": {
-        "class": "TinyApp\\Model\\Repository\\RedisStorage",
+    "writeConnection": {
+        "class": "LightApp\\Model\\Repository\\PdoDatabaseConnection",
         "inject": [
-            "%redisScheme%",
-            "%redisHost%",
-            "%redisPort%",
-            "%redisPassword%",
-            "%redisMaxTtl%"
-        ]
-    },
-    "memcachedClient": {
-        "class": "TinyApp\\Model\\Repository\\MemcachedStorage",
-        "inject": [
-            "%memcachedHost%",
-            "%memcachedPort%",
-            "%memcachedMaxTtl%"
-        ]
-    },
-    "fileRepository" : {
-        "class": "TinyApp\\Model\\Repository\\FileRepository",
-        "inject": [
-            "@writeConnection@"
+            "%databaseEngine%",
+            "%databaseHost%",
+            "%databasePort%",
+            "%databaseName%",
+            "%databaseUser%",
+            "%databasePassword%"
         ]
     },
     "priceRepository": {
-        "class": "TinyApp\\Model\\Repository\\PriceRepository",
+        "class": "FxBot\\Model\\Repository\\PriceRepository",
         "inject": [
+            "@writeConnection@",
             "@writeConnection@"
         ]
     },
     "indicatorRepository": {
-        "class": "TinyApp\\Model\\Repository\\IndicatorRepository",
+        "class": "FxBot\\Model\\Repository\\IndicatorRepository",
         "inject": [
+            "@writeConnection@",
             "@writeConnection@"
         ]
     },
     "tradeRepository": {
-        "class": "TinyApp\\Model\\Repository\\TradeRepository",
+        "class": "FxBot\\Model\\Repository\\TradeRepository",
         "inject": [
+            "@writeConnection@",
             "@writeConnection@"
         ]
     },
     "simulationRepository": {
-        "class": "TinyApp\\Model\\Repository\\SimulationRepository",
+        "class": "FxBot\\Model\\Repository\\SimulationRepository",
         "inject": [
+            "@writeConnection@",
             "@writeConnection@"
         ]
     },
     "learningRepository": {
-        "class": "TinyApp\\Model\\Repository\\LearningRepository",
+        "class": "FxBot\\Model\\Repository\\LearningRepository",
         "inject": [
+            "@writeConnection@",
             "@writeConnection@"
         ]
     },
@@ -226,47 +191,38 @@
 
 
 
-    "storeInMemoryCommand": {
-        "class": "TinyApp\\Model\\Command\\StoreInMemoryCommand",
-        "inject": [
-            "%priceInstruments%",
-            "@priceService@",
-            "@indicatorService@",
-            "@redisClient@"
-        ]
-    },
     "populateRandomCommand": {
-        "class": "TinyApp\\Model\\Command\\PopulateRandomCommand",
+        "class": "FxBot\\Model\\Command\\PopulateRandomCommand",
         "inject": [
             "@priceService@"
         ]
     },
     "populatePricesCommand": {
-        "class": "TinyApp\\Model\\Command\\PopulatePricesCommand",
+        "class": "FxBot\\Model\\Command\\PopulatePricesCommand",
         "inject": [
             "@oandaFetchingService@"
         ]
     },
     "populateIndicatorsCommand": {
-        "class": "TinyApp\\Model\\Command\\PopulateIndicatorsCommand",
+        "class": "FxBot\\Model\\Command\\PopulateIndicatorsCommand",
         "inject": [
             "@forexFactoryFetchingService@"
         ]
     },
     "tradeCommand": {
-        "class": "TinyApp\\Model\\Command\\TradeCommand",
+        "class": "FxBot\\Model\\Command\\TradeCommand",
         "inject": [
             "@tradeService@"
         ]
     },
     "simulationCommand": {
-        "class": "TinyApp\\Model\\Command\\SimulationCommand",
+        "class": "FxBot\\Model\\Command\\SimulationCommand",
         "inject": [
             "@simulationService@"
         ]
     },
     "learningCommand": {
-        "class": "TinyApp\\Model\\Command\\LearningCommand",
+        "class": "FxBot\\Model\\Command\\LearningCommand",
         "inject": [
             "@learningService@"
         ]

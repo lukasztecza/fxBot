@@ -1,8 +1,9 @@
 <?php
-namespace TinyApp\Model\Command;
+namespace FxBot\Model\Command;
 
-use TinyApp\Model\Command\CommandResult;
-use TinyApp\Model\Service\PriceService;
+use LightApp\Model\Command\CommandInterface;
+use FxBot\Model\Service\PriceService;
+use LightApp\Model\Command\CommandResult;
 
 class PopulateRandomCommand implements CommandInterface
 {

@@ -1,13 +1,14 @@
 <?php
-namespace TinyApp\Model\Service;
+namespace FxBot\Model\Service;
 
 use HttpClient\ClientFactory;
-use TinyApp\Model\Strategy\StrategyFactory;
-use TinyApp\Model\Repository\TradeRepository;
+use FxBot\Model\Strategy\StrategyFactory;
+use FxBot\Model\Repository\TradeRepository;
 
 class TradeService
 {
     private const MAX_ALLOWED_OPEN_POSITIONS = 1;
+    private const PER_PAGE = 2;
 
     private $priceInstruments;
     private $oandaClient;
@@ -91,6 +92,15 @@ class TradeService
         }
 
         return ['status' => true, 'message' => 'Trade executed and stored successfully'];
+    }
+
+    public function getTrades(int $page) : array
+    {
+        try {
+            return $this->tradeRepository->getTrades($this->oandaAccount, $page, self::PER_PAGE);
+        } catch (\Throwable $e) {
+            trigger_error('Failed to get trades for page ' . var_export($page, true) . ' with message ' . $e->getMessage(), E_USER_NOTICE);
+        }
     }
 
     private function getAccountDetails() : array

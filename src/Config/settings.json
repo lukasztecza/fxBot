@@ -1,29 +1,12 @@
 {
     "defaultContentType": "text/html",
     "applicationStartingPoint": "outputMiddleware",
-    "assetsVersion": "2",
+    "assetsVersion": "3",
 
     "securityList": [
         {
-            "route": "/private/upload/{directory}/{file}",
-            "methods": ["GET"],
+            "route": "/stats",
             "allow": ["ROLE_USER"]
-        },
-        {
-            "route": "/file/add",
-            "allow": ["ROLE_USER"]
-        },
-        {
-            "route": "/file/list/{type}/{page}",
-            "methods": ["POST"],
-            "allow": ["ROLE_USER"]
-        }
-    ],
-
-    "cacheList": [
-        {
-            "route": "/",
-            "time": "10"
         }
     ],
 
@@ -55,7 +38,7 @@
     "clientConfiguration": {
         "oandaClient": {
             "uri": "%oandaApiUri%",
-            "class": "TinyApp\\Model\\Client\\OandaClient",
+            "class": "FxBot\\Model\\Client\\OandaClient",
             "options": {
                 "apiKey": "%oandaApiKey%"
             },
@@ -70,7 +53,7 @@
         },
         "forexFactoryClient": {
             "uri": "%forexFactoryUri%",
-            "class": "TinyApp\\Model\\Client\\ForexFactoryClient"
+            "class": "FxBot\\Model\\Client\\ForexFactoryClient"
         }
     },
 

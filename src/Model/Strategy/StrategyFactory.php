@@ -1,9 +1,9 @@
 <?php
-namespace TinyApp\Model\Strategy;
+namespace FxBot\Model\Strategy;
 
-use TinyApp\Model\Service\PriceService;
-use TinyApp\Model\Service\IndicatorService;
-use TinyApp\Model\Strategy\StrategyInterface;
+use FxBot\Model\Service\PriceService;
+use FxBot\Model\Service\IndicatorService;
+use FxBot\Model\Strategy\StrategyInterface;
 
 class StrategyFactory
 {

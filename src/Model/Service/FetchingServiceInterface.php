@@ -1,5 +1,5 @@
 <?php
-namespace TinyApp\Model\Service;
+namespace FxBot\Model\Service;
 
 interface FetchingServiceInterface
 {

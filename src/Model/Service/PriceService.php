@@ -1,7 +1,7 @@
 <?php
-namespace TinyApp\Model\Service;
+namespace FxBot\Model\Service;
 
-use TinyApp\Model\Repository\PriceRepository;
+use FxBot\Model\Repository\PriceRepository;
 
 class PriceService
 {
