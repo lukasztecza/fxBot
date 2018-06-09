@@ -27,6 +27,7 @@ class RigidFundamentalStrategyPattern extends RigidStrategyAbstract
         if (
             !isset($params['rigidStopLoss']) ||
             !isset($params['takeProfitMultiplier']) ||
+            !isset($params['lossLockerFactor']) ||
             !isset($params['instrument']) ||
             !isset($params['bankFactor']) ||
             !isset($params['inflationFactor']) ||
@@ -58,7 +59,7 @@ class RigidFundamentalStrategyPattern extends RigidStrategyAbstract
         $this->unemploymentFactor = $params['unemploymentFactor'];
         $this->bankRelativeFactor = $params['bankRelativeFactor'];
 
-        parent::__construct($params['rigidStopLoss'], $params['takeProfitMultiplier'], $params['instrument']);
+        parent::__construct($params['rigidStopLoss'], $params['takeProfitMultiplier'], $params['lossLockerFactor'], $params['instrument']);
     }
 
     protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int

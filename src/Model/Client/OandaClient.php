@@ -63,4 +63,9 @@ class OandaClient extends ClientAbstract
     {
         return $this->post(['v3' => 'accounts', $oandaAccount => 'orders'], [], [], $order->getFormatted());
     }
+
+    public function getOpenTrades(string $oandaAccount) : array
+    {
+        return $this->get(['v3' => 'accounts', $oandaAccount => 'trades']);
+    }
 }
