@@ -12,6 +12,13 @@
         "action": "stats"
     },
     {
+        "path": "/stats/{page}",
+        "methods": ["GET"],
+        "requirements": {"page": "\\d+"},
+        "controller": "forexController",
+        "action": "stats"
+    },
+    {
         "path": "/login",
         "controller": "authenticationController",
         "action": "login"

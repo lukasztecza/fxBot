@@ -37,7 +37,10 @@
         ]
     },
     "forexController": {
-        "class": "FxBot\\Controller\\ForexController"
+        "class": "FxBot\\Controller\\ForexController",
+        "inject": [
+            "@tradeService@"
+        ]
     },
 
 
