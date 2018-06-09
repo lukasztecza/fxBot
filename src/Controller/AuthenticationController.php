@@ -1,14 +1,14 @@
 <?php
-namespace TinyApp\Controller;
+namespace FxBot\Controller;
 
-use TinyApp\Controller\ControllerInterface;
-use TinyApp\Model\Service\SessionService;
-use TinyApp\Model\System\Request;
-use TinyApp\Model\System\Response;
-use TinyApp\Model\Validator\ValidatorFactory;
-use TinyApp\Model\Validator\LoginValidator;
+use LightApp\Controller\ControllerAbstract;
+use LightApp\Model\Service\SessionService;
+use LightApp\Model\Validator\ValidatorFactory;
+use LightApp\Model\System\Request;
+use LightApp\Model\System\Response;
+use FxBot\Model\Validator\LoginValidator;
 
-class AuthenticationController implements ControllerInterface
+class AuthenticationController extends ControllerAbstract
 {
     private $sessionService;
     private $validatorFactory;
@@ -29,12 +29,10 @@ class AuthenticationController implements ControllerInterface
 
     public function login(Request $request) : Response
     {
-        // Redirect to home users which are already logged in
         if (!empty($this->sessionService->get(['user'])['user'])) {
-            return new Response(null, [], [], ['Location' => '/']);
+            return $this->redirectResponse('/');
         }
 
-        // Login user and redirect to previous path if exists (user could be redirected here by Security Middleware)
         $validator = $this->validatorFactory->create(LoginValidator::class);
         if ($request->getMethod() === 'POST') {
             if ($validator->check($request)) {
@@ -46,15 +44,13 @@ class AuthenticationController implements ControllerInterface
                     $this->sessionService->set(['roles' => ['ROLE_USER']]);
                     $this->sessionService->set(['user' => $payload['username']]);
 
-                    return new Response(null, [], [], [
-                        'Location' => ($this->sessionService->get(['previousNotAllowedPath'], true)['previousNotAllowedPath'] ?? '/')
-                    ]);
+                    return $this->redirectResponse($this->sessionService->get(['previousNotAllowedPath'], true)['previousNotAllowedPath'] ?? '/');
                 }
                 $error = 'Invalid credentials';
             }
         }
 
-        return new Response(
+        return $this->htmlResponse(
             'authentication/loginForm.php',
             ['error' => $error ?? $validator->getError(), 'csrfToken' => $validator->getCsrfToken()],
             ['error' => 'html']
@@ -63,11 +59,10 @@ class AuthenticationController implements ControllerInterface
 
     public function logout(Request $request) : Response
     {
-        // Logout user
         $this->sessionService->set(['roles' => null]);
         $this->sessionService->set(['user' => null]);
         $this->sessionService->destroy();
 
-        return new Response(null, [], [], ['Location' => '/']);
+        return $this->redirectResponse('/');
     }
 }

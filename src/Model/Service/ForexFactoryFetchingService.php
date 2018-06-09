@@ -1,9 +1,8 @@
 <?php
-namespace TinyApp\Model\Service;
+namespace FxBot\Model\Service;
 
-use TinyApp\Model\Service\FetchingServiceAbstract;
-use TinyApp\Model\Service\PriceService;
-use TinyApp\Model\Service\MarketService;
+use FxBot\Model\Service\FetchingServiceAbstract;
+use FxBot\Model\Service\PriceService;
 use HttpClient\ClientFactory;
 
 class ForexFactoryFetchingService extends FetchingServiceAbstract

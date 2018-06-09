@@ -1,8 +1,8 @@
 <?php
-namespace TinyApp\Model\Client;
+namespace FxBot\Model\Client;
 
 use HttpClient\Client\ClientAbstract;
-use TinyApp\Model\Strategy\Order;
+use FxBot\Model\Strategy\Order;
 
 class OandaClient extends ClientAbstract
 {

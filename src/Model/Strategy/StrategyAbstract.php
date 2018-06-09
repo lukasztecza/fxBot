@@ -1,8 +1,8 @@
 <?php
-namespace TinyApp\Model\Strategy;
+namespace FxBot\Model\Strategy;
 
-use TinyApp\Model\Strategy\StrategyInterface;
-use TinyApp\Model\Strategy\Order;
+use FxBot\Model\Strategy\StrategyInterface;
+use FxBot\Model\Strategy\Order;
 
 abstract class StrategyAbstract implements StrategyInterface
 {
