@@ -81,10 +81,10 @@ class Order
     {
         return [
             'order' => [
-                'units' => $this->units, 
-                'instrument' => $this->instrument, 
-                'timeInForce' => $this->timeInForce, 
-                'type' => $this->type, 
+                'units' => $this->units,
+                'instrument' => $this->instrument,
+                'timeInForce' => $this->timeInForce,
+                'type' => $this->type,
                 'positionFill' => $this->positionFill,
                 'stopLossOnFill'=> [
                     'timeInForce'=> self::DEFAULT_STOP_TIME_IN_FORCE,

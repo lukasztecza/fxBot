@@ -43,7 +43,12 @@ class TradeService
             return ['status' => false, 'message' => 'Could not get account details'];
         }
         if ($accountDetails['openPositionCount'] >= self::MAX_ALLOWED_OPEN_POSITIONS) {
-            return ['status' => true, 'message' => 'Max allowed open positions reached'];
+            $updatedText = '';
+            if ($this->handleExistingTrade($accountDetails['balance'])) {
+                $updatedText = ', updated existing trade blocking loss';
+            }
+
+            return ['status' => true, 'message' => 'Max allowed open positions reached' . $updatedText];
         }
         $balance = $accountDetails['balance'];
 
@@ -127,6 +132,52 @@ class TradeService
         }
 
         return $response['body']['account'];
+    }
+
+    private function handleExistingTrade(float $balance) : bool
+    {
+        $trade = $this->getTradeDetails();
+
+        if (empty($trade)) {
+            return false;
+        }
+//@TODO decide if it should be done here or maybe in strategy modify order and save it maybe
+        $strategy = $this->strategyFactory->getStrategy($this->selectedStrategy, $this->strategyParams);
+
+        $orderModification = new \TinyApp\Model\Strategy\OrderModification(
+            $trade['id'],
+            $trade['stopLossOrder']['id'],
+            $trade['stopLossOrder']['price'] + 0.0031//this should be changed
+        );
+        $result = $this->oandaClient->modifyTrade($this->oandaAccount, $orderModification);
+
+        var_dump($result);exit;
+    }
+
+    private function getTradeDetails() : array
+    {
+        try {
+            $response = $this->oandaClient->getOpenTrades($this->oandaAccount);
+
+            switch (true) {
+                case $response['info']['http_code'] !== 200:
+                    trigger_error('Failed to get valid response ' . var_export($response, true), E_USER_NOTICE);
+                    return [];
+                case (
+                    !isset($response['body']['trades'][0]['id']) ||
+                    !isset($response['body']['trades'][0]['stopLossOrder']['id']) ||
+                    !isset($response['body']['trades'][0]['stopLossOrder']['price'])
+                ):
+                    trigger_error('Failed to get expected trade details in response ' . var_export($response, true), E_USER_NOTICE);
+                    return [];
+            }
+        } catch (\Throwable $e) {
+            trigger_error('Failed to get trade details with message ' . $e->getMessage(), E_USER_NOTICE);
+
+            return [];
+        }
+
+        return $response['body']['trades'][0];
     }
 
     private function getCurrentPrices() : array
