@@ -3,32 +3,43 @@ namespace FxBot\Model\Strategy;
 
 use FxBot\Model\Strategy\StrategyInterface;
 use FxBot\Model\Entity\Order;
+use FxBot\Model\Entity\OrderModification;
 
 abstract class StrategyAbstract implements StrategyInterface
 {
-    private const HOME_CURRENCY = 'CAD';
-    private const SINGLE_TRANSACTION_RISK = 0.001; //@TODO move it to parameters or smth
+    protected $homeCurrency;
+    protected $singleTransactionRisk;
+
+    public function __construct(string $homeCurrency, float $singleTransactionRisk)
+    {
+        $this->homeCurrency = $homeCurrency;
+        $this->singleTransactionRisk = $singleTransactionRisk;
+    }
 
     /*
     This calculation follows the following formula:
 
-    (Closing Rate - Opening Rate) * (Closing {quote}/{home currency}) * Units
+    (Trade closing rate - Trade opening rate) * ({Quote currency}/{Home currency} rate) * Units
+
     For example, suppose:
 
-    Home: CAD
-    Currency Pair: GBP/CHF
-    Base: GBP; Quote: CHF
-    Quote / Home = CHF/CAD = 1.1025
-    Opening Rate = 2.1443
-    Closing Rate = 2.1452
+    Trade currency pair: GBP/CHF
+    Trade opening rate (for GBP/CHF) = 2.1443
+    Trade closing rate (for GBP/CHF) = 2.1452
+    Base currency: GBP
+    Quote currency: CHF
+
+    Home currency: CAD
+    {Quote  currency}/{Home currency} rate (for CHF/CAD) = 1.1025
     Units = 1000
 
     Then:
+
     Profit = (2.1452 - 2.1443) * (1.1025) * 1000
     Profit = 0.99225 CAD
 
     To calculate units use:
-    units = (max risk in home currency) / ((closing rate of currency instrument - opening rate of currency instrument) * quote/home rate)
+    units = (max risk in home currency) / ((Trade closing rate - Trade opening rate) * ({Quote currency}/{Home currency} rate))
     */
     protected function calculateUnits(
         float $balance,
@@ -42,20 +53,20 @@ abstract class StrategyAbstract implements StrategyInterface
         $homeInstrument = $homeInstrumentRate = null;
 
         switch (true) {
-            case $baseCurrency === self::HOME_CURRENCY:
+            case $baseCurrency === $this->homeCurrency:
                 $homeInstrument = $tradeInstrument;
                 $homeInstrumentRate = 2 / ($currentPrices[$homeInstrument]['bid'] + $currentPrices[$homeInstrument]['ask']);
                 break;
-            case $quoteCurrency === self::HOME_CURRENCY:
+            case $quoteCurrency === $this->homeCurrency:
                 $homeInstrument = $tradeInstrument;
                 $homeInstrumentRate = ($currentPrices[$homeInstrument]['bid'] + $currentPrices[$homeInstrument]['ask']) / 2;
                 break;
-            case isset($currentPrices[$quoteCurrency . '_' . self::HOME_CURRENCY]):
-                $homeInstrument = $quoteCurrency . '_' . self::HOME_CURRENCY;
+            case isset($currentPrices[$quoteCurrency . '_' . $this->homeCurrency]):
+                $homeInstrument = $quoteCurrency . '_' . $this->homeCurrency;
                 $homeInstrumentRate = ($currentPrices[$homeInstrument]['bid'] + $currentPrices[$homeInstrument]['ask']) / 2;
                 break;
-            case isset($currentPrices[self::HOME_CURRENCY . '_' . $quoteCurrency]):
-                $homeInstrument = self::HOME_CURRENCY . '_' . $quoteCurrency;
+            case isset($currentPrices[$this->homeCurrency . '_' . $quoteCurrency]):
+                $homeInstrument = $this->homeCurrency . '_' . $quoteCurrency;
                 $homeInstrumentRate = 2 / ($currentPrices[$homeInstrument]['bid'] + $currentPrices[$homeInstrument]['ask']);
                 break;
         }
@@ -65,7 +76,7 @@ abstract class StrategyAbstract implements StrategyInterface
             return 0;
         }
 
-        $balanceRisk = $balance * self::SINGLE_TRANSACTION_RISK;
+        $balanceRisk = $balance * $this->singleTransactionRisk;
 
         $openTradeInstrumentRate = null;
         if ($closeTradeInstrumentRate > $currentPrices[$tradeInstrument]['ask']) {
@@ -104,10 +115,10 @@ abstract class StrategyAbstract implements StrategyInterface
                     if ($lastName === $name) {
                         break 2;
                     }
-                    break 1;
                 }
             }
         }
+
         foreach ($averages as $name => $period) {
             if (empty($return[$name])) {
                 trigger_error('Could not create proper averages array', E_USER_NOTICE);
@@ -194,4 +205,6 @@ abstract class StrategyAbstract implements StrategyInterface
     }
 
     abstract public function getOrder(array $prices, float $balance) : ?Order;
+
+//    abstract public function getOrderModification(string $tradeId, float $price) : ?OrderModification;
 }

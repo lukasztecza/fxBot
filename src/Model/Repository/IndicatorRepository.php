@@ -52,7 +52,7 @@ class IndicatorRepository extends RepositoryAbstract
     public function getIndicatorsForDates(array $instruments, string $startDateTime, string $endDateTime) : array
     {
         $params = [];
-        $placeholders = $this->getInPlaceholdersIncludingParams($instruments, $params);
+        $placeholders = $this->getInPlaceholdersAndAddParams($instruments, $params);
         $params['startDateTime'] = $startDateTime;
         $params['endDateTime'] = $endDateTime;
 

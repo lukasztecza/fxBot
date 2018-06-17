@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace FxBot\Model\Strategy;
+namespace FxBot\Model\Entity;
 
 class OrderModification
 {
@@ -7,6 +7,7 @@ class OrderModification
     private const DEFAULT_STOP_TIME_IN_FORCE = 'GTC';
     private const DEFAULT_TRIGGER_CONDITION = 'DEFAULT';
 
+    private $orderId;
     private $tradeId;
     private $price;
     private $takeProfit;
@@ -16,12 +17,14 @@ class OrderModification
     private $positionFill;
 
     public function __construct(
+        string $orderId,
         string $tradeId,
-        string $price,
+        float $price,
         string $type = null,
         string $timeInForce = null,
         string $triggerCondition = null
     ) {
+        $this->orderId = $orderId;
         $this->tradeId = $tradeId;
         $this->price = $price;
         $this->type = $type ?? self::DEFAULT_TYPE;
@@ -29,12 +32,17 @@ class OrderModification
         $this->triggerCondition = $triggerCondition ?? self::DEFAULT_TRIGGER_CONDITION;
     }
 
+    public function getOrderId() : int
+    {
+        return $this->orderId;
+    }
+
     public function getTradeId() : int
     {
         return $this->tradeId;
     }
 
-    public function getPrice() : string
+    public function getPrice() : float
     {
         return $this->price;
     }
