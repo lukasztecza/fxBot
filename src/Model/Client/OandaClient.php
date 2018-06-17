@@ -3,6 +3,7 @@ namespace FxBot\Model\Client;
 
 use HttpClient\Client\ClientAbstract;
 use FxBot\Model\Entity\Order;
+use FxBot\Model\Entity\OrderModification;
 
 class OandaClient extends ClientAbstract
 {
@@ -46,8 +47,13 @@ class OandaClient extends ClientAbstract
 
     public function getOpenTrades(string $oandaAccount) : array
     {
-        return $this->get(['v3' => 'accounts', $oandaAccount => 'trades']);
+        return $this->get(['v3' => 'accounts', $oandaAccount => 'trades'], ['state' => 'OPEN']);
     }
 
-    //@TODO add update trade/order
+    public function modifyTrade(string $oandaAccount, OrderModification $orderModification) : array
+    {
+        return $this->put(
+            ['v3' => 'accounts', $oandaAccount => 'orders', $orderModification->getOrderId() => null], [], [], $orderModification->getFormatted()
+        );
+    }
 }
