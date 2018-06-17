@@ -4,21 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "90e5ad07e6c1b313f909454997e5801d",
-    "content-hash": "687ae9e6b26a8628caa3ac834a7b91ec",
+    "hash": "2d95051ec5fef68ca562a450b38edda1",
+    "content-hash": "e4386471fcc40020b5dd53e3cf870070",
     "packages": [
         {
             "name": "lukasztecza/httpClient",
-            "version": "dev-master",
+            "version": "1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lukasztecza/httpClient.git",
-                "reference": "a4df1f7f4cd6d1301f18c8a5820067d0b8dc0d4b"
+                "reference": "3d86f58a587d43f71927dfe0d1fc5cb3ac341a1b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lukasztecza/httpClient/zipball/a4df1f7f4cd6d1301f18c8a5820067d0b8dc0d4b",
-                "reference": "a4df1f7f4cd6d1301f18c8a5820067d0b8dc0d4b",
+                "url": "https://api.github.com/repos/lukasztecza/httpClient/zipball/3d86f58a587d43f71927dfe0d1fc5cb3ac341a1b",
+                "reference": "3d86f58a587d43f71927dfe0d1fc5cb3ac341a1b",
                 "shasum": ""
             },
             "require": {
@@ -53,23 +53,23 @@
                 "request"
             ],
             "support": {
-                "source": "https://github.com/lukasztecza/httpClient/tree/master",
+                "source": "https://github.com/lukasztecza/httpClient/tree/1.0",
                 "issues": "https://github.com/lukasztecza/httpClient/issues"
             },
-            "time": "2018-05-28 13:52:27"
+            "time": "2018-06-11 23:27:25"
         },
         {
             "name": "lukasztecza/lightApp",
-            "version": "dev-master",
+            "version": "1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lukasztecza/lightApp.git",
-                "reference": "ea35f8f5824531b7e2513b04f517edd0cc9a210e"
+                "reference": "70472b639e5ad9d8a1e2af6705af2da4f6f32f5f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lukasztecza/lightApp/zipball/ea35f8f5824531b7e2513b04f517edd0cc9a210e",
-                "reference": "ea35f8f5824531b7e2513b04f517edd0cc9a210e",
+                "url": "https://api.github.com/repos/lukasztecza/lightApp/zipball/70472b639e5ad9d8a1e2af6705af2da4f6f32f5f",
+                "reference": "70472b639e5ad9d8a1e2af6705af2da4f6f32f5f",
                 "shasum": ""
             },
             "require": {
@@ -103,10 +103,10 @@
                 "php"
             ],
             "support": {
-                "source": "https://github.com/lukasztecza/lightApp/tree/master",
+                "source": "https://github.com/lukasztecza/lightApp/tree/1.1",
                 "issues": "https://github.com/lukasztecza/lightApp/issues"
             },
-            "time": "2018-06-09 16:42:21"
+            "time": "2018-06-15 00:59:35"
         }
     ],
     "packages-dev": [
@@ -582,16 +582,16 @@
         },
         {
             "name": "myclabs/deep-copy",
-            "version": "1.8.0",
+            "version": "1.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/myclabs/DeepCopy.git",
-                "reference": "478465659fd987669df0bd8a9bf22a8710e5f1b6"
+                "reference": "3e01bdad3e18354c3dce54466b7fbe33a9f9f7f8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/478465659fd987669df0bd8a9bf22a8710e5f1b6",
-                "reference": "478465659fd987669df0bd8a9bf22a8710e5f1b6",
+                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/3e01bdad3e18354c3dce54466b7fbe33a9f9f7f8",
+                "reference": "3e01bdad3e18354c3dce54466b7fbe33a9f9f7f8",
                 "shasum": ""
             },
             "require": {
@@ -626,7 +626,7 @@
                 "object",
                 "object graph"
             ],
-            "time": "2018-05-29 17:25:09"
+            "time": "2018-06-11 23:09:50"
         },
         {
             "name": "phar-io/manifest",
@@ -2608,10 +2608,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "lukasztecza/lightapp": 20,
-        "lukasztecza/httpclient": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

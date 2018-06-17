@@ -22,8 +22,8 @@
     ],
     "require": {
         "php": ">=7.1",
-        "lukasztecza/lightApp": "dev-master",
-        "lukasztecza/httpClient": "dev-master"
+        "lukasztecza/lightApp": "1.*",
+        "lukasztecza/httpClient": "1.*"
     },
     "require-dev": {
         "codeception/codeception": "2.3.*"
