@@ -45,7 +45,6 @@ CREATE TABLE IF NOT EXISTS `trade` (
 
 CREATE TABLE IF NOT EXISTS `simulation` (
     `id` INT(11) NOT NULL AUTO_INCREMENT,
-    `instrument` CHAR(7) COLLATE utf8_general_ci NOT NULL,
     `final_balance` DECIMAL(10,5) NOT NULL,
     `max_balance` DECIMAL(10,5) NOT NULL,
     `min_balance` DECIMAL(10,5) NOT NULL,

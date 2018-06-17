@@ -5,16 +5,12 @@ use FxBot\Model\Strategy\RigidStrategyAbstract;
 use FxBot\Model\Service\PriceService;
 use FxBot\Model\Service\IndicatorService;
 
-class RigidTrendingStrategy extends RigidStrategyAbstract
+class RigidRandomStrategy extends RigidStrategyAbstract
 {
-    private $priceService;
-    private $lastPricesPeriod;
-    private $followTrend;
-    private $extremumRange;
     private $lossLockerFactor;
     private $instrument;
 
-    public function __construct(array $priceInstruments, PriceService $priceService, IndicatorService $indicatorService, $params)
+    public function __construct(array $priceInstruments, PriceService $priceService, IndicatorService $indicatorService, array $params)
     {
         foreach ($this->requiredParams() as $requiredParam) {
             if (!array_key_exists($requiredParam, $params)) {
@@ -22,10 +18,6 @@ class RigidTrendingStrategy extends RigidStrategyAbstract
             }
         }
 
-        $this->priceService = $priceService;
-        $this->lastPricesPeriod = $params['lastPricesPeriod'];
-        $this->followTrend = $params['followTrend'];
-        $this->extremumRange = $params['extremumRange'];
         $this->lossLockerFactor = $params['lossLockerFactor'];
         $this->instrument = $params['instrument'];
 
@@ -39,17 +31,15 @@ class RigidTrendingStrategy extends RigidStrategyAbstract
             'singleTransactionRisk',
             'rigidStopLoss',
             'takeProfitMultiplier',
-            'lastPricesPeriod',
-            'followTrend',
-            'extremumRange',
             'lossLockerFactor',
             'instrument'
         ];
     }
 
-    protected function getInstrument() : string
+    protected function getDirection(string $currentDateTime = null) : int
     {
-        return $this->instrument;
+        $direction = rand(0, 1);
+        return $direction === 1 ? 1 : -1;
     }
 
     public function getStrategyParams() : array
@@ -66,11 +56,8 @@ class RigidTrendingStrategy extends RigidStrategyAbstract
         return $this->lossLockerFactor;
     }
 
-    protected function getDirection(string $currentDateTime = null) : int
+    protected function getInstrument() : string
     {
-        $lastPrices = $this->priceService->getLastPricesByPeriod($this->getInstrument(), $this->lastPricesPeriod, $currentDateTime);
-        $channelDirection = $this->getChannelDirection($lastPrices, $this->extremumRange);
-
-        return $this->followTrend ? $channelDirection : -$channelDirection;
+        return $this->instrument;
     }
 }

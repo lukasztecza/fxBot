@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace FxBot\Model\Strategy;
+namespace FxBot\Model\Entity;
 
 class Order
 {
@@ -20,9 +20,9 @@ class Order
     public function __construct(
         string $instrument,
         int $units,
-        string $price,
-        string $takeProfit,
-        string $stopLoss,
+        float $price,
+        float $takeProfit,
+        float $stopLoss,
         string $type = null,
         string $timeInForce = null,
         string $positionFill = null
@@ -47,17 +47,17 @@ class Order
         return $this->units;
     }
 
-    public function getPrice() : string
+    public function getPrice() : float
     {
         return $this->price;
     }
 
-    public function getTakeProfit() : string
+    public function getTakeProfit() : float
     {
         return $this->takeProfit;
     }
 
-    public function getStopLoss() : string
+    public function getStopLoss() : float
     {
         return $this->stopLoss;
     }

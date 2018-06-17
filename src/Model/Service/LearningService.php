@@ -8,17 +8,32 @@ class LearningService
 {
     private const MAX_LEARNING_ITERATIONS = 100;
 
-    private const STRATEGY_TO_LEARN = 'TinyApp\Model\Strategy\RigidAverageDistanceDeviationStrategy';
+    private const STRATEGY_TO_LEARN = 'FxBot\Model\Strategy\RigidFundamentalStrategy';
     private const INITIAL_PARAMS = [
-        'rigidStopLoss' => 0.002,
-        'takeProfitMultiplier' => 2,
-        'lossLockerFactor' => 1,
-        'signalFastAverage' => 50,
-        'signalSlowAverage' => 100,
+        'rigidStopLoss' => 0.001,
+        'takeProfitMultiplier' => 9,
+        'lossLockerFactor' => 2,
+        'signalFastAverage' => 10,
+        'signalSlowAverage' => 30,
         'longFastAverage' => 100,
-        'longSlowAverage' => 500
+        'longSlowAverage' => 200,
+        'extremumRange' => 12,
+        'bankFactor' => 1,
+        'inflationFactor' => 1,
+        'longFastAverage' => 1,
+        'tradeFactor' => 1,
+        'companiesFactor' => 1,
+        'salesFactor' => 1,
+        'unemploymentFactor' => 1,
+        'bankRelativeFactor' => 1
     ];
     private const INSTRUMENT = 'EUR_USD';
+    private const LEARNING_PERIODS = [
+        ['start' => '2014-03-01 00:00:00', 'end' => '2015-03-01 00:00:00'],
+        ['start' => '2015-03-01 00:00:00', 'end' => '2016-03-01 00:00:00'],
+        ['start' => '2016-03-01 00:00:00', 'end' => '2017-03-01 00:00:00'],
+        ['start' => '2017-03-01 00:00:00', 'end' => '2018-03-01 00:00:00']
+    ];
 
     private const PARAM_MODIFICATION_FACTOR = 1.1;
     private const PARAM_MODIFICATION_FACTOR_CHANGE = 0.1;
@@ -50,6 +65,8 @@ class LearningService
         $increase = 1;
         $noImprovementCounter = 0;
         $paramModificationFactor = self::PARAM_MODIFICATION_FACTOR;
+        $this->simulationService->setSimulationStrategies($this->getStrategiesForTest($params));
+        $this->simulationService->setSimulationPeriods(self::LEARNING_PERIODS);
 
         while ($counter++ <= self::MAX_LEARNING_ITERATIONS) {
             if ($counter - 2 && !$this->modifyParamsForStrategy($params, $currentParam, $paramModificationFactor, $increase)) {
@@ -58,7 +75,6 @@ class LearningService
                 continue;
             }
 
-            $this->simulationService->setStrategiesForTest($this->getStrategiesForTest($params));
             $result = $this->simulationService->run();
 
             if (empty($currentSimulationIds)) {
@@ -132,9 +148,12 @@ class LearningService
         return [[
             'className' => self::STRATEGY_TO_LEARN,
             'params' => $params + [
+                'homeCurrency' => 'CAD',
+                'singleTransactionRisk' => 0.005,
                 'instrument' => self::INSTRUMENT,
                 'followTrend' => 0,
-                'lastPricesPeriod' => 'P30D'
+                'lastPricesPeriod' => 'P30D',
+                'lastIndicatorsPeriod' => 'P12M'
             ]
         ]];
     }
