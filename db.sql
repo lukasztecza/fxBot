@@ -75,6 +75,15 @@ CREATE TABLE IF NOT EXISTS `simulation_parameter` (
     CONSTRAINT simulation_id_parameter_id UNIQUE (`simulation_id`, `parameter_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
+CREATE TABLE IF NOT EXISTS `trade_parameter` (
+    `trade_id` INT(11) NOT NULL,
+    `parameter_id` INT(11) NOT NULL,
+    `value` VARCHAR(128) COLLATE utf8_general_ci NOT NULL,
+    FOREIGN KEY (`trade_id`) REFERENCES `trade`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`parameter_id`) REFERENCES `parameter`(`id`) ON DELETE CASCADE,
+    CONSTRAINT trade_id_parameter_id UNIQUE (`trade_id`, `parameter_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
 CREATE TABLE IF NOT EXISTS `learning` (
     `id` INT(11) NOT NULL AUTO_INCREMENT,
     `total` DECIMAL(10,5) NOT NULL,

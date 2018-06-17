@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace FxBot\Model\Service;
 
 use FxBot\Model\Service\SimulationService;
@@ -35,7 +35,7 @@ class LearningService
 
     public function learn() : array
     {
-        $pack = (new \DateTime(null, new \DateTimeZone('UTC')))->format('YmdHis') . bin2hex(random_bytes(8));
+        $pack = (new \DateTime('', new \DateTimeZone('UTC')))->format('YmdHis') . bin2hex(random_bytes(8));
         $counter = 1;
         $params = self::INITIAL_PARAMS;
         $noImprovementLimit = count($params) * 2;

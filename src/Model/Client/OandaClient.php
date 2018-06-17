@@ -1,34 +1,21 @@
-<?php
+<?php declare(strict_types=1);
 namespace FxBot\Model\Client;
 
 use HttpClient\Client\ClientAbstract;
-use FxBot\Model\Strategy\Order;
+use FxBot\Model\Entity\Order;
 
 class OandaClient extends ClientAbstract
 {
-    protected function getClientCurlOptions() : array
-    {
-        return [];
-    }
-
-    protected function getClientResource() : array
-    {
-        return [];
-    }
-
-    protected function getClientQuery() : array
-    {
-        return [];
-    }
-
     protected function getClientHeaders() : array
     {
         return ['Authorization' => 'Bearer ' . $this->options['apiKey']];
     }
 
-    protected function getClientPayload() : array
+    public function getCurrentPrice($instrument) : array
     {
-        return [];
+       $query = ['count' => 1, 'granularity' => 'S5', 'price' => 'BA'];
+
+       return $this->get(['v3' => 'instruments', $instrument => 'candles'], $query);
     }
 
     public function getPrices(string $instrument, string $startDate, string $endDate = null) : array
@@ -52,13 +39,6 @@ class OandaClient extends ClientAbstract
         return $this->get(['v3' => 'accounts', $oandaAccount => 'summary']);
     }
 
-    public function getCurrentPrice($instrument) : array
-    {
-       $query = ['count' => 1, 'granularity' => 'S5', 'price' => 'BA'];
-
-       return $this->get(['v3' => 'instruments', $instrument => 'candles'], $query);
-    }
-
     public function executeTrade(string $oandaAccount, Order $order) : array
     {
         return $this->post(['v3' => 'accounts', $oandaAccount => 'orders'], [], [], $order->getFormatted());
@@ -68,4 +48,6 @@ class OandaClient extends ClientAbstract
     {
         return $this->get(['v3' => 'accounts', $oandaAccount => 'trades']);
     }
+
+    //@TODO add update trade/order
 }

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace FxBot\Model\Service;
 
 use FxBot\Model\Service\FetchingServiceAbstract;
@@ -117,7 +117,7 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
                 }
                 $date = trim($dataChunk[self::DATE_KEY]);
                 $date = substr($date, 3);
-                $date = \DateTime::createFromFormat(self::FOREX_FACTORY_DAY_FORMAT, $date);
+                $date = \DateTime::createFromFormat(self::FOREX_FACTORY_DAY_FORMAT, (string) $date);
                 if (!empty($date)) {
                     $currentDay = $date->format(self::INTERNAL_DAY_FORMAT);
                 }
@@ -159,8 +159,8 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
 
         $endDate = clone $startDate;
         $endDate->add(new \DateInterval(self::INTERVAL));
-        $currentDate = new \DateTime(null, new \DateTimeZone('UTC'));
-        if ($endDate > new \DateTime(null, new \DateTimeZone('UTC'))) {
+        $currentDate = new \DateTime('', new \DateTimeZone('UTC'));
+        if ($endDate > new \DateTime('', new \DateTimeZone('UTC'))) {
             $endDate = $currentDate;
         }
 

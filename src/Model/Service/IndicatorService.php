@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace FxBot\Model\Service;
 
 use FxBot\Model\Repository\IndicatorRepository;
@@ -75,7 +75,7 @@ class IndicatorService
     public function getLastIndicatorsByPeriod(array $instruments, string $period, string $currentDateTime = null) : array
     {
         try {
-            $startDateTime = $currentDateTime ? new \DateTime($currentDateTime,new \DateTimeZone('UTC')) : new \DateTime(null, \DateTimeZone('UTC'));
+            $startDateTime = $currentDateTime ? new \DateTime($currentDateTime,new \DateTimeZone('UTC')) : new \DateTime('', \DateTimeZone('UTC'));
             $startDateTime = $startDateTime->sub(new \DateInterval($period));
             return $this->indicatorRepository->getIndicatorsForDates($instruments, $startDateTime->format('Y-m-d H:i:s'), $currentDateTime);
         } catch(\Throwable $e) {

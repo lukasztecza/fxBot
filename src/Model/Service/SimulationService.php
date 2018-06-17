@@ -1,11 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 namespace FxBot\Model\Service;
 
 use FxBot\Model\Service\PriceService;
 use FxBot\Model\Strategy\StrategyFactory;
 use FxBot\Model\Repository\TradeRepository;
 use FxBot\Model\Repository\SimulationRepository;
-use FxBot\Model\Strategy\Order;
+use FxBot\Model\Entity\Order;
 use FxBot\Model\Strategy\StrategyInterface;
 
 class SimulationService
@@ -409,7 +409,7 @@ class SimulationService
                 'losses' => $losses,
                 'simulationStart' => $simulationStart,
                 'simulationEnd' => $simulationEnd,
-                'datetime' => (new \DateTime(null, new \DateTimeZone('UTC')))->format('Y-m-d H:i:s'),
+                'datetime' => (new \DateTime('', new \DateTimeZone('UTC')))->format('Y-m-d H:i:s'),
             ]);
         } catch (\Throwable $e) {
             trigger_error('Failed to save simulation result with message ' . $e->getMessage(), E_USER_NOTICE);
