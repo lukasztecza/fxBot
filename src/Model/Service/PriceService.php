@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace FxBot\Model\Service;
 
 use FxBot\Model\Repository\PriceRepository;
@@ -54,7 +54,7 @@ class PriceService
     {
         try {
             if (is_null($currentDateTime)) {
-                $currentDateTime = new \DateTime(null, new \DateTimeZone('UTC'));
+                $currentDateTime = new \DateTime('', new \DateTimeZone('UTC'));
             } else {
                 $currentDateTime = new \DateTime($currentDateTime, new \DateTimeZone('UTC'));
             }

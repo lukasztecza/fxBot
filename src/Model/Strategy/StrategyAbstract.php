@@ -1,13 +1,13 @@
-<?php
+<?php declare(strict_types=1);
 namespace FxBot\Model\Strategy;
 
 use FxBot\Model\Strategy\StrategyInterface;
-use FxBot\Model\Strategy\Order;
+use FxBot\Model\Entity\Order;
 
 abstract class StrategyAbstract implements StrategyInterface
 {
     private const HOME_CURRENCY = 'CAD';
-    private const SINGLE_TRANSACTION_RISK = 0.001; //@TODO modigy it to 0.01 after test phase
+    private const SINGLE_TRANSACTION_RISK = 0.001; //@TODO move it to parameters or smth
 
     /*
     This calculation follows the following formula:

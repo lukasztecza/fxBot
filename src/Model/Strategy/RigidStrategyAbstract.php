@@ -1,8 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 namespace FxBot\Model\Strategy;
 
 use FxBot\Model\Strategy\StrategyAbstract;
-use FxBot\Model\Strategy\Order;
+use FxBot\Model\Entity\Order;
 
 abstract class RigidStrategyAbstract extends StrategyAbstract
 {

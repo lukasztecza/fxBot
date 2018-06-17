@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace FxBot\Model\Service;
 
 use HttpClient\ClientFactory;
@@ -68,6 +68,10 @@ class TradeService
 
         try {
             $result = $this->oandaClient->executeTrade($this->oandaAccount, $order);
+            //@TODO get price of the order from result do not assume the price got from initial call
+            //this price should be set as actual price -> add setter for it
+            //beside this price store also parameters in trade_parameters table
+            //consider storing some external order id for it in trade table
         } catch(\Throwable $e) {
             trigger_error('Failed to execute trade with message ' . $e->getMessage() . ' with order ' . var_export($order, true), E_USER_NOTICE);
 
@@ -83,7 +87,7 @@ class TradeService
                 'takeProfit' => $order->getTakeProfit(),
                 'stopLoss' => $order->getStopLoss(),
                 'balance' => $balance,
-                'datetime' => (new \DateTime(null, new \DateTimeZone('UTC')))->format('Y-m-d H:i:s')
+                'datetime' => (new \DateTime('', new \DateTimeZone('UTC')))->format('Y-m-d H:i:s')
             ]);
         } catch(\Throwable $e) {
             trigger_error('Failed to save trade for order ' . var_export($order, true) . ' with message ' . $e->getMessage(), E_USER_NOTICE);

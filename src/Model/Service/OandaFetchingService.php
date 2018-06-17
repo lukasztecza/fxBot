@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace FxBot\Model\Service;
 
 use FxBot\Model\Service\FetchingServiceInterface;
@@ -187,7 +187,7 @@ class OandaFetchingService implements FetchingServiceInterface
 
         $endDate = clone $startDate;
         $endDate->add(new \DateInterval($interval));
-        if ($endDate > new \DateTime(null, new \DateTimeZone('UTC'))) {
+        if ($endDate > new \DateTime('', new \DateTimeZone('UTC'))) {
             $endDate = null;
         }
 
@@ -207,7 +207,7 @@ class OandaFetchingService implements FetchingServiceInterface
     private function getPeriodByDateTimes(\DateTime $startDate, \DateTime $endDate = null) : int
     {
         if (empty($endDate)) {
-            $endDate = new \DateTime(null, new \DateTimeZone('UTC'));
+            $endDate = new \DateTime('', new \DateTimeZone('UTC'));
         }
 
         $difference = $startDate->diff($endDate);
