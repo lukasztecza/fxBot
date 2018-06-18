@@ -8,7 +8,7 @@ class LearningService
 {
     private const MAX_LEARNING_ITERATIONS = 100;
 
-    private const STRATEGY_TO_LEARN = 'FxBot\Model\Strategy\RigidFundamentalStrategy';
+    private const STRATEGY_TO_LEARN = 'FxBot\Model\Strategy\RigidTrendingStrategy';
     private const INITIAL_PARAMS = [
         'rigidStopLoss' => 0.001,
         'takeProfitMultiplier' => 9,

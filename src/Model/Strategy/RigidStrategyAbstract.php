@@ -37,11 +37,11 @@ abstract class RigidStrategyAbstract extends StrategyAbstract
         }
 
         if ($direction === 1) {
-            $tradePrice = $prices[$this->getInstrument()]['ask'];
+            $tradePrice = (float) $prices[$this->getInstrument()]['ask'];
             $takeProfit = ($tradePrice + ($this->getTakeProfitMultiplier() * $rigidStopLoss));
             $stopLoss = ($tradePrice - $rigidStopLoss);
         } elseif ($direction === -1) {
-            $tradePrice = $prices[$this->getInstrument()]['bid'];
+            $tradePrice = (float) $prices[$this->getInstrument()]['bid'];
             $takeProfit = ($tradePrice - ($this->getTakeProfitMultiplier() * $rigidStopLoss));
             $stopLoss = ($tradePrice + $rigidStopLoss);
         } else {
@@ -61,7 +61,7 @@ abstract class RigidStrategyAbstract extends StrategyAbstract
 
         return new Order($this->getInstrument(), $units, $tradePrice, $takeProfit, $stopLoss);
     }
-
+//TODO instead of lossLockerFactor there should be orderModification update that
 /*    public function getOrderModification(
         string $instrument,
 
@@ -70,7 +70,7 @@ abstract class RigidStrategyAbstract extends StrategyAbstract
         string $tradeId,
         string $currentDateTime = null
     ) : ?OrderModification {
-        $price = $this->getPriceModification('blah todo finish it', $currentStopLoss, $currentTakeProfit);
+        $price = $this->getPriceModification('todo finish it', $currentStopLoss, $currentTakeProfit);
 
         return !empty($price) ? new OrderModification($orderId, $tradeId, $price) : null;
     }
@@ -87,7 +87,14 @@ abstract class RigidStrategyAbstract extends StrategyAbstract
 
     abstract public function getStrategyParams() : array;
 
-    abstract protected function getInstrument() : string;
+    protected function getInstrument() : string
+    {
+        if (!isset($this->instrument)) {
+            throw new \Exception('Instrument not set for strategy nor selected by strategy');
+        }
+
+        return $this->instrument;
+    }
 
     abstract protected function getDirection(string $currentDateTime = null) : int;
 

@@ -7,9 +7,9 @@ use FxBot\Model\Service\IndicatorService;
 
 class RigidFundamentalStrategy extends RigidStrategyAbstract
 {
+    protected $instrument;
     private $instruments;
     private $priceInstruments;
-    private $instrument;
     private $indicatorService;
     private $lastIndicatorsPeriod;
     private $bankFactor;
@@ -49,7 +49,12 @@ class RigidFundamentalStrategy extends RigidStrategyAbstract
         $this->bankRelativeFactor = $params['bankRelativeFactor'];
         $this->lossLockerFactor = $params['lossLockerFactor'];
 
-        parent::__construct($params['homeCurrency'], $params['singleTransactionRisk'], $params['rigidStopLoss'], $params['takeProfitMultiplier']);
+        parent::__construct(
+            (string) $params['homeCurrency'],
+            (float) $params['singleTransactionRisk'],
+            (float) $params['rigidStopLoss'],
+            (float) $params['takeProfitMultiplier']
+        );
     }
 
     private function requiredParams() : array
@@ -158,11 +163,6 @@ class RigidFundamentalStrategy extends RigidStrategyAbstract
         asort($instrumentScores);
 
         return $instrumentScores;
-    }
-
-    protected function getInstrument() : string
-    {
-        return $this->instrument;
     }
 
     public function getStrategyParams() : array

@@ -42,6 +42,7 @@ class TradeService
         if (empty($accountDetails)) {
             return ['status' => false, 'message' => 'Could not get account details'];
         }
+$this->handleExistingTrade((float) $accountDetails['balance']);//TODO remove this
         if ($accountDetails['openPositionCount'] >= self::MAX_ALLOWED_OPEN_POSITIONS) {
             $updatedText = '';
             if ($this->handleExistingTrade($accountDetails['balance'])) {
@@ -73,10 +74,6 @@ class TradeService
 
         try {
             $result = $this->oandaClient->executeTrade($this->oandaAccount, $order);
-            //@TODO get price of the order from result do not assume the price got from initial call
-            //this price should be set as actual price -> add setter for it
-            //beside this price store also parameters in trade_parameters table
-            //consider storing some external order id for it in trade table
         } catch(\Throwable $e) {
             trigger_error('Failed to execute trade with message ' . $e->getMessage() . ' with order ' . var_export($order, true), E_USER_NOTICE);
 
@@ -84,7 +81,18 @@ class TradeService
         }
 
         try {
+            $parameters = $strategy->getStrategyParams();
+            if (!empty($result['orderFillTransaction']['orderID'])) {
+                $parameters['orderId'] = $result['orderFillTransaction']['orderID'];
+            }
+            if (!empty($result['orderFillTransaction']['tradeOpened']['tradeID'])) {
+                $parameters['tradeId'] = $result['orderFillTransaction']['tradeOpened']['tradeID'];
+            }
+            if (!empty($result['orderFillTransaction']['price'])) {
+                $parameters['executedPrice'] = $result['orderFillTransaction']['price'];
+            }
             $this->tradeRepository->saveTrade([
+                'parameters' => $parameters,
                 'account' => $this->oandaAccount,
                 'instrument' => $order->getInstrument(),
                 'units' => $order->getUnits(),
@@ -137,17 +145,21 @@ class TradeService
     private function handleExistingTrade(float $balance) : bool
     {
         $trade = $this->getTradeDetails();
-
-        if (empty($trade)) {
+/*        if (empty($trade)) {
             return false;
-        }
-//@TODO decide if it should be done here or maybe in strategy modify order and save it maybe
-        $strategy = $this->strategyFactory->getStrategy($this->selectedStrategy, $this->strategyParams);
-
+        }*/
+var_dump($trade);exit;
+/*        $strategy = $this->strategyFactory->getStrategy($this->selectedStrategy, $this->strategyParams);
+        $orderModification = $strategy->getOrderModification(
+            $trade['id'],
+            $trade['stopLossOrder']['id'],
+            $trade['stopLossOrder']['price']
+        );
+*/
         $orderModification = new \TinyApp\Model\Strategy\OrderModification(
             $trade['id'],
             $trade['stopLossOrder']['id'],
-            $trade['stopLossOrder']['price'] + 0.0031//this should be changed
+            $trade['stopLossOrder']['price'] + 0.0031
         );
         $result = $this->oandaClient->modifyTrade($this->oandaAccount, $orderModification);
 
