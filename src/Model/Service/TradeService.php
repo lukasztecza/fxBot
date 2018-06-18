@@ -145,22 +145,25 @@ $this->handleExistingTrade((float) $accountDetails['balance']);//TODO remove thi
     private function handleExistingTrade(float $balance) : bool
     {
         $trade = $this->getTradeDetails();
-/*        if (empty($trade)) {
+        if (empty($trade)) {
             return false;
-        }*/
-var_dump($trade);exit;
-/*        $strategy = $this->strategyFactory->getStrategy($this->selectedStrategy, $this->strategyParams);
+        }
+
+        $currentPrices = $this->getCurrentPrice($trade['instrument']);
+        if (empty($currentPrices)) {
+            return ['status' => false, 'message' => 'Could not get current prices'];
+        }
+        $strategy = $this->strategyFactory->getStrategy($this->selectedStrategy, $this->strategyParams);
         $orderModification = $strategy->getOrderModification(
             $trade['id'],
             $trade['stopLossOrder']['id'],
-            $trade['stopLossOrder']['price']
+            (float) $trade['price'],
+            (float) $trade['stopLossOrder']['price'],
+            (float) $trade['takeProfitOrder']['price'],
+            $currentPrices
         );
-*/
-        $orderModification = new \TinyApp\Model\Strategy\OrderModification(
-            $trade['id'],
-            $trade['stopLossOrder']['id'],
-            $trade['stopLossOrder']['price'] + 0.0031
-        );
+var_dump($orderModification);exit;
+//call exists but worng trade and params are passed TODO update it
         $result = $this->oandaClient->modifyTrade($this->oandaAccount, $orderModification);
 
         var_dump($result);exit;
@@ -197,17 +200,7 @@ var_dump($trade);exit;
         $prices = [];
         try {
             foreach ($this->priceInstruments as $instrument) {
-                $response = $this->oandaClient->getCurrentPrice($instrument);
-                if (empty($response['body']['candles'][0]['bid']['c']) || empty($response['body']['candles'][0]['ask']['c'])) {
-                    trigger_error('Failed to get current price for ' . $instrument, E_USER_NOTICE);
-
-                    return [];
-                }
-
-                $prices[$instrument] = [
-                    'ask' => $response['body']['candles'][0]['ask']['c'],
-                    'bid' => $response['body']['candles'][0]['bid']['c']
-                ];
+                $prices[$instrument] = $this->getCurrentPrice($instrument);
             }
         } catch (\Throwable $e) {
             trigger_error('Failed to get current prices with message ' . $e->getMessage(), E_USER_NOTICE);
@@ -216,5 +209,26 @@ var_dump($trade);exit;
         }
 
         return $prices;
+    }
+
+    private function getCurrentPrice(string $instrument) : array
+    {
+        try {
+            $response = $this->oandaClient->getCurrentPrice($instrument);
+            if (empty($response['body']['candles'][0]['bid']['c']) || empty($response['body']['candles'][0]['ask']['c'])) {
+                trigger_error('Failed to get current price for ' . $instrument, E_USER_NOTICE);
+
+                return [];
+            }
+
+            return [
+                'ask' => $response['body']['candles'][0]['ask']['c'],
+                'bid' => $response['body']['candles'][0]['bid']['c']
+            ];
+        } catch (\Throwable $e) {
+            trigger_error('Failed to get current price for ' . $instrument . ' with message ' . $e->getMessage(), E_USER_NOTICE);
+
+            return [];
+        }
     }
 }

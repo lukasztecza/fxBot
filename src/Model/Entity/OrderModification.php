@@ -32,12 +32,12 @@ class OrderModification
         $this->triggerCondition = $triggerCondition ?? self::DEFAULT_TRIGGER_CONDITION;
     }
 
-    public function getOrderId() : int
+    public function getOrderId() : string
     {
         return $this->orderId;
     }
 
-    public function getTradeId() : int
+    public function getTradeId() : string
     {
         return $this->tradeId;
     }

@@ -3,6 +3,7 @@ namespace FxBot\Model\Strategy;
 
 use FxBot\Model\Strategy\StrategyAbstract;
 use FxBot\Model\Entity\Order;
+use FxBot\Model\Entity\OrderModification;
 
 abstract class RigidStrategyAbstract extends StrategyAbstract
 {
@@ -62,19 +63,19 @@ abstract class RigidStrategyAbstract extends StrategyAbstract
         return new Order($this->getInstrument(), $units, $tradePrice, $takeProfit, $stopLoss);
     }
 //TODO instead of lossLockerFactor there should be orderModification update that
-/*    public function getOrderModification(
-        string $instrument,
-
+    public function getOrderModification(
+        string $orderId,
+        string $tradeId,
+        float $openPrice,
         float $currentStopLoss,
         float $currentTakeProfit,
-        string $tradeId,
-        string $currentDateTime = null
+        array $currentPrices
     ) : ?OrderModification {
-        $price = $this->getPriceModification('todo finish it', $currentStopLoss, $currentTakeProfit);
+        $price = $this->getPriceModification($openPrice, $currentStopLoss, $currentTakeProfit, $currentPrices);
 
         return !empty($price) ? new OrderModification($orderId, $tradeId, $price) : null;
     }
-*/
+
     public function getRigidStopLoss() : float
     {
         return $this->rigidStopLoss;
