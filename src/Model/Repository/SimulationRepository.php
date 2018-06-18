@@ -37,11 +37,11 @@ class SimulationRepository extends RepositoryAbstract
 
             $this->getWrite()->prepare(
                 'INSERT INTO `simulation_parameter` (`simulation_id`, `parameter_id`, `value`)
-                SELECT :simulation_id, p.`id`, :value FROM `parameter` AS p WHERE p.`name` = :name'
+                SELECT :simulationId, p.`id`, :value FROM `parameter` AS p WHERE p.`name` = :name'
             );
             foreach ($simulation['parameters'] as $name => $value) {
                 $this->getWrite()->execute(null, [
-                    'simulation_id' => $affectedId,
+                    'simulationId' => $affectedId,
                     'value' => $value,
                     'name' => $name
                 ]);

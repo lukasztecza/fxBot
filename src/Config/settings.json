@@ -46,6 +46,8 @@
     },
 
     "strategyParams": {
+        "homeCurrency": "%homeCurrency%",
+        "singleTransactionRisk": "%singleTransactionRisk%",
         "rigidStopLoss": "%rigidStopLoss%",
         "takeProfitMultiplier": "%takeProfitMultiplier%",
         "longFastAverage": "%longFastAverage%",
@@ -53,7 +55,6 @@
         "extremumRange": "%extremumRange%",
         "signalFastAverage": "%signalFastAverage%",
         "signalSlowAverage": "%signalSlowAverage%",
-        "averageTrend": "%averageTrend%",
         "bankFactor": "%bankFactor%",
         "inflationFactor": "%inflationFactor%",
         "tradeFactor": "%tradeFactor%",
@@ -63,6 +64,7 @@
         "bankRelativeFactor": "%bankRelativeFactor%",
         "followTrend": "%followTrend%",
         "lastPricesPeriod": "%lastPricesPeriod%",
+        "lossLockerFactor": "%lossLockerFactor%",
         "instrument": "%instrument%"
     }
 }

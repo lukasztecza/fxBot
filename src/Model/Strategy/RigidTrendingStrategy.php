@@ -7,12 +7,12 @@ use FxBot\Model\Service\IndicatorService;
 
 class RigidTrendingStrategy extends RigidStrategyAbstract
 {
+    protected $instrument;
     private $priceService;
     private $lastPricesPeriod;
     private $followTrend;
     private $extremumRange;
     private $lossLockerFactor;
-    private $instrument;
 
     public function __construct(array $priceInstruments, PriceService $priceService, IndicatorService $indicatorService, $params)
     {
@@ -29,7 +29,12 @@ class RigidTrendingStrategy extends RigidStrategyAbstract
         $this->lossLockerFactor = $params['lossLockerFactor'];
         $this->instrument = $params['instrument'];
 
-        parent::__construct($params['homeCurrency'], $params['singleTransactionRisk'], $params['rigidStopLoss'], $params['takeProfitMultiplier']);
+        parent::__construct(
+            (string) $params['homeCurrency'],
+            (float) $params['singleTransactionRisk'],
+            (float) $params['rigidStopLoss'],
+            (float) $params['takeProfitMultiplier']
+        );
     }
 
     private function requiredParams() : array
@@ -45,11 +50,6 @@ class RigidTrendingStrategy extends RigidStrategyAbstract
             'lossLockerFactor',
             'instrument'
         ];
-    }
-
-    protected function getInstrument() : string
-    {
-        return $this->instrument;
     }
 
     public function getStrategyParams() : array

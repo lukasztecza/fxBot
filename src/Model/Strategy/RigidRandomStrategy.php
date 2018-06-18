@@ -7,8 +7,8 @@ use FxBot\Model\Service\IndicatorService;
 
 class RigidRandomStrategy extends RigidStrategyAbstract
 {
+    protected $instrument;
     private $lossLockerFactor;
-    private $instrument;
 
     public function __construct(array $priceInstruments, PriceService $priceService, IndicatorService $indicatorService, array $params)
     {
@@ -21,7 +21,12 @@ class RigidRandomStrategy extends RigidStrategyAbstract
         $this->lossLockerFactor = $params['lossLockerFactor'];
         $this->instrument = $params['instrument'];
 
-        parent::__construct($params['homeCurrency'], $params['singleTransactionRisk'], $params['rigidStopLoss'], $params['takeProfitMultiplier']);
+        parent::__construct(
+            (string) $params['homeCurrency'],
+            (float) $params['singleTransactionRisk'],
+            (float) $params['rigidStopLoss'],
+            (float) $params['takeProfitMultiplier']
+        );
     }
 
     private function requiredParams() : array
@@ -54,10 +59,5 @@ class RigidRandomStrategy extends RigidStrategyAbstract
 
     public function getLossLockerFactor() {
         return $this->lossLockerFactor;
-    }
-
-    protected function getInstrument() : string
-    {
-        return $this->instrument;
     }
 }

@@ -11,7 +11,6 @@ use FxBot\Model\Strategy\StrategyInterface;
 class SimulationService
 {
     private const INITIAL_TEST_BALANCE = 100;
-    private const SINGLE_TRANSACTION_RISK = 0.005;
     private const MAX_SPREAD = 0.0003;
     private const MAX_ITERATIONS_PER_STRATEGY = 4000000;
     private const SIMULATION_STEP = 'PT20M';
@@ -315,7 +314,6 @@ class SimulationService
             $parameters = $strategyParams['params'];
             $parameters['strategy'] = substr($strategyParams['className'], strrpos($strategyParams['className'], '\\') + 1);
             $simulationIds[] = $this->simulationRepository->saveSimulation([
-                'instrument' => $strategyParams['params']['instrument'],
                 'parameters' => $parameters,
                 'finalBalance' => $balance,
                 'minBalance' => $minBalance,
