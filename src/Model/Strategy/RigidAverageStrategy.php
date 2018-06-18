@@ -97,11 +97,17 @@ class RigidAverageStrategy extends RigidStrategyAbstract
         }
     }
 
-/*    protected function getPriceModification($currentStopLoss, $currentTakeProfit, $currentDateTime = null) : float
+    protected function getPriceModification(float $openPrice, float $currentStopLoss, float $currentTakeProfit, array $currentPrices) : ?float
     {
-        //TODO finish this
+        if ($currentTakeProfit > $currentStopLoss && $currentPrices['bid'] > $openPrice + 0.0015) {
+            return $openPrice;
+        } elseif ($currentTakeProfit < $currentStopLoss && $currentPrices['ask'] < $openPrice - 0.0015) {
+            return $openPrice;
+        }
+
+        return null;
     }
-*/
+
     public function getStrategyParams() : array
     {
         $return['className'] = get_class($this);
