@@ -42,11 +42,13 @@ class TradeService
         if (empty($accountDetails)) {
             return ['status' => false, 'message' => 'Could not get account details'];
         }
-$this->handleExistingTrade((float) $accountDetails['balance']);//TODO remove this
+//TODO test handle modification and execute trade
         if ($accountDetails['openPositionCount'] >= self::MAX_ALLOWED_OPEN_POSITIONS) {
             $updatedText = '';
             if ($this->handleExistingTrade($accountDetails['balance'])) {
                 $updatedText = ', updated existing trade blocking loss';
+            } else {
+                $updatedText = ', did not update existing trade';
             }
 
             return ['status' => true, 'message' => 'Max allowed open positions reached' . $updatedText];
@@ -59,38 +61,35 @@ $this->handleExistingTrade((float) $accountDetails['balance']);//TODO remove thi
         }
 
         $strategy = $this->strategyFactory->getStrategy($this->selectedStrategy, $this->strategyParams);
-
         try {
             $order = $strategy->getOrder($prices, $balance);
-        } catch(\Throwable $e) {
+        } catch (\Throwable $e) {
             trigger_error('Failed to build order with message ' . $e->getMessage(), E_USER_NOTICE);
 
             return ['status' => false, 'message' => 'Could not create order'];
         }
-
         if (empty($order)) {
             return ['status' => false, 'message' => 'Could not build order'];
         }
 
         try {
             $result = $this->oandaClient->executeTrade($this->oandaAccount, $order);
-        } catch(\Throwable $e) {
+        } catch (\Throwable $e) {
             trigger_error('Failed to execute trade with message ' . $e->getMessage() . ' with order ' . var_export($order, true), E_USER_NOTICE);
 
             return ['status' => false, 'message' => 'Got exception trying to execute trade  prices'];
         }
+        if (
+            empty($result['orderFillTransaction']['tradeOpened']['tradeID'] ||
+            empty($result['orderFillTransaction']['price']
+        ) {
+            return ['status' => false, 'message' => 'Failed to execute trade got unexpexted response'];
+        }
 
         try {
             $parameters = $strategy->getStrategyParams();
-            if (!empty($result['orderFillTransaction']['orderID'])) {
-                $parameters['orderId'] = $result['orderFillTransaction']['orderID'];
-            }
-            if (!empty($result['orderFillTransaction']['tradeOpened']['tradeID'])) {
-                $parameters['tradeId'] = $result['orderFillTransaction']['tradeOpened']['tradeID'];
-            }
-            if (!empty($result['orderFillTransaction']['price'])) {
-                $parameters['executedPrice'] = $result['orderFillTransaction']['price'];
-            }
+            $parameters['tradeId'] = $result['orderFillTransaction']['tradeOpened']['tradeID'];
+            $parameters['executedPrice'] = $result['orderFillTransaction']['price'];
             $this->tradeRepository->saveTrade([
                 'parameters' => $parameters,
                 'account' => $this->oandaAccount,
@@ -102,7 +101,7 @@ $this->handleExistingTrade((float) $accountDetails['balance']);//TODO remove thi
                 'balance' => $balance,
                 'datetime' => (new \DateTime('', new \DateTimeZone('UTC')))->format('Y-m-d H:i:s')
             ]);
-        } catch(\Throwable $e) {
+        } catch (\Throwable $e) {
             trigger_error('Failed to save trade for order ' . var_export($order, true) . ' with message ' . $e->getMessage(), E_USER_NOTICE);
 
             return ['status' => false, 'message' => 'Got exception trying to save  execute trade  prices'];
@@ -151,8 +150,9 @@ $this->handleExistingTrade((float) $accountDetails['balance']);//TODO remove thi
 
         $currentPrices = $this->getCurrentPrice($trade['instrument']);
         if (empty($currentPrices)) {
-            return ['status' => false, 'message' => 'Could not get current prices'];
+            return false;
         }
+
         $strategy = $this->strategyFactory->getStrategy($this->selectedStrategy, $this->strategyParams);
         $orderModification = $strategy->getOrderModification(
             $trade['id'],
@@ -162,11 +162,36 @@ $this->handleExistingTrade((float) $accountDetails['balance']);//TODO remove thi
             (float) $trade['takeProfitOrder']['price'],
             $currentPrices
         );
-var_dump($orderModification);exit;
-//call exists but worng trade and params are passed TODO update it
-        $result = $this->oandaClient->modifyTrade($this->oandaAccount, $orderModification);
+        if (empty($orderModification)) {
+            return false;
+        }
 
-        var_dump($result);exit;
+        try {
+            $result = $this->oandaClient->modifyTrade($this->oandaAccount, $orderModification);
+        } catch (\Throwable $e) {
+            trigger_error('Failed to modify trade with message ' . $e->getMessage(), E_USER_NOTICE);
+
+            return false;
+        }
+        if (empty($result['body']['orderCreateTransaction']['price'])) {
+            return false;
+        }
+
+        try {
+            $parameters['executedPrice'] = $result['orderFillTransaction']['price'];
+            $this->tradeRepository->updateTrade(
+                $trade['id'],
+                [
+                    'modifiedPrice' => $result['body']['orderCreateTransaction']['price']
+                ]
+            );
+        } catch (\Throwable $e) {
+            trigger_error('Failed to store trade modification with message ' . $e->getMessage(), E_USER_NOTICE);
+
+            return false;
+        }
+
+        return true;
     }
 
     private function getTradeDetails() : array
@@ -177,6 +202,7 @@ var_dump($orderModification);exit;
             switch (true) {
                 case $response['info']['http_code'] !== 200:
                     trigger_error('Failed to get valid response ' . var_export($response, true), E_USER_NOTICE);
+
                     return [];
                 case (
                     !isset($response['body']['trades'][0]['id']) ||
@@ -184,6 +210,7 @@ var_dump($orderModification);exit;
                     !isset($response['body']['trades'][0]['stopLossOrder']['price'])
                 ):
                     trigger_error('Failed to get expected trade details in response ' . var_export($response, true), E_USER_NOTICE);
+
                     return [];
             }
         } catch (\Throwable $e) {
@@ -198,14 +225,12 @@ var_dump($orderModification);exit;
     private function getCurrentPrices() : array
     {
         $prices = [];
-        try {
-            foreach ($this->priceInstruments as $instrument) {
-                $prices[$instrument] = $this->getCurrentPrice($instrument);
+        foreach ($this->priceInstruments as $instrument) {
+            $result = $this->getCurrentPrice($instrument);
+            if (empty($result)) {
+                return [];
             }
-        } catch (\Throwable $e) {
-            trigger_error('Failed to get current prices with message ' . $e->getMessage(), E_USER_NOTICE);
-
-            return [];
+            $prices[$instrument] = $result;
         }
 
         return $prices;

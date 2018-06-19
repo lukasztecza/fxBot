@@ -50,6 +50,13 @@ class OandaClient extends ClientAbstract
         return $this->get(['v3' => 'accounts', $oandaAccount => 'trades'], ['state' => 'OPEN']);
     }
 
+    public function getOrders(string $oandaAccount) : array
+    {
+        return $this->get(
+            ['v3' => 'accounts', $oandaAccount => 'orders']
+        );
+    }
+
     public function modifyTrade(string $oandaAccount, OrderModification $orderModification) : array
     {
         return $this->put(

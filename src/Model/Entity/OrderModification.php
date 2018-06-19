@@ -7,39 +7,37 @@ class OrderModification
     private const DEFAULT_STOP_TIME_IN_FORCE = 'GTC';
     private const DEFAULT_TRIGGER_CONDITION = 'DEFAULT';
 
-    private $orderId;
     private $tradeId;
+    private $orderId;
     private $price;
-    private $takeProfit;
-    private $stopLoss;
     private $type;
     private $timeInForce;
     private $positionFill;
 
     public function __construct(
-        string $orderId,
         string $tradeId,
+        string $orderId,
         float $price,
         string $type = null,
         string $timeInForce = null,
         string $triggerCondition = null
     ) {
-        $this->orderId = $orderId;
         $this->tradeId = $tradeId;
+        $this->orderId = $orderId;
         $this->price = $price;
         $this->type = $type ?? self::DEFAULT_TYPE;
         $this->timeInForce = $timeInForce ?? self::DEFAULT_STOP_TIME_IN_FORCE;
         $this->triggerCondition = $triggerCondition ?? self::DEFAULT_TRIGGER_CONDITION;
     }
 
-    public function getOrderId() : string
-    {
-        return $this->orderId;
-    }
-
     public function getTradeId() : string
     {
         return $this->tradeId;
+    }
+
+    public function getOrderId() : string
+    {
+        return $this->orderId;
     }
 
     public function getPrice() : float
