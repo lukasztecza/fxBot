@@ -99,5 +99,5 @@ abstract class RigidStrategyAbstract extends StrategyAbstract
 
     abstract protected function getDirection(string $currentDateTime = null) : int;
 
-//    abstract protected function getPriceModification(string $currentDateTime = null, string $selectedInstrument = null) : float;
+    abstract protected function getPriceModification(float $openPrice, float $currentStopLoss, float $currentTakeProfit, array $currentPrices) : ?float;
 }

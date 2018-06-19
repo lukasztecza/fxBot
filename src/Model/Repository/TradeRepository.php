@@ -56,7 +56,34 @@ class TradeRepository extends RepositoryAbstract
         }
         $this->getWrite()->clean();
 
-        return (int)$affectedId;
+        return (int) $affectedId;
+    }
+
+    public function updateTrade(string $tradeId, array $params) : int
+    {
+        $this->getWrite()->prepare(
+            'INSERT INTO `parameter` (`name`) VALUES (:name)
+            ON DUPLICATE KEY UPDATE `id` = `id`'
+        );
+        foreach ($params as $name => $value) {
+            $this->getWrite()->execute(null, [
+                'name' => $name
+            ]);
+        }
+
+        $this->getWrite()->prepare(
+            'INSERT INTO `trade_parameter` (`trade_id`, `parameter_id`, `value`)
+            SELECT :tradeId, p.`id`, :value FROM `parameter` AS p WHERE p.`name` = :name'
+        );
+        foreach ($params as $name => $value) {
+            $this->getWrite()->execute(null, [
+                'tradeId' => $tradeId,
+                'value' => $value,
+                'name' => $name
+            ]);
+        }
+
+        return (int) $affectedId;
     }
 
     public function getTrades(string $account, int $page, int $perPage) : array
