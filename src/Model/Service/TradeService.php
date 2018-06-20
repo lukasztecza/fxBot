@@ -8,7 +8,7 @@ use FxBot\Model\Repository\TradeRepository;
 class TradeService
 {
     private const MAX_ALLOWED_OPEN_POSITIONS = 1;
-    private const PER_PAGE = 2;
+    private const PER_PAGE = 10;
 
     private $priceInstruments;
     private $oandaClient;
@@ -79,22 +79,23 @@ class TradeService
 
             return ['status' => false, 'message' => 'Got exception trying to execute trade  prices'];
         }
-//@TODO TAKE_PROFIT_ON_FILL_PRICE_PRECISION_EXCEEDED this error sometimes occures <- strip prices sent to oanda to 4 digits after comma        
-var_dump($response);
+
         if (
             empty($response['body']['orderFillTransaction']['tradeOpened']['tradeID']) ||
             empty($response['body']['orderFillTransaction']['price'])
         ) {
+            trigger_error('Got unexpected response structure ' . var_export($response, true), E_USER_NOTICE);
+
             return ['status' => false, 'message' => 'Failed to execute trade got unexpexted response'];
         }
 
         try {
-            $parameters = $strategy->getStrategyParams();
-            $parameters['tradeId'] = $response['body']['orderFillTransaction']['tradeOpened']['tradeID'];
+            $parameters = $strategy->getStrategyParams()['params'];
             $parameters['executedPrice'] = $response['body']['orderFillTransaction']['price'];
             $this->tradeRepository->saveTrade([
                 'parameters' => $parameters,
                 'account' => $this->oandaAccount,
+                'externalId' => $response['body']['orderFillTransaction']['tradeOpened']['tradeID'],
                 'instrument' => $order->getInstrument(),
                 'units' => $order->getUnits(),
                 'price' => $order->getPrice(),
@@ -182,22 +183,22 @@ var_dump($response);
         }
 
         try {
-            $result = $this->oandaClient->modifyTrade($this->oandaAccount, $orderModification);
+            $response = $this->oandaClient->modifyTrade($this->oandaAccount, $orderModification);
         } catch (\Throwable $e) {
             trigger_error('Failed to modify trade with message ' . $e->getMessage(), E_USER_NOTICE);
 
             return false;
         }
 
-        if (empty($result['body']['orderCreateTransaction']['price'])) {
-            trigger_error('Got unexpected response structure ' . var_export($result, true), E_USER_NOTICE);
+        if (empty($response['body']['orderCreateTransaction']['price'])) {
+            trigger_error('Got unexpected response structure ' . var_export($response, true), E_USER_NOTICE);
 
             return false;
         }
 
         try {
             $this->tradeRepository->updateTrade(
-                $trade['id'], ['modifiedPrice' => $result['body']['orderCreateTransaction']['price']]
+                $trade['id'], ['modifiedPrice' => $response['body']['orderCreateTransaction']['price']]
             );
         } catch (\Throwable $e) {
             trigger_error('Failed to store trade modification with message ' . $e->getMessage(), E_USER_NOTICE);
