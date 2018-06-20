@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace FxBot\Model\Repository;
 
 use LightApp\Model\Repository\RepositoryAbstract; 
@@ -11,10 +11,9 @@ class SimulationRepository extends RepositoryAbstract
             $this->getWrite()->begin();
             $affectedId = $this->getWrite()->execute(
                 'INSERT INTO `simulation`
-                (`instrument`, `final_balance`, `max_balance`, `min_balance`, `profits`, `losses`, `simulation_start`, `simulation_end`, `datetime`)
+                (`final_balance`, `max_balance`, `min_balance`, `profits`, `losses`, `simulation_start`, `simulation_end`, `datetime`)
                 VALUES
-                (:instrument, :finalBalance, :maxBalance, :minBalance, :profits, :losses, :simulationStart, :simulationEnd, :datetime)', [
-                    'instrument' => $simulation['instrument'],
+                (:finalBalance, :maxBalance, :minBalance, :profits, :losses, :simulationStart, :simulationEnd, :datetime)', [
                     'finalBalance' => $simulation['finalBalance'],
                     'maxBalance' => $simulation['maxBalance'],
                     'minBalance' => $simulation['minBalance'],
@@ -38,11 +37,11 @@ class SimulationRepository extends RepositoryAbstract
 
             $this->getWrite()->prepare(
                 'INSERT INTO `simulation_parameter` (`simulation_id`, `parameter_id`, `value`)
-                SELECT :simulation_id, p.`id`, :value FROM `parameter` AS p WHERE p.`name` = :name'
+                SELECT :simulationId, p.`id`, :value FROM `parameter` AS p WHERE p.`name` = :name'
             );
             foreach ($simulation['parameters'] as $name => $value) {
                 $this->getWrite()->execute(null, [
-                    'simulation_id' => $affectedId,
+                    'simulationId' => $affectedId,
                     'value' => $value,
                     'name' => $name
                 ]);
@@ -65,7 +64,7 @@ class SimulationRepository extends RepositoryAbstract
     public function getSimulationsSummaryByIds(array $ids) : array
     {
         $params = [];
-        $placeholders = $this->getInPlaceholdersIncludingParams($ids, $params);
+        $placeholders = $this->getInPlaceholdersAndAddParams($ids, $params);
 
         return $this->getRead()->fetch(
             "SELECT

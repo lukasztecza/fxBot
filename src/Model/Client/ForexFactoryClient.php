@@ -1,35 +1,10 @@
-<?php
+<?php declare(strict_types=1);
 namespace FxBot\Model\Client;
 
 use HttpClient\Client\ClientAbstract;
 
 class ForexFactoryClient extends ClientAbstract
 {
-    protected function getClientCurlOptions() : array
-    {
-        return [];
-    }
-
-    protected function getClientResource() : array
-    {
-        return [];
-    }
-
-    protected function getClientQuery() : array
-    {
-        return [];
-    }
-
-    protected function getClientHeaders() : array
-    {
-        return [];
-    }
-
-    protected function getClientPayload() : array
-    {
-        return [];
-    }
-
     public function getIndicators(string $range) : array
     {
         $query = ['range' => $range];

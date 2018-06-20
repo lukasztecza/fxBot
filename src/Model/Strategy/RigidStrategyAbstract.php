@@ -1,41 +1,50 @@
-<?php
+<?php declare(strict_types=1);
 namespace FxBot\Model\Strategy;
 
 use FxBot\Model\Strategy\StrategyAbstract;
-use FxBot\Model\Strategy\Order;
+use FxBot\Model\Entity\Order;
+use FxBot\Model\Entity\OrderModification;
 
 abstract class RigidStrategyAbstract extends StrategyAbstract
 {
+    private const SPECIAL_INSTRUMENTS = [
+        'JPY' => 100
+    ];
+
     protected $rigidStopLoss;
     protected $takeProfitMultiplier;
-    protected $lossLockerFactor;
-    protected $instrument;
 
-    public function __construct(float $rigidStopLoss, float $takeProfitMultiplier, float $lossLockerFactor, string $instrument)
-    {
+    public function __construct(
+        string $homeCurrency,
+        float $singleTransactionRisk,
+        float $rigidStopLoss,
+        float $takeProfitMultiplier
+    ) {
         $this->rigidStopLoss = $rigidStopLoss;
         $this->takeProfitMultiplier = $takeProfitMultiplier;
-        $this->lossLockerFactor = $lossLockerFactor;
-        $this->instrument = $instrument;
+        parent::__construct($homeCurrency, $singleTransactionRisk);
     }
 
     public function getOrder(array $prices, float $balance, string $currentDateTime = null) : ?Order
     {
-        $direction = $this->getDirection($currentDateTime, $this->getInstrument());
+        $direction = $this->getDirection($currentDateTime);
 
         $rigidStopLoss = $this->getRigidStopLoss();
-        if (strpos($this->getInstrument(), 'JPY') !== false) {
-            $rigidStopLoss *= 100;
+        foreach (self::SPECIAL_INSTRUMENTS as $key => $modificationFactor) {
+            if (strpos($this->getInstrument(), $key) !== false) {
+                $rigidStopLoss *= $modificationFactor;
+                break;
+            }
         }
 
         if ($direction === 1) {
-            $tradePrice = $prices[$this->getInstrument()]['ask'];
-            $takeProfit = (string)($tradePrice + ($this->getTakeProfitMultiplier() * $rigidStopLoss));
-            $stopLoss = (string)($tradePrice - $rigidStopLoss);
+            $tradePrice = (float) $prices[$this->getInstrument()]['ask'];
+            $takeProfit = ($tradePrice + ($this->getTakeProfitMultiplier() * $rigidStopLoss));
+            $stopLoss = ($tradePrice - $rigidStopLoss);
         } elseif ($direction === -1) {
-            $tradePrice = $prices[$this->getInstrument()]['bid'];
-            $takeProfit = (string)($tradePrice - ($this->getTakeProfitMultiplier() * $rigidStopLoss));
-            $stopLoss = (string)($tradePrice + $rigidStopLoss);
+            $tradePrice = (float) $prices[$this->getInstrument()]['bid'];
+            $takeProfit = ($tradePrice - ($this->getTakeProfitMultiplier() * $rigidStopLoss));
+            $stopLoss = ($tradePrice + $rigidStopLoss);
         } else {
             return null;
         }
@@ -53,6 +62,19 @@ abstract class RigidStrategyAbstract extends StrategyAbstract
 
         return new Order($this->getInstrument(), $units, $tradePrice, $takeProfit, $stopLoss);
     }
+//TODO instead of lossLockerFactor there should be orderModification update that
+    public function getOrderModification(
+        string $orderId,
+        string $tradeId,
+        float $openPrice,
+        float $currentStopLoss,
+        float $currentTakeProfit,
+        array $currentPrices
+    ) : ?OrderModification {
+        $price = $this->getPriceModification($openPrice, $currentStopLoss, $currentTakeProfit, $currentPrices);
+
+        return !empty($price) ? new OrderModification($orderId, $tradeId, $price) : null;
+    }
 
     public function getRigidStopLoss() : float
     {
@@ -64,15 +86,29 @@ abstract class RigidStrategyAbstract extends StrategyAbstract
         return $this->takeProfitMultiplier;
     }
 
-    public function getLossLockerFactor() : float
+    public function getStrategyParams() : array
     {
-        return $this->lossLockerFactor;
+        $return['className'] = get_class($this);
+        $return['params'] = [];
+        foreach ($this->getRequiredParams() as $requiredParam) {
+            $return['params'][$requiredParam] = $this->$requiredParam;
+        }
+
+        return $return;
     }
 
-    public function getInstrument() : string
+    protected function getInstrument() : string
     {
+        if (!isset($this->instrument)) {
+            throw new \Exception('Instrument not set for strategy nor selected by strategy');
+        }
+
         return $this->instrument;
     }
 
-    abstract protected function getDirection(string $currentDateTime = null, string $selectedInstrument = null) : int;
+    abstract protected function getDirection(string $currentDateTime = null) : int;
+
+    abstract protected function getPriceModification(float $openPrice, float $currentStopLoss, float $currentTakeProfit, array $currentPrices) : ?float;
+
+    abstract protected function getRequiredParams() : array;
 }

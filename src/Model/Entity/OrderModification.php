@@ -1,5 +1,5 @@
-<?php
-namespace FxBot\Model\Strategy;
+<?php declare(strict_types=1);
+namespace FxBot\Model\Entity;
 
 class OrderModification
 {
@@ -8,33 +8,39 @@ class OrderModification
     private const DEFAULT_TRIGGER_CONDITION = 'DEFAULT';
 
     private $tradeId;
+    private $orderId;
     private $price;
-    private $takeProfit;
-    private $stopLoss;
     private $type;
     private $timeInForce;
     private $positionFill;
 
     public function __construct(
         string $tradeId,
-        string $price,
+        string $orderId,
+        float $price,
         string $type = null,
         string $timeInForce = null,
         string $triggerCondition = null
     ) {
         $this->tradeId = $tradeId;
+        $this->orderId = $orderId;
         $this->price = $price;
         $this->type = $type ?? self::DEFAULT_TYPE;
         $this->timeInForce = $timeInForce ?? self::DEFAULT_STOP_TIME_IN_FORCE;
         $this->triggerCondition = $triggerCondition ?? self::DEFAULT_TRIGGER_CONDITION;
     }
 
-    public function getTradeId() : int
+    public function getTradeId() : string
     {
         return $this->tradeId;
     }
 
-    public function getPrice() : string
+    public function getOrderId() : string
+    {
+        return $this->orderId;
+    }
+
+    public function getPrice() : float
     {
         return $this->price;
     }
@@ -59,7 +65,7 @@ class OrderModification
         return [
             'order' => [
                 'tradeID' => $this->tradeId,
-                'price'=> $this->price,
+                'price'=> (string) round($this->price, 5),
                 'type' => $this->type,
                 'timeInForce' => $this->timeInForce,
                 'triggerCondition' => $this->triggerCondition

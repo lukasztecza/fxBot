@@ -1,72 +1,19 @@
-<?php
+<?php declare(strict_types=1);
 namespace FxBot\Model\Service;
 
 use FxBot\Model\Service\PriceService;
 use FxBot\Model\Strategy\StrategyFactory;
 use FxBot\Model\Repository\TradeRepository;
 use FxBot\Model\Repository\SimulationRepository;
-use FxBot\Model\Strategy\Order;
+use FxBot\Model\Entity\Order;
 use FxBot\Model\Strategy\StrategyInterface;
 
 class SimulationService
 {
     private const INITIAL_TEST_BALANCE = 100;
-    private const SINGLE_TRANSACTION_RISK = 0.005;
     private const MAX_SPREAD = 0.0003;
     private const MAX_ITERATIONS_PER_STRATEGY = 4000000;
     private const SIMULATION_STEP = 'PT20M';
-
-    private const SIMULATION_PERIODS = [
-        ['start' => '2010-03-01 00:00:00', 'end' => '2011-03-01 00:00:00'],
-        ['start' => '2011-03-01 00:00:00', 'end' => '2012-03-01 00:00:00'],
-        ['start' => '2012-03-01 00:00:00', 'end' => '2013-03-01 00:00:00'],
-        ['start' => '2013-03-01 00:00:00', 'end' => '2014-03-01 00:00:00'],
-        ['start' => '2014-03-01 00:00:00', 'end' => '2015-03-01 00:00:00'],
-        ['start' => '2015-03-01 00:00:00', 'end' => '2016-03-01 00:00:00'],
-        ['start' => '2016-03-01 00:00:00', 'end' => '2017-03-01 00:00:00'],
-        ['start' => '2017-03-01 00:00:00', 'end' => '2018-03-01 00:00:00'],
-//        ['start' => '2010-03-01 00:00:00', 'end' => '2018-03-01 00:00:00']
-    ];
-
-    private const FORCE_INSTRUMENT = 'EUR_USD';
-
-    private const STRATEGIES_CLASS_FOR_SIMULATION = [
-        'TinyApp\Model\Strategy\RigidAverageTrendingStrategy',
-        'TinyApp\Model\Strategy\RigidFundamentalTrendingStrategyPattern',
-        'TinyApp\Model\Strategy\RigidTrendingStrategy',
-        'TinyApp\Model\Strategy\RigidLongAverageDeviationStrategy',
-        'TinyApp\Model\Strategy\RigidAverageDistanceDeviationStrategy',
-        'TinyApp\Model\Strategy\RigidTrendingDeviationStrategy',
-        'TinyApp\Model\Strategy\RigidLongAverageTrendingStrategy',
-        'TinyApp\Model\Strategy\RigidLongAverageTrendingDeviationStrategy',
-        'TinyApp\Model\Strategy\RigidAverageTrendLongAverageDeviationStrategy',
-        'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern',
-        'TinyApp\Model\Strategy\RigidRandomStrategyPattern'
-    ];
-    private const INSTRUMENT_INDEPENDENT_STRATEGIES = [
-        'TinyApp\Model\Strategy\RigidFundamentalStrategyPattern',
-        'TinyApp\Model\Strategy\RigidFundamentalTrendingStrategyPattern'
-    ];
-
-    private const CHANGING_PARAMETERS = [
-        'rigidStopLoss' => [0.002],
-        'takeProfitMultiplier' => [10],
-        'longFastAverage' => [50, 100],
-        'longSlowAverage' => [200, 300],
-        'extremumRange' => [12, 15],
-        'signalFastAverage' => [25, 50],
-        'signalSlowAverage' => [100, 125],
-        'averageTrend' => [100, 500],
-        'bankFactor' => [1],
-        'inflationFactor' => [1],
-        'tradeFactor' => [1],
-        'companiesFactor' => [1],
-        'salesFactor' => [1],
-        'unemploymentFactor' => [1],
-        'bankRelativeFactor' => [1],
-        'followTrend' => [0,1],
-        'lastPricesPeriod' => ['P60D']
-    ];
 
     private $priceInstruments;
     private $priceService;
@@ -87,20 +34,18 @@ class SimulationService
         $this->strategyFactory = $strategyFactory;
         $this->tradeRepository = $tradeRepository;
         $this->simulationRepository = $simulationRepository;
-        $this->strategiesForTest = $this->buildStrategiesForTest();
     }
 
     public function run() : array
     {
         $simulationIds = [];
-        foreach (self::SIMULATION_PERIODS as $simulationPeriod) {
-            foreach ($this->getStrategiesForTest() as $settings) {
-                echo PHP_EOL . '=========================================================================================================' . PHP_EOL;
-                echo 'Simulation for ' . $settings['className'] . (
-                    !empty($settings['params']) ? ' with params ' . var_export($settings['params'], true) : ''
-                ) . PHP_EOL;
-                echo '=========================================================================================================' . PHP_EOL;
+        foreach ($this->getSimulationPeriods() as $simulationPeriod) {
+            foreach ($this->getSimulationStrategies() as $settings) {
                 $strategy = $this->strategyFactory->getStrategy($settings['className'], $settings['params']);
+                echo PHP_EOL . '=========================================================================================================' . PHP_EOL;
+                echo 'Simulation for ' . $strategy->getStrategyParams()['className'] . ' with params ';
+                echo var_export($strategy->getStrategyParams()['params'], true) . PHP_EOL;
+                echo '=========================================================================================================' . PHP_EOL;
 
                 $balance = self::INITIAL_TEST_BALANCE;
                 $currentDate = $simulationPeriod['start'];
@@ -163,7 +108,15 @@ class SimulationService
                 echo PHP_EOL;
 
                 if (!$this->saveSimulationResult(
-                    $settings, $balance, $minBalance, $maxBalance, $profits, $losses, $simulationPeriod['start'], $currentDate, $simulationIds
+                    $strategy->getStrategyParams(),
+                    $balance,
+                    $minBalance,
+                    $maxBalance,
+                    $profits,
+                    $losses,
+                    $simulationPeriod['start'],
+                    $currentDate,
+                    $simulationIds
                 )) {
                     return [
                         'status' => false,
@@ -174,11 +127,6 @@ class SimulationService
         }
 
         return ['status' => true, 'message' => 'simulation finished', 'simulationIds' => $simulationIds];
-    }
-
-    public function getInitialTestBalance() : float
-    {
-        return self::INITIAL_TEST_BALANCE;
     }
 
     public function getSimulationsSummaryByIds(array $ids) : array
@@ -198,72 +146,42 @@ class SimulationService
         }
     }
 
-    public function setStrategiesForTest(array $strategiesForTest) : void
+    public function setSimulationPeriods(array $simulationPeriods) : void
     {
-        foreach ($strategiesForTest as $strategy) {
+        foreach ($simulationPeriods as $period) {
+            if (empty($period['start']) || empty($period['end'])) {
+                throw new \Exception('Wrong periods for test');
+            }
+        }
+        $this->simulationPeriods = $simulationPeriods;
+    }
+
+    public function setSimulationStrategies(array $simulationStrategies) : void
+    {
+        foreach ($simulationStrategies as $strategy) {
             if (empty($strategy['className']) || empty($strategy['params']['instrument'])) {
                 throw new \Exception('Wrong strategies for test');
             }
         }
-        $this->strategiesForTest = $strategiesForTest;
+        $this->simulationStrategies = $simulationStrategies;
     }
 
-    private function getStrategiesForTest() : array
+    private function getSimulationPeriods() : array
     {
-        return $this->strategiesForTest;
+        if (empty($this->simulationPeriods)) {
+            throw new \Exception('Periods for test are not set');
+        }
+
+        return $this->simulationPeriods;
     }
 
-    private function buildStrategiesForTest() : array
+    private function getSimulationStrategies() : array
     {
-        $strategies = [];
-        $counter = 0;
-        $changingParameters = self::CHANGING_PARAMETERS;
-        end($changingParameters);
-        $lastKey = key($changingParameters);
-
-        foreach (self::STRATEGIES_CLASS_FOR_SIMULATION as $strategy) {
-            if (in_array($strategy, self::INSTRUMENT_INDEPENDENT_STRATEGIES)) {
-                $params = ['instrument' => 'VARIED'];
-                reset($changingParameters);
-                $this->nestIteration($counter, $strategies, $changingParameters, $lastKey, $params, $strategy);
-            } elseif(!is_null(self::FORCE_INSTRUMENT)) {
-                $params = ['instrument' => self::FORCE_INSTRUMENT];
-                reset($changingParameters);
-                $this->nestIteration($counter, $strategies, $changingParameters, $lastKey, $params, $strategy);
-            } else {
-                foreach ($this->priceInstruments as $instrument) {
-                    $params = ['instrument' => $instrument];
-                    reset($changingParameters);
-                    $this->nestIteration($counter, $strategies, $changingParameters, $lastKey, $params, $strategy);
-                }
-            }
+        if (empty($this->simulationStrategies)) {
+            throw new \Exception('Strategies for test are not set');
         }
 
-        return $strategies;
-    }
-
-    private function nestIteration(int $counter, array &$strategies, array &$changingParameters, string $lastKey, array $params, string $strategy) : void
-    {
-        $counter++;
-        if ($counter > 100) {
-            throw new \Exception('Too deep nesting or danger of infinite recurrence, reached counter ' . var_export($counter, true));
-        }
-
-        $key = key($changingParameters);
-        foreach ($changingParameters[$key] as $value) {
-            $params[$key] = $value;
-
-            if ($key === $lastKey) {
-                $strategies[] = [
-                    'className' => $strategy,
-                    'params' => $params
-                ];
-            } else {
-                next($changingParameters);
-                $this->nestIteration($counter, $strategies, $changingParameters, $lastKey, $params, $strategy);
-            }
-        }
-        prev($changingParameters);
+        return $this->simulationStrategies;
     }
 
     private function getCurrentPrices($inputPrices) : array
@@ -297,6 +215,7 @@ class SimulationService
 
     private function formatBalance(float $balance) : string
     {
+        $balance = (string) $balance;
         return substr($balance, 0, strpos($balance, '.') + 3) . (strpos($balance, '.') === false ? '.00' : '');
     }
 
@@ -319,7 +238,7 @@ class SimulationService
                 if (!empty($activeOrder)) {
                     echo $currentDate . ' balance ' . str_pad($this->formatBalance($balance), 10) .
                         ($activeOrder->getUnits() > 0 ? 'Buy ' : 'Sell') . ' at price on ' . $activeOrder->getInstrument() .
-                        ' ' . str_pad($activeOrder->getPrice(), 10)
+                        ' ' . str_pad((string) $activeOrder->getPrice(), 10)
                     ;
                     $executedTrades++;
                 }
@@ -332,11 +251,11 @@ class SimulationService
             ($activeOrder->getUnits() > 0 && $activeOrder->getTakeProfit() < $prices[$activeOrder->getInstrument()]['bid']) ||
             ($activeOrder->getUnits() < 0 && $activeOrder->getTakeProfit() > $prices[$activeOrder->getInstrument()]['ask'])
         ) {
-            $balance = $balance + ($balance * self::SINGLE_TRANSACTION_RISK * $takeProfitMultiplier);
+            $balance = $balance + ($balance * $strategy->getStrategyParams()['params']['singleTransactionRisk'] * $takeProfitMultiplier);
             echo
                 'PROFIT ' . str_pad($this->formatBalance($balance), 10) . ' on ' . $currentDate .
-                ' due to ask ' . str_pad($prices[$activeOrder->getInstrument()]['ask'], 10) .
-                ' bid ' . str_pad($prices[$activeOrder->getInstrument()]['bid'], 10) . PHP_EOL
+                ' due to ask ' . str_pad((string) $prices[$activeOrder->getInstrument()]['ask'], 10) .
+                ' bid ' . str_pad((string) $prices[$activeOrder->getInstrument()]['bid'], 10) . PHP_EOL
             ;
             $profits++;
             $activeOrder = null;
@@ -346,12 +265,12 @@ class SimulationService
             ($activeOrder->getUnits() < 0 && $activeOrder->getStopLoss() < $prices[$activeOrder->getInstrument()]['ask'])
         ) {
             if (!$stopLossShifted) {
-                $balance = $balance - ($balance * self::SINGLE_TRANSACTION_RISK);
+                $balance = $balance - ($balance * $strategy->getStrategyParams()['params']['singleTransactionRisk']);
             }
             echo
                 (!$stopLossShifted ? 'LOSS   ' : 'BLOCK  ') . str_pad($this->formatBalance($balance), 10) . ' on ' . $currentDate .
-                ' due to ask ' . str_pad($prices[$activeOrder->getInstrument()]['ask'], 10) .
-                ' bid ' . str_pad($prices[$activeOrder->getInstrument()]['bid'], 10) . PHP_EOL
+                ' due to ask ' . str_pad((string) $prices[$activeOrder->getInstrument()]['ask'], 10) .
+                ' bid ' . str_pad((string) $prices[$activeOrder->getInstrument()]['bid'], 10) . PHP_EOL
             ;
             if (!$stopLossShifted) {
                 $losses++;
@@ -381,7 +300,7 @@ class SimulationService
     }
 
     private function saveSimulationResult(
-        array $settings,
+        array $strategyParams,
         float $balance,
         float $minBalance,
         float $maxBalance,
@@ -392,15 +311,9 @@ class SimulationService
         array &$simulationIds
     ) : bool {
         try {
-            $parameters = $settings['params'];
-            $parameters['strategy'] = substr($settings['className'], strrpos($settings['className'], '\\') + 1);
-            $parameters['singleTransactionRisk'] = self::SINGLE_TRANSACTION_RISK;
-            $instrument = $settings['params']['instrument'];
-            if (in_array($settings['className'], self::INSTRUMENT_INDEPENDENT_STRATEGIES)) {
-                $instrument = 'VARIED';
-            }
+            $parameters = $strategyParams['params'];
+            $parameters['strategy'] = substr($strategyParams['className'], strrpos($strategyParams['className'], '\\') + 1);
             $simulationIds[] = $this->simulationRepository->saveSimulation([
-                'instrument' => $instrument,
                 'parameters' => $parameters,
                 'finalBalance' => $balance,
                 'minBalance' => $minBalance,
@@ -409,7 +322,7 @@ class SimulationService
                 'losses' => $losses,
                 'simulationStart' => $simulationStart,
                 'simulationEnd' => $simulationEnd,
-                'datetime' => (new \DateTime(null, new \DateTimeZone('UTC')))->format('Y-m-d H:i:s'),
+                'datetime' => (new \DateTime('', new \DateTimeZone('UTC')))->format('Y-m-d H:i:s'),
             ]);
         } catch (\Throwable $e) {
             trigger_error('Failed to save simulation result with message ' . $e->getMessage(), E_USER_NOTICE);
