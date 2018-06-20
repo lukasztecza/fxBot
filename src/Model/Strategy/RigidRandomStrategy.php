@@ -49,7 +49,6 @@ class RigidRandomStrategy extends RigidStrategyAbstract
 
     protected function getPriceModification(float $openPrice, float $currentStopLoss, float $currentTakeProfit, array $currentPrices) : ?float
     {
-    return $openPrice;
         if ($currentTakeProfit > $currentStopLoss && $currentPrices['bid'] > $openPrice + 0.0015) {
             return $openPrice;
         } elseif ($currentTakeProfit < $currentStopLoss && $currentPrices['ask'] < $openPrice - 0.0015) {
