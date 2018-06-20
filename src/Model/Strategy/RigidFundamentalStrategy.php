@@ -8,22 +8,22 @@ use FxBot\Model\Service\IndicatorService;
 class RigidFundamentalStrategy extends RigidStrategyAbstract
 {
     protected $instrument;
-    private $instruments;
-    private $priceInstruments;
-    private $indicatorService;
-    private $lastIndicatorsPeriod;
-    private $bankFactor;
-    private $inflationFactor;
-    private $tradeFactor;
-    private $companiesFactor;
-    private $salesFactor;
-    private $unemploymentFactor;
-    private $bankRelativeFactor;
-    private $lossLockerFactor;
+    protected $instruments;
+    protected $priceInstruments;
+    protected $indicatorService;
+    protected $lastIndicatorsPeriod;
+    protected $bankFactor;
+    protected $inflationFactor;
+    protected $tradeFactor;
+    protected $companiesFactor;
+    protected $salesFactor;
+    protected $unemploymentFactor;
+    protected $bankRelativeFactor;
+    protected $lossLockerFactor;
 
     public function __construct(array $priceInstruments, PriceService $priceService, IndicatorService $indicatorService, array $params)
     {
-        foreach ($this->requiredParams() as $requiredParam) {
+        foreach ($this->getRequiredParams() as $requiredParam) {
             if (!array_key_exists($requiredParam, $params)) {
                 throw new \Exception('Could not create strategy due to missing params');
             }
@@ -57,7 +57,7 @@ class RigidFundamentalStrategy extends RigidStrategyAbstract
         );
     }
 
-    private function requiredParams() : array
+    protected function getRequiredParams() : array
     {
         return [
             'homeCurrency',
@@ -174,6 +174,17 @@ class RigidFundamentalStrategy extends RigidStrategyAbstract
         $return['params']['instrument'] = 'VARIED';
 
         return $return;
+    }
+
+    protected function getPriceModification(float $openPrice, float $currentStopLoss, float $currentTakeProfit, array $currentPrices) : ?float
+    {
+        if ($currentTakeProfit > $currentStopLoss && $currentPrices['bid'] > $openPrice + 0.0015) {
+            return $openPrice;
+        } elseif ($currentTakeProfit < $currentStopLoss && $currentPrices['ask'] < $openPrice - 0.0015) {
+            return $openPrice;
+        }
+
+        return null;
     }
 
     public function getLossLockerFactor() {

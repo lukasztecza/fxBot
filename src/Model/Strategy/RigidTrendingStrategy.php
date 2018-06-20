@@ -8,15 +8,15 @@ use FxBot\Model\Service\IndicatorService;
 class RigidTrendingStrategy extends RigidStrategyAbstract
 {
     protected $instrument;
-    private $priceService;
-    private $lastPricesPeriod;
-    private $followTrend;
-    private $extremumRange;
-    private $lossLockerFactor;
+    protected $priceService;
+    protected $lastPricesPeriod;
+    protected $followTrend;
+    protected $extremumRange;
+    protected $lossLockerFactor;
 
     public function __construct(array $priceInstruments, PriceService $priceService, IndicatorService $indicatorService, $params)
     {
-        foreach ($this->requiredParams() as $requiredParam) {
+        foreach ($this->getRequiredParams() as $requiredParam) {
             if (!array_key_exists($requiredParam, $params)) {
                 throw new \Exception('Could not create strategy due to missing params');
             }
@@ -37,7 +37,7 @@ class RigidTrendingStrategy extends RigidStrategyAbstract
         );
     }
 
-    private function requiredParams() : array
+    protected function getRequiredParams() : array
     {
         return [
             'homeCurrency',
@@ -52,25 +52,27 @@ class RigidTrendingStrategy extends RigidStrategyAbstract
         ];
     }
 
-    public function getStrategyParams() : array
-    {
-        $return['className'] = get_class($this);
-        foreach ($this->requiredParams() as $requiredParam) {
-            $return['params'][$requiredParam] = $this->$requiredParam;
-        }
-
-        return $return;
-    }
-
-    public function getLossLockerFactor() {
-        return $this->lossLockerFactor;
-    }
-
     protected function getDirection(string $currentDateTime = null) : int
     {
         $lastPrices = $this->priceService->getLastPricesByPeriod($this->getInstrument(), $this->lastPricesPeriod, $currentDateTime);
         $channelDirection = $this->getChannelDirection($lastPrices, $this->extremumRange);
 
         return $this->followTrend ? $channelDirection : -$channelDirection;
+    }
+
+    protected function getPriceModification(float $openPrice, float $currentStopLoss, float $currentTakeProfit, array $currentPrices) : ?float
+    {
+        if ($currentTakeProfit > $currentStopLoss && $currentPrices['bid'] > $openPrice + 0.0015) {
+            return $openPrice;
+        } elseif ($currentTakeProfit < $currentStopLoss && $currentPrices['ask'] < $openPrice - 0.0015) {
+            return $openPrice;
+        }
+
+        return null;
+    }
+
+    public function getLossLockerFactor()
+    {
+        return $this->lossLockerFactor;
     }
 }

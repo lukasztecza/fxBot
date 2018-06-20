@@ -8,18 +8,18 @@ use FxBot\Model\Service\IndicatorService;
 class RigidAverageStrategy extends RigidStrategyAbstract
 {
     protected $instrument;
-    private $priceService;
-    private $lastPricesPeriod;
-    private $followTrend;
-    private $longFastAverage;
-    private $longSlowAverage;
-    private $signalFastAverage;
-    private $signalSlowAverage;
-    private $lossLockerFactor;
+    protected $priceService;
+    protected $lastPricesPeriod;
+    protected $followTrend;
+    protected $longFastAverage;
+    protected $longSlowAverage;
+    protected $signalFastAverage;
+    protected $signalSlowAverage;
+    protected $lossLockerFactor;
 
     public function __construct(array $priceInstruments, PriceService $priceService, IndicatorService $indicatorService, $params)
     {
-        foreach ($this->requiredParams() as $requiredParam) {
+        foreach ($this->getRequiredParams() as $requiredParam) {
             if (!array_key_exists($requiredParam, $params)) {
                 throw new \Exception('Could not create strategy due to missing params');
             }
@@ -43,7 +43,7 @@ class RigidAverageStrategy extends RigidStrategyAbstract
         );
     }
 
-    private function requiredParams() : array
+    protected function getRequiredParams() : array
     {
         return [
             'homeCurrency',
@@ -108,17 +108,8 @@ class RigidAverageStrategy extends RigidStrategyAbstract
         return null;
     }
 
-    public function getStrategyParams() : array
+    public function getLossLockerFactor()
     {
-        $return['className'] = get_class($this);
-        foreach ($this->requiredParams() as $requiredParam) {
-            $return['params'][$requiredParam] = $this->$requiredParam;
-        }
-
-        return $return;
-    }
-
-    public function getLossLockerFactor() {
         return $this->lossLockerFactor;
     }
 }

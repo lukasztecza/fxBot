@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS `price` (
 
 CREATE TABLE IF NOT EXISTS `trade` (
     `id` INT(11) NOT NULL AUTO_INCREMENT,
+    `external_id` VARCHAR(32) COLLATE utf8_general_ci NOT NULL,
     `account` VARCHAR(32) COLLATE utf8_general_ci NOT NULL,
     `instrument` CHAR(7) COLLATE utf8_general_ci NOT NULL,
     `units` INT(11) NOT NULL,
