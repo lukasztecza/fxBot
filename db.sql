@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS `price` (
 
 CREATE TABLE IF NOT EXISTS `trade` (
     `id` INT(11) NOT NULL AUTO_INCREMENT,
+    `external_id` VARCHAR(32) COLLATE utf8_general_ci NOT NULL,
     `account` VARCHAR(32) COLLATE utf8_general_ci NOT NULL,
     `instrument` CHAR(7) COLLATE utf8_general_ci NOT NULL,
     `units` INT(11) NOT NULL,
@@ -45,7 +46,6 @@ CREATE TABLE IF NOT EXISTS `trade` (
 
 CREATE TABLE IF NOT EXISTS `simulation` (
     `id` INT(11) NOT NULL AUTO_INCREMENT,
-    `instrument` CHAR(7) COLLATE utf8_general_ci NOT NULL,
     `final_balance` DECIMAL(10,5) NOT NULL,
     `max_balance` DECIMAL(10,5) NOT NULL,
     `min_balance` DECIMAL(10,5) NOT NULL,
@@ -73,6 +73,15 @@ CREATE TABLE IF NOT EXISTS `simulation_parameter` (
     FOREIGN KEY (`simulation_id`) REFERENCES `simulation`(`id`) ON DELETE CASCADE,
     FOREIGN KEY (`parameter_id`) REFERENCES `parameter`(`id`) ON DELETE CASCADE,
     CONSTRAINT simulation_id_parameter_id UNIQUE (`simulation_id`, `parameter_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+CREATE TABLE IF NOT EXISTS `trade_parameter` (
+    `trade_id` INT(11) NOT NULL,
+    `parameter_id` INT(11) NOT NULL,
+    `value` VARCHAR(128) COLLATE utf8_general_ci NOT NULL,
+    FOREIGN KEY (`trade_id`) REFERENCES `trade`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`parameter_id`) REFERENCES `parameter`(`id`) ON DELETE CASCADE,
+    CONSTRAINT trade_id_parameter_id UNIQUE (`trade_id`, `parameter_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE IF NOT EXISTS `learning` (

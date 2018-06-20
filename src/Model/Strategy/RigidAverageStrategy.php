@@ -5,13 +5,16 @@ use FxBot\Model\Strategy\RigidStrategyAbstract;
 use FxBot\Model\Service\PriceService;
 use FxBot\Model\Service\IndicatorService;
 
-class RigidTrendingStrategy extends RigidStrategyAbstract
+class RigidAverageStrategy extends RigidStrategyAbstract
 {
     protected $instrument;
     protected $priceService;
     protected $lastPricesPeriod;
     protected $followTrend;
-    protected $extremumRange;
+    protected $longFastAverage;
+    protected $longSlowAverage;
+    protected $signalFastAverage;
+    protected $signalSlowAverage;
     protected $lossLockerFactor;
 
     public function __construct(array $priceInstruments, PriceService $priceService, IndicatorService $indicatorService, $params)
@@ -25,7 +28,10 @@ class RigidTrendingStrategy extends RigidStrategyAbstract
         $this->priceService = $priceService;
         $this->lastPricesPeriod = $params['lastPricesPeriod'];
         $this->followTrend = $params['followTrend'];
-        $this->extremumRange = $params['extremumRange'];
+        $this->longFastAverage = $params['longFastAverage'];
+        $this->longSlowAverage = $params['longSlowAverage'];
+        $this->signalFastAverage = $params['signalFastAverage'];
+        $this->signalSlowAverage = $params['signalSlowAverage'];
         $this->lossLockerFactor = $params['lossLockerFactor'];
         $this->instrument = $params['instrument'];
 
@@ -46,7 +52,10 @@ class RigidTrendingStrategy extends RigidStrategyAbstract
             'takeProfitMultiplier',
             'lastPricesPeriod',
             'followTrend',
-            'extremumRange',
+            'longFastAverage',
+            'longSlowAverage',
+            'signalFastAverage',
+            'signalSlowAverage',
             'lossLockerFactor',
             'instrument'
         ];
@@ -55,9 +64,37 @@ class RigidTrendingStrategy extends RigidStrategyAbstract
     protected function getDirection(string $currentDateTime = null) : int
     {
         $lastPrices = $this->priceService->getLastPricesByPeriod($this->getInstrument(), $this->lastPricesPeriod, $currentDateTime);
-        $channelDirection = $this->getChannelDirection($lastPrices, $this->extremumRange);
-
-        return $this->followTrend ? $channelDirection : -$channelDirection;
+        $averages = $this->getAveragesByPeriods($lastPrices, [
+            'current' => 1,
+            'signalFast' => $this->signalFastAverage,
+            'signalSlow' => $this->signalSlowAverage,
+            'longFast' => $this->longFastAverage,
+            'longSlow' => $this->longSlowAverage
+        ]);
+        switch (true) {
+            case (
+                !isset($averages['current']) ||
+                !isset($averages['signalFast']) ||
+                !isset($averages['signalSlow']) ||
+                !isset($averages['longFast']) ||
+                !isset($averages['longSlow'])
+            ):
+                return 0;
+            case (
+                $averages['longFast'] > $averages['longSlow'] &&
+                $averages['current'] < $averages['signalFast'] &&
+                $averages['current'] > $averages['signalSlow']
+            ):
+                return $this->followTrend ? 1 : -1;
+            case (
+                $averages['longFast'] < $averages['longSlow'] &&
+                $averages['current'] > $averages['signalFast'] &&
+                $averages['current'] < $averages['signalSlow']
+            ):
+                return $this->followTrend ? -1 : 1;
+            default:
+                return 0;
+        }
     }
 
     protected function getPriceModification(float $openPrice, float $currentStopLoss, float $currentTakeProfit, array $currentPrices) : ?float
