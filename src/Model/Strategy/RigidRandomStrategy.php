@@ -8,11 +8,11 @@ use FxBot\Model\Service\IndicatorService;
 class RigidRandomStrategy extends RigidStrategyAbstract
 {
     protected $instrument;
-    private $lossLockerFactor;
+    protected $lossLockerFactor;
 
     public function __construct(array $priceInstruments, PriceService $priceService, IndicatorService $indicatorService, array $params)
     {
-        foreach ($this->requiredParams() as $requiredParam) {
+        foreach ($this->getRequiredParams() as $requiredParam) {
             if (!array_key_exists($requiredParam, $params)) {
                 throw new \Exception('Could not create strategy due to missing params');
             }
@@ -29,7 +29,7 @@ class RigidRandomStrategy extends RigidStrategyAbstract
         );
     }
 
-    private function requiredParams() : array
+    protected function getRequiredParams() : array
     {
         return [
             'homeCurrency',
@@ -47,17 +47,19 @@ class RigidRandomStrategy extends RigidStrategyAbstract
         return $direction === 1 ? 1 : -1;
     }
 
-    public function getStrategyParams() : array
+    protected function getPriceModification(float $openPrice, float $currentStopLoss, float $currentTakeProfit, array $currentPrices) : ?float
     {
-        $return['className'] = get_class($this);
-        foreach ($this->requiredParams() as $requiredParam) {
-            $return['params'][$requiredParam] = $this->$requiredParam;
+        if ($currentTakeProfit > $currentStopLoss && $currentPrices['bid'] > $openPrice + 0.0015) {
+            return $openPrice;
+        } elseif ($currentTakeProfit < $currentStopLoss && $currentPrices['ask'] < $openPrice - 0.0015) {
+            return $openPrice;
         }
 
-        return $return;
+        return null;
     }
 
-    public function getLossLockerFactor() {
+    public function getLossLockerFactor()
+    {
         return $this->lossLockerFactor;
     }
 }

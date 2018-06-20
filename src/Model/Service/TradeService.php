@@ -42,10 +42,10 @@ class TradeService
         if (empty($accountDetails)) {
             return ['status' => false, 'message' => 'Could not get account details'];
         }
-//TODO test handle modification and execute trade
+
         if ($accountDetails['openPositionCount'] >= self::MAX_ALLOWED_OPEN_POSITIONS) {
             $updatedText = '';
-            if ($this->handleExistingTrade($accountDetails['balance'])) {
+            if ($this->handleExistingTrade((float) $accountDetails['balance'])) {
                 $updatedText = ', updated existing trade blocking loss';
             } else {
                 $updatedText = ', did not update existing trade';
@@ -62,7 +62,7 @@ class TradeService
 
         $strategy = $this->strategyFactory->getStrategy($this->selectedStrategy, $this->strategyParams);
         try {
-            $order = $strategy->getOrder($prices, $balance);
+            $order = $strategy->getOrder($prices, (float) $balance);
         } catch (\Throwable $e) {
             trigger_error('Failed to build order with message ' . $e->getMessage(), E_USER_NOTICE);
 
@@ -73,23 +73,25 @@ class TradeService
         }
 
         try {
-            $result = $this->oandaClient->executeTrade($this->oandaAccount, $order);
+            $response = $this->oandaClient->executeTrade($this->oandaAccount, $order);
         } catch (\Throwable $e) {
             trigger_error('Failed to execute trade with message ' . $e->getMessage() . ' with order ' . var_export($order, true), E_USER_NOTICE);
 
             return ['status' => false, 'message' => 'Got exception trying to execute trade  prices'];
         }
+//@TODO TAKE_PROFIT_ON_FILL_PRICE_PRECISION_EXCEEDED this error sometimes occures <- strip prices sent to oanda to 4 digits after comma        
+var_dump($response);
         if (
-            empty($result['orderFillTransaction']['tradeOpened']['tradeID'] ||
-            empty($result['orderFillTransaction']['price']
+            empty($response['body']['orderFillTransaction']['tradeOpened']['tradeID']) ||
+            empty($response['body']['orderFillTransaction']['price'])
         ) {
             return ['status' => false, 'message' => 'Failed to execute trade got unexpexted response'];
         }
 
         try {
             $parameters = $strategy->getStrategyParams();
-            $parameters['tradeId'] = $result['orderFillTransaction']['tradeOpened']['tradeID'];
-            $parameters['executedPrice'] = $result['orderFillTransaction']['price'];
+            $parameters['tradeId'] = $response['body']['orderFillTransaction']['tradeOpened']['tradeID'];
+            $parameters['executedPrice'] = $response['body']['orderFillTransaction']['price'];
             $this->tradeRepository->saveTrade([
                 'parameters' => $parameters,
                 'account' => $this->oandaAccount,
@@ -123,13 +125,14 @@ class TradeService
     {
         try {
             $response = $this->oandaClient->getAccountSummary($this->oandaAccount);
-
             switch (true) {
                 case $response['info']['http_code'] !== 200:
                     trigger_error('Failed to get valid response ' . var_export($response, true), E_USER_NOTICE);
+
                     return [];
                 case !isset($response['body']['account']['openPositionCount']) || empty($response['body']['account']['balance']):
                     trigger_error('Failed to get expected account details in response ' . var_export($response, true), E_USER_NOTICE);
+
                     return [];
             }
         } catch (\Throwable $e) {
@@ -143,23 +146,35 @@ class TradeService
 
     private function handleExistingTrade(float $balance) : bool
     {
-        $trade = $this->getTradeDetails();
-        if (empty($trade)) {
+        $externalTrade = $this->getTradeDetails();
+        if (empty($externalTrade['id'])) {
+            return false;
+        }
+        try {
+            $trade = $this->tradeRepository->getTradeWithParametersByExternalId($externalTrade['id']);
+        } catch (\Throwable $e) {
+            trigger_error('Failed to get stored trade with message ' . $e->getMessage());
+
+            return false;
+        }
+        if (empty($trade['id']) || !empty($trade['parameters']['modifiedPrice'])) {
+            trigger_error('Trade can not be modified');
+
             return false;
         }
 
-        $currentPrices = $this->getCurrentPrice($trade['instrument']);
+        $currentPrices = $this->getCurrentPrice($externalTrade['instrument']);
         if (empty($currentPrices)) {
             return false;
         }
 
         $strategy = $this->strategyFactory->getStrategy($this->selectedStrategy, $this->strategyParams);
         $orderModification = $strategy->getOrderModification(
-            $trade['id'],
-            $trade['stopLossOrder']['id'],
-            (float) $trade['price'],
-            (float) $trade['stopLossOrder']['price'],
-            (float) $trade['takeProfitOrder']['price'],
+            $externalTrade['id'],
+            $externalTrade['stopLossOrder']['id'],
+            (float) $externalTrade['price'],
+            (float) $externalTrade['stopLossOrder']['price'],
+            (float) $externalTrade['takeProfitOrder']['price'],
             $currentPrices
         );
         if (empty($orderModification)) {
@@ -173,22 +188,21 @@ class TradeService
 
             return false;
         }
+
         if (empty($result['body']['orderCreateTransaction']['price'])) {
+            trigger_error('Got unexpected response structure ' . var_export($result, true), E_USER_NOTICE);
+
             return false;
         }
 
         try {
-            $parameters['executedPrice'] = $result['orderFillTransaction']['price'];
             $this->tradeRepository->updateTrade(
-                $trade['id'],
-                [
-                    'modifiedPrice' => $result['body']['orderCreateTransaction']['price']
-                ]
+                $trade['id'], ['modifiedPrice' => $result['body']['orderCreateTransaction']['price']]
             );
         } catch (\Throwable $e) {
             trigger_error('Failed to store trade modification with message ' . $e->getMessage(), E_USER_NOTICE);
 
-            return false;
+            return true;
         }
 
         return true;

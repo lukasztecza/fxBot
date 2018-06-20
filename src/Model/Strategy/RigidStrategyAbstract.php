@@ -86,7 +86,15 @@ abstract class RigidStrategyAbstract extends StrategyAbstract
         return $this->takeProfitMultiplier;
     }
 
-    abstract public function getStrategyParams() : array;
+    public function getStrategyParams() : array
+    {
+        $return['className'] = get_class($this);
+        foreach ($this->getRequiredParams() as $requiredParam) {
+            $return['params'][$requiredParam] = $this->$requiredParam;
+        }
+
+        return $return;
+    }
 
     protected function getInstrument() : string
     {
@@ -100,4 +108,6 @@ abstract class RigidStrategyAbstract extends StrategyAbstract
     abstract protected function getDirection(string $currentDateTime = null) : int;
 
     abstract protected function getPriceModification(float $openPrice, float $currentStopLoss, float $currentTakeProfit, array $currentPrices) : ?float;
+
+    abstract protected function getRequiredParams() : array;
 }

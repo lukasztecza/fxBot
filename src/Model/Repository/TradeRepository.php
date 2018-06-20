@@ -9,7 +9,7 @@ class TradeRepository extends RepositoryAbstract
     {
         try {
             $this->getWrite()->begin();
-            $affectedId = $this->getWrite()->execute(
+            $insertedId = $this->getWrite()->execute(
                 'INSERT INTO `trade` (`account`, `instrument`, `units`, `price`, `take_profit`, `stop_loss`, `balance`, `datetime`)
                 VALUES (:account, :instrument, :units, :price, :takeProfit, :stopLoss, :balance, :datetime)', [
                     'account' => $trade['account'],
@@ -37,9 +37,9 @@ class TradeRepository extends RepositoryAbstract
                 'INSERT INTO `trade_parameter` (`trade_id`, `parameter_id`, `value`)
                 SELECT :tradeId, p.`id`, :value FROM `parameter` AS p WHERE p.`name` = :name'
             );
-            foreach ($simulation['parameters'] as $name => $value) {
+            foreach ($trade['parameters'] as $name => $value) {
                 $this->getWrite()->execute(null, [
-                    'tradeId' => $affectedId,
+                    'tradeId' => $insertedId,
                     'value' => $value,
                     'name' => $name
                 ]);
@@ -56,34 +56,46 @@ class TradeRepository extends RepositoryAbstract
         }
         $this->getWrite()->clean();
 
-        return (int) $affectedId;
+        return (int) $insertedId;
     }
 
-    public function updateTrade(string $tradeId, array $params) : int
+    public function updateTrade(int $tradeId, array $params) : void
     {
-        $this->getWrite()->prepare(
-            'INSERT INTO `parameter` (`name`) VALUES (:name)
-            ON DUPLICATE KEY UPDATE `id` = `id`'
-        );
-        foreach ($params as $name => $value) {
-            $this->getWrite()->execute(null, [
-                'name' => $name
-            ]);
-        }
+        try {
+            $this->getWrite()->begin();
+            $this->getWrite()->prepare(
+                'INSERT INTO `parameter` (`name`) VALUES (:name)
+                ON DUPLICATE KEY UPDATE `id` = `id`'
+            );
+            foreach ($params as $name => $value) {
+                $this->getWrite()->execute(null, [
+                    'name' => $name
+                ]);
+            }
 
-        $this->getWrite()->prepare(
-            'INSERT INTO `trade_parameter` (`trade_id`, `parameter_id`, `value`)
-            SELECT :tradeId, p.`id`, :value FROM `parameter` AS p WHERE p.`name` = :name'
-        );
-        foreach ($params as $name => $value) {
-            $this->getWrite()->execute(null, [
-                'tradeId' => $tradeId,
-                'value' => $value,
-                'name' => $name
-            ]);
+            $this->getWrite()->prepare(
+                'INSERT INTO `trade_parameter` (`trade_id`, `parameter_id`, `value`)
+                SELECT :tradeId, p.`id`, :value FROM `parameter` p WHERE p.`name` = :name
+                ON DUPLICATE KEY UPDATE value = values(value)'
+            );
+            foreach ($params as $name => $value) {
+                $this->getWrite()->execute(null, [
+                    'tradeId' => $tradeId,
+                    'value' => $value,
+                    'name' => $name
+                ]);
+            }
+            $this->getWrite()->commit();
+        } catch(\Throwable $e) {
+            trigger_error(
+                'Rolling back after failed attempt to update trade with message ' .
+                $e->getMessage() . ' with params ' . var_export($params, true) . ' and tradeId ' . $tradeId,
+                E_USER_NOTICE
+            );
+            $this->getWrite()->rollBack();
+            throw $e;
         }
-
-        return (int) $affectedId;
+        $this->getWrite()->clean();
     }
 
     public function getTrades(string $account, int $page, int $perPage) : array
@@ -100,5 +112,25 @@ class TradeRepository extends RepositoryAbstract
          );
 
          return ['trades' => $trades, 'page' => $page, 'pages' => $pages];
+    }
+
+    public function getTradeWithParametersByExternalId(string $externalId) : array
+    {
+        $tradeRaw = $this->getRead()->fetch(
+            'SELECT t.`id`, p.`name`, tp.`value` FROM `trade` t
+            JOIN `trade_parameter` tp ON tp.`trade_id` = t.`id`
+            JOIN `parameter` p ON p.`id` = tp.`parameter_id`
+            WHERE t.`external_id` = :externalId', ['externalId' => $externalId]
+        );
+        if (empty($tradeRaw[0]['id'])) {
+            return [];
+        }
+
+        $return = ['id' => $tradeRaw[0]['id']];
+        foreach ($tradeRaw as $row) {
+            $return['parameters'][$row['name']] = $row['value'];
+        }
+
+        return $return;
     }
 }
