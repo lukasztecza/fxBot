@@ -10,9 +10,10 @@ class TradeRepository extends RepositoryAbstract
         try {
             $this->getWrite()->begin();
             $insertedId = $this->getWrite()->execute(
-                'INSERT INTO `trade` (`account`, `instrument`, `units`, `price`, `take_profit`, `stop_loss`, `balance`, `datetime`)
-                VALUES (:account, :instrument, :units, :price, :takeProfit, :stopLoss, :balance, :datetime)', [
+                'INSERT INTO `trade` (`account`, `external_id`, `instrument`, `units`, `price`, `take_profit`, `stop_loss`, `balance`, `datetime`)
+                VALUES (:account, :externalId, :instrument, :units, :price, :takeProfit, :stopLoss, :balance, :datetime)', [
                     'account' => $trade['account'],
+                    'externalId' => $trade['externalId'],
                     'instrument' => $trade['instrument'],
                     'units' => $trade['units'],
                     'price' => $trade['price'],
@@ -101,7 +102,17 @@ class TradeRepository extends RepositoryAbstract
     public function getTrades(string $account, int $page, int $perPage) : array
     {
          $trades = $this->getRead()->fetch(
-             'SELECT `id`, `account`, `instrument`, `units`, `price`, `take_profit` takeProfit, `stop_loss` stopLoss, `balance`, `datetime`
+             'SELECT
+                `id`,
+                `account`,
+                `external_id` externalId,
+                `instrument`,
+                `units`,
+                `price`,
+                `take_profit` takeProfit,
+                `stop_loss` stopLoss,
+                `balance`,
+                `datetime`
               FROM `trade`
               WHERE `account` = :account
               LIMIT ' . ($page - 1) * $perPage . ', ' . $perPage,

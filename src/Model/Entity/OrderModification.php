@@ -65,7 +65,7 @@ class OrderModification
         return [
             'order' => [
                 'tradeID' => $this->tradeId,
-                'price'=> $this->price,
+                'price'=> (string) round($this->price, 5),
                 'type' => $this->type,
                 'timeInForce' => $this->timeInForce,
                 'triggerCondition' => $this->triggerCondition

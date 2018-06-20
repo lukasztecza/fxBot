@@ -88,11 +88,11 @@ class Order
                 'positionFill' => $this->positionFill,
                 'stopLossOnFill'=> [
                     'timeInForce'=> self::DEFAULT_STOP_TIME_IN_FORCE,
-                    'price'=> $this->stopLoss
+                    'price'=> (string) round($this->stopLoss, 5)
                 ],
                 'takeProfitOnFill' => [
                     'timeInForce'=> self::DEFAULT_STOP_TIME_IN_FORCE,
-                    'price'=> $this->takeProfit
+                    'price'=> (string) round($this->takeProfit, 5)
                 ]
             ]
         ];

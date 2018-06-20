@@ -89,6 +89,7 @@ abstract class RigidStrategyAbstract extends StrategyAbstract
     public function getStrategyParams() : array
     {
         $return['className'] = get_class($this);
+        $return['params'] = [];
         foreach ($this->getRequiredParams() as $requiredParam) {
             $return['params'][$requiredParam] = $this->$requiredParam;
         }
