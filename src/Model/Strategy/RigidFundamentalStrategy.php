@@ -168,7 +168,7 @@ class RigidFundamentalStrategy extends RigidStrategyAbstract
     public function getStrategyParams() : array
     {
         $return['className'] = get_class($this);
-        foreach ($this->requiredParams() as $requiredParam) {
+        foreach ($this->getRequiredParams() as $requiredParam) {
             $return['params'][$requiredParam] = $this->$requiredParam;
         }
         $return['params']['instrument'] = 'VARIED';
@@ -185,9 +185,5 @@ class RigidFundamentalStrategy extends RigidStrategyAbstract
         }
 
         return null;
-    }
-
-    public function getLossLockerFactor() {
-        return $this->lossLockerFactor;
     }
 }

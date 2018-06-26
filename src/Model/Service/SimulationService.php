@@ -10,6 +10,7 @@ use FxBot\Model\Strategy\StrategyInterface;
 
 class SimulationService
 {
+//@TODO remove lossLockerFactor from strategies etc.
     private const INITIAL_TEST_BALANCE = 100;
     private const MAX_SPREAD = 0.0003;
     private const MAX_ITERATIONS_PER_STRATEGY = 4000000;
@@ -56,9 +57,8 @@ class SimulationService
                 $profits = 0;
                 $losses = 0;
                 $activeOrder = null;
-                $stopLossShifted = false;
-                $takeProfitMultiplier = $strategy->getTakeProfitMultiplier();
-                $lossLockerFactor = $strategy->getLossLockerFactor();
+                $singleTransactionRiskSize = null;
+
                 while ($counter++ < self::MAX_ITERATIONS_PER_STRATEGY && $currentDate < $simulationPeriod['end']) {
                     if ($balance < self::INITIAL_TEST_BALANCE / 5) {
                         $balance = 0;
@@ -81,20 +81,18 @@ class SimulationService
 
                     if (!$this->handleOrder(
                         $activeOrder,
+                        $singleTransactionRiskSize,
                         $strategy,
                         $prices,
                         $balance,
                         $currentDate,
                         $executedTrades,
                         $profits,
-                        $losses,
-                        $takeProfitMultiplier,
-                        $lossLockerFactor,
-                        $stopLossShifted
+                        $losses
                     )) {
                         return [
                             'status' => false,
-                            'message' => 'Could not create order'
+                            'message' => 'Could not handle order'
                         ];
                     }
 
@@ -221,16 +219,14 @@ class SimulationService
 
     private function handleOrder(
         Order &$activeOrder = null,
+        float &$singleTransactionRiskSize = null,
         StrategyInterface $strategy,
         array $prices,
         float &$balance,
         string $currentDate,
         int &$executedTrades,
         int &$profits,
-        int &$losses,
-        float $takeProfitMultiplier,
-        float $lossLockerFactor,
-        bool &$stopLossShifted
+        int &$losses
     ) : bool {
         if (is_null($activeOrder)) {
             try {
@@ -241,17 +237,24 @@ class SimulationService
                         ' ' . str_pad((string) $activeOrder->getPrice(), 10)
                     ;
                     $executedTrades++;
+                    $singleTransactionRiskSize = abs($activeOrder->getPrice() - $activeOrder->getStopLoss());
                 }
             } catch(\Throwable $e) {
                 trigger_error('Could not create order due to ' . $e->getMessage(), E_USER_NOTICE);
 
                 return false;
             }
+
         } elseif (
             ($activeOrder->getUnits() > 0 && $activeOrder->getTakeProfit() < $prices[$activeOrder->getInstrument()]['bid']) ||
             ($activeOrder->getUnits() < 0 && $activeOrder->getTakeProfit() > $prices[$activeOrder->getInstrument()]['ask'])
         ) {
-            $balance = $balance + ($balance * $strategy->getStrategyParams()['params']['singleTransactionRisk'] * $takeProfitMultiplier);
+            $balance = $balance + (
+                $balance *
+                $strategy->getStrategyParams()['params']['singleTransactionRisk'] *
+                abs($activeOrder->getTakeProfit() - $activeOrder->getPrice()) /
+                $singleTransactionRiskSize
+            );
             echo
                 'PROFIT ' . str_pad($this->formatBalance($balance), 10) . ' on ' . $currentDate .
                 ' due to ask ' . str_pad((string) $prices[$activeOrder->getInstrument()]['ask'], 10) .
@@ -259,41 +262,54 @@ class SimulationService
             ;
             $profits++;
             $activeOrder = null;
-            $stopLossShifted = false;
+            $singleTransactionRiskSize = null;
         } elseif (
             ($activeOrder->getUnits() > 0 && $activeOrder->getStopLoss() > $prices[$activeOrder->getInstrument()]['bid']) ||
             ($activeOrder->getUnits() < 0 && $activeOrder->getStopLoss() < $prices[$activeOrder->getInstrument()]['ask'])
         ) {
-            if (!$stopLossShifted) {
-                $balance = $balance - ($balance * $strategy->getStrategyParams()['params']['singleTransactionRisk']);
+            $balance = $balance - (
+                $balance *
+                $strategy->getStrategyParams()['params']['singleTransactionRisk'] *
+                abs($activeOrder->getStopLoss() - $activeOrder->getPrice()) /
+                $singleTransactionRiskSize
+            );
+
+            if (
+                $activeOrder->getUnits() > 0 && (
+                    $activeOrder->getPrice() < $activeOrder->getStopLoss()
+                ) ||
+                $activeOrder->getUnits() < 0 && (
+                    $activeOrder->getPrice() > $activeOrder->getStopLoss()
+                )
+            ) {
+                $resultText = 'TSL    ';
+            } elseif ($activeOrder->getPrice() == $activeOrder->getStopLoss()) {
+                $resultText = 'BLOCK  ';
+            }  else {
+                $resultText = 'LOSS   ';
             }
+
             echo
-                (!$stopLossShifted ? 'LOSS   ' : 'BLOCK  ') . str_pad($this->formatBalance($balance), 10) . ' on ' . $currentDate .
+                $resultText . str_pad($this->formatBalance($balance), 10) . ' on ' . $currentDate .
                 ' due to ask ' . str_pad((string) $prices[$activeOrder->getInstrument()]['ask'], 10) .
                 ' bid ' . str_pad((string) $prices[$activeOrder->getInstrument()]['bid'], 10) . PHP_EOL
             ;
-            if (!$stopLossShifted) {
-                $losses++;
-            }
+            $losses++;
             $activeOrder = null;
-            $stopLossShifted = false;
-        } elseif (
-            !$stopLossShifted && ((
-                $activeOrder->getUnits() > 0 && ((
-                    $activeOrder->getStopLoss() + (
-                        $lossLockerFactor * ($activeOrder->getTakeProfit() - $activeOrder->getStopLoss())
-                    ) / ($takeProfitMultiplier + 1)
-                ) < $prices[$activeOrder->getInstrument()]['bid'])
-            ) || (
-                $activeOrder->getUnits() < 0 && ((
-                    $activeOrder->getStopLoss() - (
-                        $lossLockerFactor * ($activeOrder->getStopLoss() - $activeOrder->getTakeProfit())
-                    ) / ($takeProfitMultiplier + 1)
-                ) > $prices[$activeOrder->getInstrument()]['ask'])
-            ))
-        ) {
-            $stopLossShifted = true;
-            (function () {$this->stopLoss = $this->price;})->bindTo($activeOrder, $activeOrder)();
+            $singleTransactionRiskSize = null;
+        } else {
+            $orderModification = $strategy->getOrderModification(
+                'orderId',
+                'tradeId',
+                $activeOrder->getPrice(),
+                $activeOrder->getStopLoss(),
+                $activeOrder->getTakeProfit(),
+                $prices[$activeOrder->getInstrument()]
+            );
+            if (!empty($orderModification)) {
+                $activeOrder->applyOrderModification($orderModification);
+            }
+            $orderModification = null;
         }
 
         return true;

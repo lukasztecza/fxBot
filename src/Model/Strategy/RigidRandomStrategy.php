@@ -57,9 +57,4 @@ class RigidRandomStrategy extends RigidStrategyAbstract
 
         return null;
     }
-
-    public function getLossLockerFactor()
-    {
-        return $this->lossLockerFactor;
-    }
 }

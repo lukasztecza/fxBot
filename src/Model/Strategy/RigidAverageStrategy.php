@@ -99,17 +99,14 @@ class RigidAverageStrategy extends RigidStrategyAbstract
 
     protected function getPriceModification(float $openPrice, float $currentStopLoss, float $currentTakeProfit, array $currentPrices) : ?float
     {
-        if ($currentTakeProfit > $currentStopLoss && $currentPrices['bid'] > $openPrice + 0.0015) {
+        if (round($openPrice, 4) === round($currentStopLoss, 4)) {
+            return null;
+        } elseif ($currentTakeProfit > $currentStopLoss && $currentPrices['bid'] > $openPrice + 0.002) {
             return $openPrice;
-        } elseif ($currentTakeProfit < $currentStopLoss && $currentPrices['ask'] < $openPrice - 0.0015) {
+        } elseif ($currentTakeProfit < $currentStopLoss && $currentPrices['ask'] < $openPrice - 0.002) {
             return $openPrice;
         }
 
         return null;
-    }
-
-    public function getLossLockerFactor()
-    {
-        return $this->lossLockerFactor;
     }
 }
