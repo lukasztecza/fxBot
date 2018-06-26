@@ -3,9 +3,11 @@ namespace FxBot\Model\Entity;
 
 class OrderModification
 {
-    private const DEFAULT_TYPE = 'STOP_LOSS';
     private const DEFAULT_STOP_TIME_IN_FORCE = 'GTC';
     private const DEFAULT_TRIGGER_CONDITION = 'DEFAULT';
+
+    private const STOP_LOSS_TYPE = 'STOP_LOSS';
+    private const TAKE_PROFIT_TYPE = 'TAKE_PROFIT';
 
     private $tradeId;
     private $orderId;
@@ -25,9 +27,19 @@ class OrderModification
         $this->tradeId = $tradeId;
         $this->orderId = $orderId;
         $this->price = $price;
-        $this->type = $type ?? self::DEFAULT_TYPE;
+        $this->type = $type ?? self::STOP_LOSS_TYPE;
         $this->timeInForce = $timeInForce ?? self::DEFAULT_STOP_TIME_IN_FORCE;
         $this->triggerCondition = $triggerCondition ?? self::DEFAULT_TRIGGER_CONDITION;
+    }
+
+    public function getStopLossType() : string
+    {
+        return self::STOP_LOSS_TYPE;
+    }
+
+    public function getTakeProfitType() : string
+    {
+        return self::TAKE_PROFIT_TYPE;
     }
 
     public function getTradeId() : string
