@@ -55,7 +55,7 @@ class RigidTrendingStrategy extends RigidStrategyAbstract
     protected function getDirection(string $currentDateTime = null) : int
     {
         $lastPrices = $this->priceService->getLastPricesByPeriod($this->getInstrument(), $this->lastPricesPeriod, $currentDateTime);
-        $channelDirection = $this->getChannelDirection($lastPrices, $this->extremumRange);
+        $channelDirection = $this->getChannelDirection($lastPrices, (int) $this->extremumRange);
 
         return $this->followTrend ? $channelDirection : -$channelDirection;
     }

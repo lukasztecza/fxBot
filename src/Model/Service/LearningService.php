@@ -10,9 +10,7 @@ class LearningService
 
     private const STRATEGY_TO_LEARN = 'FxBot\Model\Strategy\RigidFundamentalStrategy';
     private const INITIAL_PARAMS = [
-        'rigidStopLoss' => 0.001,
         'takeProfitMultiplier' => 9,
-        'lossLockerFactor' => 1,
         'signalFastAverage' => 10,
         'signalSlowAverage' => 25,
         'longFastAverage' => 100,
@@ -138,7 +136,7 @@ class LearningService
                     $noImprovementCounter = 0;
                 } else {
                     return [
-                        'status' => 'success',
+                        'status' => true,
                         'message' => 'Finished reaching limit of param modification factor with summary ' . var_export($bestSummary, true)
                     ];
                 }
@@ -146,7 +144,7 @@ class LearningService
         }
 
         return [
-            'status' => 'success',
+            'status' => true,
             'message' => 'Finished reaching max learning iterations with summary ' . var_export($bestSummary, true)
         ];
     }
@@ -156,6 +154,8 @@ class LearningService
         return [[
             'className' => self::STRATEGY_TO_LEARN,
             'params' => $params + [
+                'rigidStopLoss' => 0.002,
+                'lossLockerFactor' => 1,
                 'homeCurrency' => 'CAD',
                 'singleTransactionRisk' => 0.005,
                 'instrument' => self::INSTRUMENT,
