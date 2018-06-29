@@ -168,7 +168,7 @@ class RigidFundamentalStrategy extends RigidStrategyAbstract
     public function getStrategyParams() : array
     {
         $return['className'] = get_class($this);
-        foreach ($this->requiredParams() as $requiredParam) {
+        foreach ($this->getRequiredParams() as $requiredParam) {
             $return['params'][$requiredParam] = $this->$requiredParam;
         }
         $return['params']['instrument'] = 'VARIED';
@@ -178,16 +178,17 @@ class RigidFundamentalStrategy extends RigidStrategyAbstract
 
     protected function getPriceModification(float $openPrice, float $currentStopLoss, float $currentTakeProfit, array $currentPrices) : ?float
     {
-        if ($currentTakeProfit > $currentStopLoss && $currentPrices['bid'] > $openPrice + 0.0015) {
+        if (round($openPrice, 4) === round($currentStopLoss, 4)) {
+            return null;
+        }
+
+        $difference = $this->lossLockerFactor * abs($currentTakeProfit - $openPrice) / $this->takeProfitMultiplier;
+        if ($currentTakeProfit > $currentStopLoss && $currentPrices['bid'] > $openPrice + $difference) {
             return $openPrice;
-        } elseif ($currentTakeProfit < $currentStopLoss && $currentPrices['ask'] < $openPrice - 0.0015) {
+        } elseif ($currentTakeProfit < $currentStopLoss && $currentPrices['ask'] < $openPrice - $difference) {
             return $openPrice;
         }
 
         return null;
-    }
-
-    public function getLossLockerFactor() {
-        return $this->lossLockerFactor;
     }
 }

@@ -1,6 +1,8 @@
 <?php declare(strict_types=1);
 namespace FxBot\Model\Entity;
 
+use FxBot\Model\Entity\OrderModification;
+
 class Order
 {
     private const DEFAULT_TYPE = 'MARKET';
@@ -75,6 +77,15 @@ class Order
     public function getPositionFill() : string
     {
         return $this->positionFill;
+    }
+
+    public function applyOrderModification(OrderModification $orderModification) : void
+    {
+        if ($orderModification->getType() === $orderModification->getStopLossType()) {
+            $this->stopLoss = $orderModification->getPrice();
+        } elseif ($orderModification->getType() === $orderModification->getTakeProfitType()) {
+            $this->takeProfit = $orderModification->getPrice();
+        }
     }
 
     public function getFormatted() : array
