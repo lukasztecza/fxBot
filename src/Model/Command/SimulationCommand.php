@@ -17,7 +17,7 @@ class SimulationCommand implements CommandInterface
         ['start' => '2015-03-01 00:00:00', 'end' => '2016-03-01 00:00:00'],
         ['start' => '2016-03-01 00:00:00', 'end' => '2017-03-01 00:00:00'],
         ['start' => '2017-03-01 00:00:00', 'end' => '2018-03-01 00:00:00'],
-        ['start' => '2010-03-01 00:00:00', 'end' => '2018-03-01 00:00:00']
+        ['start' => '2018-06-01 00:00:00', 'end' => '2018-06-28 00:00:00']
     ];
     private const STRATEGIES_CLASS_FOR_SIMULATION = [
         'FxBot\Model\Strategy\RigidAverageStrategy',
@@ -27,11 +27,11 @@ class SimulationCommand implements CommandInterface
     ];
     private const CHANGING_PARAMETERS = [
         'rigidStopLoss' => [0.002],
-        'takeProfitMultiplier' => [10],
-        'lossLockerFactor' => [1],
-        'signalFastAverage' => [25],
-        'signalSlowAverage' => [100],
-        'longFastAverage' => [50],
+        'takeProfitMultiplier' => [4],
+        'lossLockerFactor' => [2],
+        'signalFastAverage' => [10],
+        'signalSlowAverage' => [25],
+        'longFastAverage' => [100],
         'longSlowAverage' => [200],
         'extremumRange' => [12],
         'bankFactor' => [1],
@@ -42,7 +42,7 @@ class SimulationCommand implements CommandInterface
         'unemploymentFactor' => [1],
         'bankRelativeFactor' => [1],
         'homeCurrency' => ['CAD'],
-        'singleTransactionRisk' => [0.001],
+        'singleTransactionRisk' => [0.01],
         'instrument' => ['EUR_USD'],
         'followTrend' => [0],
         'lastPricesPeriod' => ['P60D'],

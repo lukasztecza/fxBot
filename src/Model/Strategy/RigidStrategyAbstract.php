@@ -62,7 +62,7 @@ abstract class RigidStrategyAbstract extends StrategyAbstract
 
         return new Order($this->getInstrument(), $units, $tradePrice, $takeProfit, $stopLoss);
     }
-//TODO instead of lossLockerFactor there should be orderModification update that
+
     public function getOrderModification(
         string $orderId,
         string $tradeId,
