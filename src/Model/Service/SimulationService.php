@@ -10,9 +10,8 @@ use FxBot\Model\Strategy\StrategyInterface;
 
 class SimulationService
 {
-//@TODO remove lossLockerFactor from strategies etc.
     private const INITIAL_TEST_BALANCE = 100;
-    private const MAX_SPREAD = 0.0003;
+    private const MAX_SPREAD = 0.0005;
     private const MAX_ITERATIONS_PER_STRATEGY = 4000000;
     private const SIMULATION_STEP = 'PT20M';
 
@@ -267,7 +266,7 @@ class SimulationService
             ($activeOrder->getUnits() > 0 && $activeOrder->getStopLoss() > $prices[$activeOrder->getInstrument()]['bid']) ||
             ($activeOrder->getUnits() < 0 && $activeOrder->getStopLoss() < $prices[$activeOrder->getInstrument()]['ask'])
         ) {
-            $balance = $balance - (
+            $difference = (
                 $balance *
                 $strategy->getStrategyParams()['params']['singleTransactionRisk'] *
                 abs($activeOrder->getStopLoss() - $activeOrder->getPrice()) /
@@ -283,10 +282,12 @@ class SimulationService
                 )
             ) {
                 $resultText = 'TSL    ';
+                $balance += $difference;
             } elseif ($activeOrder->getPrice() == $activeOrder->getStopLoss()) {
                 $resultText = 'BLOCK  ';
             }  else {
                 $resultText = 'LOSS   ';
+                $balance -= $difference;
             }
 
             echo
