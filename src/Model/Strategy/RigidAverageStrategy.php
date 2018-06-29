@@ -101,9 +101,12 @@ class RigidAverageStrategy extends RigidStrategyAbstract
     {
         if (round($openPrice, 4) === round($currentStopLoss, 4)) {
             return null;
-        } elseif ($currentTakeProfit > $currentStopLoss && $currentPrices['bid'] > $openPrice + 0.002) {
+        }
+
+        $difference = $this->lossLockerFactor * abs($currentTakeProfit - $openPrice) / $this->takeProfitMultiplier;
+        if ($currentTakeProfit > $currentStopLoss && $currentPrices['bid'] > $openPrice + $difference) {
             return $openPrice;
-        } elseif ($currentTakeProfit < $currentStopLoss && $currentPrices['ask'] < $openPrice - 0.002) {
+        } elseif ($currentTakeProfit < $currentStopLoss && $currentPrices['ask'] < $openPrice - $difference) {
             return $openPrice;
         }
 

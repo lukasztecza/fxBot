@@ -8,35 +8,44 @@ class LearningService
 {
     private const MAX_LEARNING_ITERATIONS = 100;
 
-    private const STRATEGY_TO_LEARN = 'FxBot\Model\Strategy\RigidTrendingStrategy';
+    private const STRATEGY_TO_LEARN = 'FxBot\Model\Strategy\RigidFundamentalStrategy';
     private const INITIAL_PARAMS = [
         'rigidStopLoss' => 0.001,
         'takeProfitMultiplier' => 9,
-        'lossLockerFactor' => 2,
+        'lossLockerFactor' => 1,
         'signalFastAverage' => 10,
-        'signalSlowAverage' => 30,
+        'signalSlowAverage' => 25,
         'longFastAverage' => 100,
         'longSlowAverage' => 200,
         'extremumRange' => 12,
-        'bankFactor' => 1,
-        'inflationFactor' => 1,
-        'longFastAverage' => 1,
-        'tradeFactor' => 1,
-        'companiesFactor' => 1,
-        'salesFactor' => 1,
-        'unemploymentFactor' => 1,
-        'bankRelativeFactor' => 1
+        'bankFactor' => 2,
+        'inflationFactor' => 15,
+        'tradeFactor' => 22,
+        'companiesFactor' => 4,
+        'salesFactor' => 10,
+        'unemploymentFactor' => 10,
+        'bankRelativeFactor' => 15
     ];
     private const INSTRUMENT = 'EUR_USD';
     private const LEARNING_PERIODS = [
-        ['start' => '2014-03-01 00:00:00', 'end' => '2015-03-01 00:00:00'],
-        ['start' => '2015-03-01 00:00:00', 'end' => '2016-03-01 00:00:00'],
-        ['start' => '2016-03-01 00:00:00', 'end' => '2017-03-01 00:00:00'],
-        ['start' => '2017-03-01 00:00:00', 'end' => '2018-03-01 00:00:00']
+        ['start' => '2015-01-01 00:00:00', 'end' => '2015-04-01 00:00:00'],
+        ['start' => '2015-04-01 00:00:00', 'end' => '2015-07-01 00:00:00'],
+        ['start' => '2015-07-01 00:00:00', 'end' => '2015-10-01 00:00:00'],
+        ['start' => '2015-10-01 00:00:00', 'end' => '2016-01-01 00:00:00'],
+        ['start' => '2016-01-01 00:00:00', 'end' => '2016-04-01 00:00:00'],
+        ['start' => '2016-04-01 00:00:00', 'end' => '2016-07-01 00:00:00'],
+        ['start' => '2016-07-01 00:00:00', 'end' => '2016-10-01 00:00:00'],
+        ['start' => '2016-10-01 00:00:00', 'end' => '2017-01-01 00:00:00'],
+        ['start' => '2017-01-01 00:00:00', 'end' => '2017-04-01 00:00:00'],
+        ['start' => '2017-04-01 00:00:00', 'end' => '2017-07-01 00:00:00'],
+        ['start' => '2017-07-01 00:00:00', 'end' => '2017-10-01 00:00:00'],
+        ['start' => '2017-10-01 00:00:00', 'end' => '2018-01-01 00:00:00'],
+        ['start' => '2018-01-01 00:00:00', 'end' => '2018-04-01 00:00:00'],
+        ['start' => '2018-04-01 00:00:00', 'end' => '2018-06-28 00:00:00'],
     ];
 
-    private const PARAM_MODIFICATION_FACTOR = 1.1;
-    private const PARAM_MODIFICATION_FACTOR_CHANGE = 0.1;
+    private const PARAM_MODIFICATION_FACTOR = 1.5;
+    private const PARAM_MODIFICATION_FACTOR_CHANGE = 0.5;
     private const PARAM_MODIFICATION_FACTOR_LIMIT = 5;
 
     private $simulationService;
@@ -65,7 +74,6 @@ class LearningService
         $increase = 1;
         $noImprovementCounter = 0;
         $paramModificationFactor = self::PARAM_MODIFICATION_FACTOR;
-        $this->simulationService->setSimulationStrategies($this->getStrategiesForTest($params));
         $this->simulationService->setSimulationPeriods(self::LEARNING_PERIODS);
 
         while ($counter++ <= self::MAX_LEARNING_ITERATIONS) {
@@ -74,9 +82,9 @@ class LearningService
                 trigger_error('Pushing change to the next param ' . var_export($currentParam, true), E_USER_NOTICE);
                 continue;
             }
+            $this->simulationService->setSimulationStrategies($this->getStrategiesForTest($params));
 
             $result = $this->simulationService->run();
-
             if (empty($currentSimulationIds)) {
                 $bestSimulationIds = $result['simulationIds'];
             }
@@ -171,19 +179,19 @@ class LearningService
                 trigger_error('Learning tried to set negative parameter value ' . var_export($newValue, true), E_USER_NOTICE);
                 break;
             case $paramName === 'rigidStopLoss' && $newValue < 0.001:
-                trigger_error('Learnin tried to set too low stop loss' . var_export(['rigidStopLoss' => $newValue], true), E_USER_NOTICE);
+                trigger_error('Learning tried to set too low stop loss' . var_export(['rigidStopLoss' => $newValue], true), E_USER_NOTICE);
                 break;
             case $paramName === 'signalFastAverage' && $newValue >= $params['signalSlowAverage']:
-                trigger_error('Learnin tried to set too high signalFastAverage' . var_export(['signalFastAverage' => $newValue], true), E_USER_NOTICE);
+                trigger_error('Learning tried to set too high signalFastAverage' . var_export(['signalFastAverage' => $newValue], true), E_USER_NOTICE);
                 break;
             case $paramName === 'longFastAverage' && $newValue >= $params['longSlowAverage']:
-                trigger_error('Learnin tried to set too high longFastAverage' . var_export(['longFastAverage' => $newValue], true), E_USER_NOTICE);
+                trigger_error('Learning tried to set too high longFastAverage' . var_export(['longFastAverage' => $newValue], true), E_USER_NOTICE);
                 break;
             case $paramName === 'signalSlowAverage' && $newValue <= $params['signalFastAverage']:
-                trigger_error('Learnin tried to set too low signalSlowAverage' . var_export(['signalSlowAverage' => $newValue], true), E_USER_NOTICE);
+                trigger_error('Learning tried to set too low signalSlowAverage' . var_export(['signalSlowAverage' => $newValue], true), E_USER_NOTICE);
                 break;
             case $paramName === 'longSlowAverage' && $newValue <= $params['longFastAverage']:
-                trigger_error('Learnin tried to set too low longSlowAverage' . var_export(['longSlowAverage' => $newValue], true), E_USER_NOTICE);
+                trigger_error('Learning tried to set too low longSlowAverage' . var_export(['longSlowAverage' => $newValue], true), E_USER_NOTICE);
                 break;
             default:
                 $params[$paramName] = $newValue;
