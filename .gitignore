@@ -16,10 +16,7 @@ public/upload
 src/Config/parameters.json
 
 # created by codeception
-tests/*
+tests/_data/
+tests/_output/
+tests/_support/_generated
 codeception.yml
-
-# application test classes
-!tests/acceptance/
-!tests/functional/
-!tests/unit/
