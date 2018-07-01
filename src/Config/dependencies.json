@@ -39,7 +39,10 @@
     "forexController": {
         "class": "FxBot\\Controller\\ForexController",
         "inject": [
-            "@tradeService@"
+            "@tradeService@",
+            "@indicatorService@",
+            "@validatorFactory@",
+            "%priceInstruments%"
         ]
     },
 
