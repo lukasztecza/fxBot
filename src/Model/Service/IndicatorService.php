@@ -48,6 +48,18 @@ class IndicatorService
         return self::SALES_INDICATOR;
     }
 
+    public function getAllIndicators() : array
+    {
+        return [
+            self::BANK_RATE_INDICATOR,
+            self::INFLATION_INDICATOR,
+            self::COMPANIES_INDICATOR,
+            self::TRADE_BALANCE_INDICATOR,
+            self::UNEMPLOYMENT_INDICATOR,
+            self::SALES_INDICATOR
+        ];
+    }
+
     public function saveIndicators(array $indicators) : array
     {
         try {
@@ -83,5 +95,18 @@ class IndicatorService
 
             return [];
         }
+    }
+
+    public function getComparison(string $type, string $instrument) : array
+    {
+        try {
+            $comparison = $this->indicatorRepository->getComparison($type, $instrument);
+        } catch (\Throwable $e) {
+            trigger_error('Failed to get comparison with message ' . $e->getMessage());
+
+            return [];
+        }
+
+        return $comparison;
     }
 }

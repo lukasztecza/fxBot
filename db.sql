@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS `indicator` (
     `forecast` DECIMAL(10,5) DEFAULT NULL,
     `actual` DECIMAL(10,5) NOT NULL,
     PRIMARY KEY (`instrument`, `datetime`, `name`),
+    KEY (`instrument`),
+    KEY (`datetime`),
     KEY (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
@@ -25,7 +27,9 @@ CREATE TABLE IF NOT EXISTS `price` (
     `high` DECIMAL(10,5) NOT NULL,
     `low` DECIMAL(10,5) NOT NULL,
     `close` DECIMAL(10,5) NOT NULL,
-    PRIMARY KEY (`instrument`, `datetime`)
+    PRIMARY KEY (`instrument`, `datetime`),
+    KEY (`instrument`),
+    KEY (`datetime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE IF NOT EXISTS `trade` (
@@ -40,7 +44,8 @@ CREATE TABLE IF NOT EXISTS `trade` (
     `balance` DECIMAL(10,5) NOT NULL,
     `datetime` DATETIME NOT NULL,
     PRIMARY KEY (`id`),
-    KEY (`instrument`),
+    KEY (`account`),
+    KEY (`external_id`),
     KEY (`datetime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 

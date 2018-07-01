@@ -63,4 +63,49 @@ class IndicatorRepository extends RepositoryAbstract
             $params
         );
     }
+
+    public function getComparison(string $type, string $priceInstrument) : array
+    {
+        $instruments = explode('_', $priceInstrument);
+
+        $params = [];
+        $placeholders = $this->getInPlaceholdersAndAddParams($instruments, $params);
+        $params['type'] = $type;
+
+        $comparisons = $this->getRead()->fetch(
+            'SELECT `instrument`, `actual`, `datetime` FROM `indicator`
+            WHERE `type` = :type
+            AND `instrument` IN (' . $placeholders . ')
+            ORDER BY `datetime` DESC',
+            $params
+        );
+
+        $this->getRead()->prepare(
+            'SELECT `close` FROM `price`
+            WHERE `instrument` = :instrument
+            AND `datetime` BETWEEN :startDateTime AND :endDateTime
+            LIMIT 1'
+        );
+
+        foreach ($comparisons as $key => $comparison) {
+            $startDateTime = new \DateTime($comparison['datetime'], new \DateTimeZone('UTC'));
+            $endDateTime = clone $startDateTime;
+            $startDateTime = $startDateTime->sub(new \DateInterval('PT20M'));
+            $endDateTime = $endDateTime->add(new \DateInterval('PT20M'));
+            $closePrice = $this->getRead()->fetch(null, [
+                'instrument' => $priceInstrument,
+                'startDateTime' => $startDateTime->format('Y-m-d H:i:s'),
+                'endDateTime' => $endDateTime->format('Y-m-d H:i:s')
+            ]);
+            if (!empty($closePrice[0]['close'])) {
+                $comparisons[$key]['price'] = $closePrice[0]['close'];
+                $comparisons[$key]['priceInstrument'] = $priceInstrument;
+            } else {
+                unset($comparisons[$key]);
+                trigger_error('Could not get proper structure for ' . $comparison['datetime']);
+            }
+        }
+
+        return $comparisons;
+    }
 }
