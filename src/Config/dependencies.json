@@ -4,8 +4,8 @@
         "inject": [
             "@securityMiddleware@",
             "%defaultContentType%",
-            "%assetsVersion%",
-            "@sessionService@"
+            "@sessionService@",
+            "%environment%"
         ]
     },
     "securityMiddleware": {

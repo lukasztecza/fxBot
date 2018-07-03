@@ -8,22 +8,22 @@ class LearningService
 {
     private const MAX_LEARNING_ITERATIONS = 100;
 
-    private const STRATEGY_TO_LEARN = 'FxBot\Model\Strategy\RigidDeviationStrategy';
+    private const STRATEGY_TO_LEARN = 'FxBot\Model\Strategy\RigidRandomStrategy';
     private const INITIAL_PARAMS = [
-        'rigidStopLoss' => 0.003,
-        'takeProfitMultiplier' => 9.6,
-        'signalFastAverage' => 34,
-        'signalSlowAverage' => 100,
+                'rigidStopLoss' => 0.0025,
+                'takeProfitMultiplier' => 9.6,
+                'lossLockerFactor' => 1,
+                'singleTransactionRisk' => 0.02
 /*        'longFastAverage' => 300,
         'longSlowAverage' => 600,
         'extremumRange' => 12,
-        'bankFactor' => 2,
-        'inflationFactor' => 15,
-        'tradeFactor' => 22,
-        'companiesFactor' => 4,
-        'salesFactor' => 10,
-        'unemploymentFactor' => 10,
-        'bankRelativeFactor' => 15 */
+        'bankFactor' => 1,
+        'inflationFactor' => 1,
+        'tradeFactor' => 1,
+        'companiesFactor' => 1,
+        'salesFactor' => 1,
+        'unemploymentFactor' => 1,
+        'bankRelativeFactor' => 1 */
     ];
     private const INSTRUMENT = 'EUR_USD';
     private const LEARNING_PERIODS = [
@@ -34,7 +34,7 @@ class LearningService
         ['start' => '2016-01-01 00:00:00', 'end' => '2016-04-01 00:00:00'],
         ['start' => '2016-04-01 00:00:00', 'end' => '2016-07-01 00:00:00'],
         ['start' => '2016-07-01 00:00:00', 'end' => '2016-10-01 00:00:00'],
-        ['start' => '2016-10-01 00:00:00', 'end' => '2017-01-01 00:00:00'], */
+        ['start' => '2016-10-01 00:00:00', 'end' => '2017-01-01 00:00:00'],*/
         ['start' => '2017-01-01 00:00:00', 'end' => '2017-04-01 00:00:00'],
         ['start' => '2017-04-01 00:00:00', 'end' => '2017-07-01 00:00:00'],
         ['start' => '2017-07-01 00:00:00', 'end' => '2017-10-01 00:00:00'],
@@ -43,9 +43,9 @@ class LearningService
         ['start' => '2018-04-01 00:00:00', 'end' => '2018-06-28 00:00:00'],
     ];
 
-    private const PARAM_MODIFICATION_FACTOR = 1.2;
-    private const PARAM_MODIFICATION_FACTOR_CHANGE = 0.2;
-    private const PARAM_MODIFICATION_FACTOR_LIMIT = 5;
+    private const PARAM_MODIFICATION_FACTOR = 1.3;
+    private const PARAM_MODIFICATION_FACTOR_CHANGE = 0.3;
+    private const PARAM_MODIFICATION_FACTOR_LIMIT = 10;
 
     private $simulationService;
     private $learningRepository;
@@ -155,8 +155,13 @@ class LearningService
         return [[
             'className' => self::STRATEGY_TO_LEARN,
             'params' => $params + [
-                'lossLockerFactor' => 1,
-                'singleTransactionRisk' => 0.01,
+//                'rigidStopLoss' => 0.0025,
+//                'takeProfitMultiplier' => 9.6,
+//                'signalFastAverage' => 34,
+//                'signalSlowAverage' => 100,
+
+//                'lossLockerFactor' => 1,
+//                'singleTransactionRisk' => 0.02,
                 'homeCurrency' => 'CAD',
                 'instrument' => self::INSTRUMENT,
                 'followTrend' => 0,
