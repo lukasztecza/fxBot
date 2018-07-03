@@ -12,6 +12,13 @@
         "action": "stats"
     },
     {
+        "path": "/compare",
+        "methods": ["GET", "POST"],
+        "controller": "forexController",
+        "action": "compare"
+    },
+
+    {
         "path": "/stats/{page}",
         "methods": ["GET"],
         "requirements": {"page": "\\d+"},
@@ -21,11 +28,13 @@
     {
         "path": "/login",
         "controller": "authenticationController",
+        "methods": ["GET", "POST"],
         "action": "login"
     },
     {
         "path": "/logout",
         "controller": "authenticationController",
+        "methods": ["GET"],
         "action": "logout"
     }
 ]

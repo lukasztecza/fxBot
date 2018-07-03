@@ -9,29 +9,31 @@ class SimulationCommand implements CommandInterface
 {
     private const FORCE_INSTRUMENT = 'EUR_USD';
     private const SIMULATION_PERIODS = [
-        ['start' => '2010-03-01 00:00:00', 'end' => '2010-03-20 00:00:00'],
+/*        ['start' => '2010-03-01 00:00:00', 'end' => '2010-03-20 00:00:00'],
         ['start' => '2011-03-01 00:00:00', 'end' => '2011-03-20 00:00:00'],
         ['start' => '2012-03-01 00:00:00', 'end' => '2013-03-01 00:00:00'],
         ['start' => '2013-03-01 00:00:00', 'end' => '2014-03-01 00:00:00'],
         ['start' => '2014-03-01 00:00:00', 'end' => '2015-03-01 00:00:00'],
         ['start' => '2015-03-01 00:00:00', 'end' => '2016-03-01 00:00:00'],
         ['start' => '2016-03-01 00:00:00', 'end' => '2017-03-01 00:00:00'],
-        ['start' => '2017-03-01 00:00:00', 'end' => '2018-03-01 00:00:00'],
-        ['start' => '2018-06-01 00:00:00', 'end' => '2018-06-28 00:00:00']
+        ['start' => '2017-03-01 00:00:00', 'end' => '2018-03-01 00:00:00'], */
+        ['start' => '2010-03-01 00:00:00', 'end' => '2018-06-28 00:00:00']
     ];
     private const STRATEGIES_CLASS_FOR_SIMULATION = [
-        'FxBot\Model\Strategy\RigidAverageStrategy',
-        'FxBot\Model\Strategy\RigidFundamentalStrategy',
-        'FxBot\Model\Strategy\RigidTrendingStrategy',
+//        'FxBot\Model\Strategy\RigidAverageStrategy',
+//        'FxBot\Model\Strategy\RigidFundamentalStrategy',
+//        'FxBot\Model\Strategy\RigidTrendingStrategy',
+//        'FxBot\Model\Strategy\RigidRandomStrategy'
+        'FxBot\Model\Strategy\RigidDeviationStrategy',
         'FxBot\Model\Strategy\RigidRandomStrategy'
     ];
     private const CHANGING_PARAMETERS = [
-        'rigidStopLoss' => [0.002],
-        'takeProfitMultiplier' => [4],
-        'lossLockerFactor' => [2],
-        'signalFastAverage' => [10],
-        'signalSlowAverage' => [25],
-        'longFastAverage' => [100],
+        'rigidStopLoss' => [0.0025],
+        'takeProfitMultiplier' => [9.6],
+        'lossLockerFactor' => [1],
+        'signalFastAverage' => [34],
+        'signalSlowAverage' => [100],
+/*        'longFastAverage' => [100],
         'longSlowAverage' => [200],
         'extremumRange' => [12],
         'bankFactor' => [1],
@@ -40,13 +42,13 @@ class SimulationCommand implements CommandInterface
         'companiesFactor' => [1],
         'salesFactor' => [1],
         'unemploymentFactor' => [1],
-        'bankRelativeFactor' => [1],
+        'bankRelativeFactor' => [1], */
         'homeCurrency' => ['CAD'],
-        'singleTransactionRisk' => [0.01],
+        'singleTransactionRisk' => [0.02],
         'instrument' => ['EUR_USD'],
-        'followTrend' => [0],
+//        'followTrend' => [0],
         'lastPricesPeriod' => ['P60D'],
-        'lastIndicatorsPeriod' => ['P12M']
+//        'lastIndicatorsPeriod' => ['P12M']
     ];
 
     private $simulationService;

@@ -20,3 +20,7 @@ tests/_data/
 tests/_output/
 tests/_support/_generated
 codeception.yml
+
+# created by node
+node_modules
+npm-debug.log
