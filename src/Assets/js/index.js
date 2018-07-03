@@ -2,7 +2,7 @@ import _ from 'lodash';
 import printMe from './print.js';
 import '../sass/main.scss';
 import '../sass/core.scss';
-import Icon from '../images/lukasztecza.png';
+import Icon from '../images/lukasztecza.jpg';
 
 //TODO index.js should be entry which includes one index.scss
 // index.js includes also all other js files and images
@@ -15,6 +15,8 @@ function component() {
 
     var myIcon = new Image();
     myIcon.src = Icon;
+    myIcon.width = '100';
+    myIcon.height = '100';
     element.appendChild(myIcon);
 
     if (process.env.NODE_ENV !== 'production') {
