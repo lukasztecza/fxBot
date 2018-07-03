@@ -140,19 +140,22 @@ fi
 composer install --no-plugins --no-scripts
 
 #@TODO install webpacki might need sudo might need package.json
-wget https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-x64.tar.gz
-mkdir -p /opt/nodejs
-tar -xvzf node-v8.11.3-linux-x64.tar.gz -C /opt/nodejs/
-cd /opt/nodejs
-mv node-v8.11.3-linux-x64/ 8.11.3
-ln -s 8.11.3/ current
-ln -s /opt/nodejs/current/bin/node /bin/node
-ln -s /opt/nodejs/current/bin/npm /bin/npm
-cd /vagrant
-rm node-v8.11.3-linux-x64.tar.gz
-npm install --save-dev webpack
-npm install --save-dev webpack-cli
-# to create package.json run npm init -y
+curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+apt install -y nodejs
+npm install webpack webpack-cli --save-dev -g
+npm install --save-dev \
+    style-loader \
+    css-loader \
+    sass-loader \
+    node-sass \
+    mini-css-extract-plugin \
+    optimize-css-assets-webpack-plugin \
+    file-loader \
+    clean-webpack-plugin \
+    webpack-merge \
+    mini-css-extract-plugin \
+    optimize-css-assets-webpack-plugin \
+    html-webpack-plugin
 
 # Information for user
 echo "[Info] Your project will be accessible via url: http://$HOST:$PORT"

@@ -1,7 +1,6 @@
 {
     "defaultContentType": "text/html",
     "applicationStartingPoint": "outputMiddleware",
-    "assetsVersion": "3",
 
     "securityList": [
         {

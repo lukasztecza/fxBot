@@ -10,7 +10,6 @@ class RigidDeviationStrategy extends RigidStrategyAbstract
     protected $instrument;
     protected $priceService;
     protected $lastPricesPeriod;
-    protected $followTrend;
     protected $signalFastAverage;
     protected $signalSlowAverage;
     protected $lossLockerFactor;
@@ -72,12 +71,12 @@ class RigidDeviationStrategy extends RigidStrategyAbstract
                 $averages['current'] < $averages['signalFast'] &&
                 $averages['current'] > $averages['signalSlow']
             ):
-                return $this->followTrend ? 1 : -1;
+                return -1;
             case (
                 $averages['current'] > $averages['signalFast'] &&
                 $averages['current'] < $averages['signalSlow']
             ):
-                return $this->followTrend ? -1 : 1;
+                return 1;
             default:
                 return 0;
         }
