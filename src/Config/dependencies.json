@@ -4,8 +4,8 @@
         "inject": [
             "@securityMiddleware@",
             "%defaultContentType%",
-            "%assetsVersion%",
-            "@sessionService@"
+            "@sessionService@",
+            "%environment%"
         ]
     },
     "securityMiddleware": {
@@ -39,7 +39,10 @@
     "forexController": {
         "class": "FxBot\\Controller\\ForexController",
         "inject": [
-            "@tradeService@"
+            "@tradeService@",
+            "@indicatorService@",
+            "@validatorFactory@",
+            "%priceInstruments%"
         ]
     },
 

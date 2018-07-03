@@ -17,13 +17,13 @@ export DEBIAN_FRONTEND=noninteractive
 
 # Add ondrej php repository
 sudo add-apt-repository ppa:ondrej/php
-apt-get update
+apt update
 
 # Install basic tools
-apt-get install -y vim curl
+apt install -y vim curl
 
 # Install apache
-apt-get install -y apache2="$APACHE_VERSION"
+apt install -y apache2="$APACHE_VERSION"
 
 # Create symlink from default apache web dir to /vagrant
 if ! [ -L /var/www/html ]; then
@@ -41,7 +41,7 @@ a2enmod headers
 # Set mysql answers and install mysql-server and mysql-client
 debconf-set-selections <<< "mysql-server mysql-server/root_password password $MYSQL_ROOT_PASSWORD"
 debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $MYSQL_ROOT_PASSWORD"
-apt-get install -y mysql-server-"$MYSQL_VERSION" mysql-client-"$MYSQL_VERSION"
+apt install -y mysql-server-"$MYSQL_VERSION" mysql-client-"$MYSQL_VERSION"
 
 # Set key_buffer_size to fix "Using unique option prefix key_buffer instead of key_buffer_size..." warning
 if ! fgrep key_buffer_size /etc/mysql/my.cnf; then
@@ -49,15 +49,15 @@ if ! fgrep key_buffer_size /etc/mysql/my.cnf; then
 fi
 
 # Install redis
-apt-get install -y redis-server
+apt install -y redis-server
 sed -i "s/# requirepass foobared/ requirepass pass/" /etc/redis/redis.conf
 service redis-server restart
 
 # Install memcached
-apt-get install -y memcached
+apt install -y memcached
 
 # Install php and modules
-apt-get install -y php"$PHP_VERSION" \
+apt install -y php"$PHP_VERSION" \
     php"$PHP_VERSION"-curl \
     php"$PHP_VERSION"-mysql \
     php"$PHP_VERSION"-gd \
@@ -129,7 +129,7 @@ mysql -u "$MYSQL_USER" -p"$MYSQL_USER_PASSWORD" -h $MYSQL_HOST $MYSQL_DATABASE <
 service apache2 restart
 
 # Install git
-apt-get install -y git
+apt install -y git
 
 # Install composer and run install packages
 if ! [ -L /usr/bin/composer ]; then
@@ -139,7 +139,23 @@ if ! [ -L /usr/bin/composer ]; then
 fi
 composer install --no-plugins --no-scripts
 
-#@TODO install webpack
+#@TODO install webpacki might need sudo might need package.json
+curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+apt install -y nodejs
+npm install webpack webpack-cli --save-dev -g
+npm install --save-dev \
+    style-loader \
+    css-loader \
+    sass-loader \
+    node-sass \
+    mini-css-extract-plugin \
+    optimize-css-assets-webpack-plugin \
+    file-loader \
+    clean-webpack-plugin \
+    webpack-merge \
+    mini-css-extract-plugin \
+    optimize-css-assets-webpack-plugin \
+    html-webpack-plugin
 
 # Information for user
 echo "[Info] Your project will be accessible via url: http://$HOST:$PORT"

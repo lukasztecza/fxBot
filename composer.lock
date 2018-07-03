@@ -60,16 +60,16 @@
         },
         {
             "name": "lukasztecza/lightApp",
-            "version": "1.2.0",
+            "version": "1.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lukasztecza/lightApp.git",
-                "reference": "c48f4b4260516d06ae89237741138766e616ed96"
+                "reference": "3d32b00ad8826bb13dbdc1a426899ae52c1af534"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lukasztecza/lightApp/zipball/c48f4b4260516d06ae89237741138766e616ed96",
-                "reference": "c48f4b4260516d06ae89237741138766e616ed96",
+                "url": "https://api.github.com/repos/lukasztecza/lightApp/zipball/3d32b00ad8826bb13dbdc1a426899ae52c1af534",
+                "reference": "3d32b00ad8826bb13dbdc1a426899ae52c1af534",
                 "shasum": ""
             },
             "require": {
@@ -103,10 +103,10 @@
                 "php"
             ],
             "support": {
-                "source": "https://github.com/lukasztecza/lightApp/tree/1.2.0",
+                "source": "https://github.com/lukasztecza/lightApp/tree/1.2.3",
                 "issues": "https://github.com/lukasztecza/lightApp/issues"
             },
-            "time": "2018-06-20 23:22:04"
+            "time": "2018-07-02 19:22:13"
         }
     ],
     "packages-dev": [
