@@ -31,7 +31,7 @@ class ForexController extends ControllerAbstract
 
     public function stats(Request $request) : Response
     {
-        $page = $request->getAttributes(['page'])['page'] ?? 1;
+        $page = (int) ($request->getAttributes(['page'])['page'] ?? 1);
         $tradesPack = $this->tradeService->getTrades($page);
 
         return $this->htmlResponse(
