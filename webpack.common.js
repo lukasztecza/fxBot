@@ -4,7 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     entry: {
-        main: '/vagrant/src/Assets/js/index.js'
+        main: '/app/assets/js/index.js'
     },
     output: {
         filename: './assets/js/[hash].js',
@@ -12,12 +12,12 @@ module.exports = {
     },
     plugins: [
         new CleanWebpackPlugin([
-            '/vagrant/public/assets',
-            '/vagrant/src/View/common/webpackAssets.html'
+            '/app/public/assets',
+            '/app/src/View/common/webpackAssets.html'
         ]),
         new HtmlWebpackPlugin({
             text: 'webpack generated',
-            template: './src/Assets/template/index.html',
+            template: './assets/template/index.html',
             filename: '../src/View/common/webpackAssets.html'
         })
     ],
@@ -35,7 +35,7 @@ module.exports = {
                 ]
             },
             {
-                test: /\/vagrant\/src\/Assets\/sass\/([a-z])+\.scss$/,
+                test: /\/app\/assets\/sass\/([a-z])+\.scss$/,
                 use: [
                     'style-loader',
                     'css-loader',

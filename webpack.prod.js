@@ -29,7 +29,7 @@ module.exports = merge(common, {
     module: {
         rules: [
             {
-                test: /\/vagrant\/src\/Assets\/sass\/([a-z])+\.scss$/,
+                test: /\/app\/assets\/sass\/([a-z])+\.scss$/,
                 use: [
                     MiniCssExtractPlugin.loader,
                     'css-loader'
