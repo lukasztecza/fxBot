@@ -17,19 +17,19 @@ export DEBIAN_FRONTEND=noninteractive
 
 # Add ondrej php repository
 sudo add-apt-repository ppa:ondrej/php
-apt update
+apt-get update
 
 # Install basic tools
-apt install -y vim curl
+apt-get install -y vim curl
 
 # Install apache
-apt install -y apache2="$APACHE_VERSION"
+apt-get install -y apache2="$APACHE_VERSION"
 
-# Create symlink from default apache web dir to /vagrant
+# Create symlink from default apache web dir to /app
 if ! [ -L /var/www/html ]; then
     rm -rf /var/www
     mkdir /var/www
-    ln -fs /vagrant /var/www/html
+    ln -fs /app /var/www/html
 fi
 
 # Enable mod_rewrite for apache
@@ -41,23 +41,15 @@ a2enmod headers
 # Set mysql answers and install mysql-server and mysql-client
 debconf-set-selections <<< "mysql-server mysql-server/root_password password $MYSQL_ROOT_PASSWORD"
 debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $MYSQL_ROOT_PASSWORD"
-apt install -y mysql-server-"$MYSQL_VERSION" mysql-client-"$MYSQL_VERSION"
+apt-get install -y mysql-server-"$MYSQL_VERSION" mysql-client-"$MYSQL_VERSION"
 
 # Set key_buffer_size to fix "Using unique option prefix key_buffer instead of key_buffer_size..." warning
 if ! fgrep key_buffer_size /etc/mysql/my.cnf; then
     echo 'key_buffer_size = 16M' | sudo tee -a /etc/mysql/my.cnf
 fi
 
-# Install redis
-apt install -y redis-server
-sed -i "s/# requirepass foobared/ requirepass pass/" /etc/redis/redis.conf
-service redis-server restart
-
-# Install memcached
-apt install -y memcached
-
 # Install php and modules
-apt install -y php"$PHP_VERSION" \
+apt-get install -y php"$PHP_VERSION" \
     php"$PHP_VERSION"-curl \
     php"$PHP_VERSION"-mysql \
     php"$PHP_VERSION"-gd \
@@ -70,13 +62,8 @@ apt install -y php"$PHP_VERSION" \
 sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/"$PHP_VERSION"/apache2/php.ini
 sed -i "s/display_errors = .*/display_errors = On/" /etc/php/"$PHP_VERSION"/apache2/php.ini
 
-# Allow large file uploads
-sed -i "s/memory_limit = .*/memory_limit = 32M/" /etc/php/"$PHP_VERSION"/apache2/php.ini
-sed -i "s/upload_max_filesize = .*/upload_max_filesize = 16M/" /etc/php/"$PHP_VERSION"/apache2/php.ini
-sed -i "s/post_max_size = .*/post_max_size = 24M/" /etc/php/"$PHP_VERSION"/apache2/php.ini
-
 # Set php upload tmp directory
-sed -i "s/;upload_tmp_dir =/upload_tmp_dir = \/vagrant\/tmp\/upload/" /etc/php/"$PHP_VERSION"/apache2/php.ini
+sed -i "s/;upload_tmp_dir =/upload_tmp_dir = \/app\/tmp\/upload/" /etc/php/"$PHP_VERSION"/apache2/php.ini
 
 # Create logs directory if not exists
 if ! [ -L /var/www/html/tmp/logs ]; then
@@ -120,7 +107,7 @@ if [ $? != "0" ]; then
     exit 1
 fi
 
-cd /vagrant
+cd /app
 
 # Create tables needed by app
 mysql -u "$MYSQL_USER" -p"$MYSQL_USER_PASSWORD" -h $MYSQL_HOST $MYSQL_DATABASE < db.sql
@@ -129,7 +116,7 @@ mysql -u "$MYSQL_USER" -p"$MYSQL_USER_PASSWORD" -h $MYSQL_HOST $MYSQL_DATABASE <
 service apache2 restart
 
 # Install git
-apt install -y git
+apt-get install -y git
 
 # Install composer and run install packages
 if ! [ -L /usr/bin/composer ]; then
@@ -139,9 +126,9 @@ if ! [ -L /usr/bin/composer ]; then
 fi
 composer install --no-plugins --no-scripts
 
-#@TODO install webpacki might need sudo might need package.json
+# Install webpack
 curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
-apt install -y nodejs
+apt-get install -y nodejs
 npm install webpack webpack-cli --save-dev -g
 npm install --save-dev \
     style-loader \
