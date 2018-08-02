@@ -60,7 +60,6 @@ CREATE TABLE IF NOT EXISTS `simulation` (
     `simulation_end` DATETIME NOT NULL,
     `datetime` DATETIME NOT NULL,
     PRIMARY KEY (`id`),
-    KEY (`instrument`),
     KEY (`datetime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
