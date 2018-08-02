@@ -4,7 +4,11 @@
 
     "securityList": [
         {
-            "route": "/stats",
+            "route": "/stats/*",
+            "allow": ["ROLE_USER"]
+        },
+        {
+            "route": "/compare/*",
             "allow": ["ROLE_USER"]
         }
     ],
