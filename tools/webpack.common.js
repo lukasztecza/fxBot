@@ -8,13 +8,18 @@ module.exports = {
     },
     output: {
         filename: './assets/js/[hash].js',
-        path: path.resolve(__dirname, 'public')
+        path: path.resolve(__dirname, '../public')
     },
     plugins: [
-        new CleanWebpackPlugin([
-            '/app/public/assets',
-            '/app/src/View/common/webpackAssets.html'
-        ]),
+        new CleanWebpackPlugin(
+            [
+                '/app/public/assets',
+                '/app/src/View/common/webpackAssets.html'
+            ],
+            {
+                root: path.resolve(__dirname, './..')
+            }
+        ),
         new HtmlWebpackPlugin({
             text: 'webpack generated',
             template: './assets/template/index.html',

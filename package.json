@@ -28,7 +28,7 @@
     "license": "ISC",
     "dependencies": {},
     "scripts": {
-        "watch": "webpack --watch --config webpack.dev.js",
-        "build": "webpack --config webpack.prod.js"
+        "watch": "webpack --watch --config ./tools/webpack.dev.js",
+        "build": "webpack --config ./tools/webpack.prod.js"
     }
 }

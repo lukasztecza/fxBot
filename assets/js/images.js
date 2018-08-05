@@ -1,6 +1,6 @@
 import '../sass/index.scss';
-import Default from '../images/default.png';
-import Icon from '../images/lukasztecza.jpg';
+import Default from '../images/default_image.png';
+import Icon from '../images/test_image.png';
 
 export default function images(name) {
     switch (name) {
