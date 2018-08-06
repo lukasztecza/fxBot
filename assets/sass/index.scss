@@ -1,18 +1,2 @@
+@import '../../node_modules/chartist/dist/scss/chartist.scss';
 @import 'main.scss';
-
-.error {
-    color: coral;
-}
-
-.success {
-    color: green;
-}
-
-table, td {
-    border: 1px solid black;
-    border-collapse: collapse;
-}
-
-td {
-    padding: 15px;
-}

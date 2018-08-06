@@ -7,5 +7,40 @@ body {
     width: 150px;
     height: 50px;
     color: coral;
-    background: url('../images/lukasztecza.jpg');
+    background: url('../images/default_image.png');
+}
+
+.error {
+    color: coral;
+}
+
+.success {
+    color: green;
+}
+
+table, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+td {
+    padding: 15px;
+}
+
+$chart-primary-color: red;
+.ct-series-a .ct-point, #title1, #title2 {
+    stroke: $chart-primary-color;
+}
+
+#title1, #title2 {
+    color: $chart-primary-color;
+}
+
+$chart-secondary-color: orange;
+.ct-series-b .ct-point, #title3 {
+    stroke: $chart-secondary-color;
+}
+
+#title3 {
+    color: $chart-secondary-color;
 }
