@@ -1,10 +1,6 @@
 import images from './images.js';
 import _ from 'lodash';
 
-function printMe() {
-     console.log('I get called from print.js hey yo man!');
-}
-
 function component() {
     var element1 = document.createElement('div');
     var element2 = document.createElement('div');
@@ -23,13 +19,9 @@ function component() {
     element1.appendChild(element2);
     element1.appendChild(myIcon);
 
-    if (process.env.NODE_ENV !== 'production') {
-        console.log('Looks like we are in development mode!');
-    }
-
-    printMe();
-
     return element1;
 }
 
-document.body.appendChild(component());
+if (document.getElementById('home') !== null) {
+    document.body.appendChild(component());
+}
