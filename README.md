@@ -2,7 +2,7 @@
 Work in progress
 TODO
 
-## You will need oanda account and api token in order to use this app (practice account recommended)
+## You will need [oanda](https://www.oanda.com/forex-trading/platform/fxtrade-demo-platform) account and api token in order to use this app (practice account recommended)
 
 ### How to start dev environment
 - install [virtualbox](https://www.virtualbox.org/)
