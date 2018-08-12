@@ -37,7 +37,7 @@ databaseName: fx_bot
 databaseUser: user
 databasePassword: pass
 inMemoryUsername: user
-inMemoryPasswordHash: $2y$12$gNxhxS/wtPahKqiaueQQXuX14jK.F6dco01MBBFcFcekkh1rjMct2
+inMemoryPasswordHash: $2y$12$gNxhxS/wtPahKqiaueQQXuX14jK.F6dco01MBBFcFcekkh1rjMct2 (the password is pass)
 oandaApiUri: https://api-fxpractice.oanda.com
 oandaApiKey: some_oanda_api_key
 oandaAccount: some_oanda_account
