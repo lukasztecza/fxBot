@@ -3,6 +3,7 @@
 
     "databaseEngine": "",
     "databaseHost": "",
+    "databasePort": "",
     "databaseName": "",
     "databaseUser": "",
     "databasePassword": "",
@@ -16,26 +17,20 @@
 
     "forexFactoryUri": "",
 
-    "redisScheme": "",
-    "redisHost": "",
-    "redisPort": "",
-    "redisPassword": "",
-    "redisMaxTtl": "",
-
-    "memcachedHost": "",
-    "memcachedPort": "",
-    "memcachedMaxTtl": "",
-
     "selectedStrategy": "",
 
+    "instrument": "",
+    "homeCurrency": "",
+    "singleTransactionRisk": "",
     "rigidStopLoss": "",
     "takeProfitMultiplier": "",
+    "lossLockerFactor": "",
+
     "longFastAverage": "",
     "longSlowAverage": "",
-    "extremumRange": "",
     "signalFastAverage": "",
     "signalSlowAverage": "",
-    "averageTrend": "",
+
     "bankFactor": "",
     "inflationFactor": "",
     "tradeFactor": "",
@@ -43,7 +38,10 @@
     "salesFactor": "",
     "unemploymentFactor": "",
     "bankRelativeFactor": "",
+
+    "extremumRange": "",
     "followTrend": "",
+
     "lastPricesPeriod": "",
-    "instrument": ""
+    "lastIndicatorsPeriod": ""
 }

@@ -20,7 +20,7 @@ $pattern = json_decode(file_get_contents($inputFile), true);
 
 $parameters = [];
 foreach ($pattern as $key => $value) {
-$parameters[$key] = '';
+    $parameters[$key] = '';
 }
 file_put_contents($outputFile, json_encode($parameters, JSON_PRETTY_PRINT));
 echo 'parameters.json.dist -> created' . PHP_EOL;

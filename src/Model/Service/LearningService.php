@@ -10,10 +10,10 @@ class LearningService
 
     private const STRATEGY_TO_LEARN = 'FxBot\Model\Strategy\RigidRandomStrategy';
     private const INITIAL_PARAMS = [
-                'rigidStopLoss' => 0.0025,
-                'takeProfitMultiplier' => 9.6,
-                'lossLockerFactor' => 1,
-                'singleTransactionRisk' => 0.02
+        'rigidStopLoss' => 0.0025,
+        'takeProfitMultiplier' => 1,
+        'lossLockerFactor' => 1,
+        'singleTransactionRisk' => 0.01
 /*        'longFastAverage' => 300,
         'longSlowAverage' => 600,
         'extremumRange' => 12,
@@ -27,20 +27,20 @@ class LearningService
     ];
     private const INSTRUMENT = 'EUR_USD';
     private const LEARNING_PERIODS = [
-/*        ['start' => '2015-01-01 00:00:00', 'end' => '2015-04-01 00:00:00'],
-        ['start' => '2015-04-01 00:00:00', 'end' => '2015-07-01 00:00:00'],
+        ['start' => '2010-01-10 00:00:00', 'end' => '2010-01-20 00:00:00'],
+/*        ['start' => '2015-04-01 00:00:00', 'end' => '2015-07-01 00:00:00'],
         ['start' => '2015-07-01 00:00:00', 'end' => '2015-10-01 00:00:00'],
         ['start' => '2015-10-01 00:00:00', 'end' => '2016-01-01 00:00:00'],
         ['start' => '2016-01-01 00:00:00', 'end' => '2016-04-01 00:00:00'],
         ['start' => '2016-04-01 00:00:00', 'end' => '2016-07-01 00:00:00'],
         ['start' => '2016-07-01 00:00:00', 'end' => '2016-10-01 00:00:00'],
-        ['start' => '2016-10-01 00:00:00', 'end' => '2017-01-01 00:00:00'],*/
-        ['start' => '2017-01-01 00:00:00', 'end' => '2017-04-01 00:00:00'],
+        ['start' => '2016-10-01 00:00:00', 'end' => '2017-01-01 00:00:00'],
+        ['start' => '2017-01-01 00:00:00', 'end' => '2017-01-11 00:00:00'],
         ['start' => '2017-04-01 00:00:00', 'end' => '2017-07-01 00:00:00'],
         ['start' => '2017-07-01 00:00:00', 'end' => '2017-10-01 00:00:00'],
         ['start' => '2017-10-01 00:00:00', 'end' => '2018-01-01 00:00:00'],
         ['start' => '2018-01-01 00:00:00', 'end' => '2018-04-01 00:00:00'],
-        ['start' => '2018-04-01 00:00:00', 'end' => '2018-06-28 00:00:00'],
+        ['start' => '2018-04-01 00:00:00', 'end' => '2018-06-28 00:00:00'],*/
     ];
 
     private const PARAM_MODIFICATION_FACTOR = 1.3;
@@ -159,12 +159,11 @@ class LearningService
 //                'takeProfitMultiplier' => 9.6,
 //                'signalFastAverage' => 34,
 //                'signalSlowAverage' => 100,
-
 //                'lossLockerFactor' => 1,
 //                'singleTransactionRisk' => 0.02,
                 'homeCurrency' => 'CAD',
                 'instrument' => self::INSTRUMENT,
-                'followTrend' => 0,
+//                'followTrend' => 0,
                 'lastPricesPeriod' => 'P30D',
                 'lastIndicatorsPeriod' => 'P12M'
             ]
