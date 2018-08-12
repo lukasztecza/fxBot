@@ -103,7 +103,7 @@ sudo tail /var/log/syslog
 #*/1 * * * * php /app/scripts/command.php populateIndicatorsCommand
 ```
 
-### Usage (assuming you are in machine an /app directory)
+### Usage (assuming you are in machine in /app directory)
 - run simulation with configuration in `src/Model/Command/SimulationCommand.php`
 ```
 php scripts/command simulationCommand
@@ -133,4 +133,17 @@ php vendor/codeception/codeception/codecept bootstrap
 - run tests
 ```
 php vendor/codeception/codeception/codecept run
+```
+
+### Working on front-end
+- inside vagrant machine you can webpack watch your assets
+```
+vagrant ssh
+cd /app
+npm run watch
+```
+
+- when you finished clean dev builds created by watch and build final assets
+```
+npm run build
 ```
