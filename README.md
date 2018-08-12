@@ -110,15 +110,14 @@ php scripts/command simulationCommand
 ```
 - you should be able to see simulation output
 - simulation results are stored in db `fx_bot`.`simulation` table
-
 - run learning with configuration in `src/Model/Service/LearningService.php`
 ```
 php scripts/command learningCommand
 ```
 - you should be able to see learning output
-
+- learning results are stored in db `fx_bot`.`learning` table
 - by default simulations and learnings use RigidRandomStrategy which uses rand() to decide if it should sell or buy
-- you change configuration of SimulationCommand or LearningService and choose/create other strategy from `src/Model/Strategy` directory
+- you can change configuration of SimulationCommand or LearningService and choose/create other strategy from `src/Model/Strategy` directory
 - you can play around with different parameters in these classes and maybe you will be able to find what works
 - so far I could not find anything that works well on live account event though some tests were quite promissing :/
 
