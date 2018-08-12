@@ -3,20 +3,20 @@
     "version": "1.0.0",
     "description": "assets for fxBot",
     "devDependencies": {
+        "chartist": "^0.11.0",
         "clean-webpack-plugin": "^0.1.19",
         "css-loader": "^0.28.11",
         "file-loader": "^1.1.11",
         "html-webpack-plugin": "^3.2.0",
         "mini-css-extract-plugin": "^0.4.1",
-        "node-sass": "^4.9.2",
+        "node-sass": "^4.9.3",
         "optimize-css-assets-webpack-plugin": "^4.0.3",
         "sass-loader": "^7.1.0",
         "style-loader": "^0.21.0",
         "webpack": "^4.16.4",
         "webpack-cli": "^3.1.0",
         "webpack-command": "^0.3.1",
-        "webpack-merge": "^4.1.4",
-        "chartist": "^0.11.0"
+        "webpack-merge": "^4.1.4"
     },
     "repository": {
         "type": "git",
@@ -27,8 +27,7 @@
     ],
     "author": "lukasztecza",
     "license": "ISC",
-    "dependencies": {
-    },
+    "dependencies": {},
     "scripts": {
         "watch": "webpack --watch --config ./tools/webpack.dev.js",
         "build": "webpack --config ./tools/webpack.prod.js"

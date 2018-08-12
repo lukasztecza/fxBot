@@ -139,7 +139,7 @@ class ForexFactoryFetchingService extends FetchingServiceAbstract
                     'instrument' => $instrument,
                     'datetime' => $dateTime,
                     'name' => trim($dataChunk[self::NAME_KEY]) . (!empty($unit) ? ' ' . $unit : ''),
-                    'type' => $this->getTypeByInstrumentAndName($dataChunk[self::INSTRUMENT_KEY], $dataChunk[self::NAME_KEY]),
+                    'type' => $this->getTypeByInstrumentAndName($instrument, $dataChunk[self::NAME_KEY]),
                     'actual' => $actual,
                     'forecast' => $forecast
                 ];
