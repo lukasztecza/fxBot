@@ -119,7 +119,7 @@ php scripts/command learningCommand
 - by default simulations and learnings use RigidRandomStrategy which uses rand() to decide if it should sell or buy
 - you can change configuration of SimulationCommand or LearningService and choose/create other strategy from `src/Model/Strategy` directory
 - you can play around with different parameters in these classes and maybe you will be able to find what works
-- so far I could not find anything that works well on live account event though some tests were quite promissing :/
+- so far I could not find anything that works well on live account event though some tests were quite promising :/
 
 - have fun and good luck
 
